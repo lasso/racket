@@ -2,14 +2,21 @@ module Racket
   class Application
 
     def initialize(options = {})
-      @router = Router.new
-      if options.key?(:routes)
-        options[:routes].each_pair { |key, val| @router.map(key, val) }
-      end
+      @options = default_options.merge(options)
+      @router = Router.new(@options[:controller_dir])
     end
 
     def call(env)
       @router.route(Request.new(env))
+    end
+
+    private
+
+    def default_options
+      {
+        controller_dir: File.join(Dir.pwd, 'controllers'),
+        view_dir: File.join(Dir.pwd, 'views')
+      }
     end
   end
 end
