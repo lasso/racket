@@ -20,6 +20,12 @@ module Racket
       instance.options
     end
 
+    def self.using(options)
+      @instance = self.new(options)
+      @instance.instance_eval { setup_routes }
+      self
+    end
+
     private
 
     def initialize(options = {})
