@@ -1,22 +1,58 @@
 module Racket
   class Application
 
-    def initialize(options = {})
-      @options = default_options.merge(options)
-      @router = Router.new(@options[:controller_dir])
+    attr_reader :options
+
+    @instance = nil
+
+    def self.call(env)
+      instance.instance_eval { @router.route(Request.new(env)) }
     end
 
-    def call(env)
-      @router.route(Request.new(env))
+    def self.instance
+      return @instance if @instance
+      @instance = self.new
+      @instance.instance_eval { setup_routes }
+      @instance
+    end
+
+    def self.options
+      instance.options
     end
 
     private
 
+    def initialize(options = {})
+      @options = default_options.merge(options)
+    end
+
     def default_options
       {
         controller_dir: File.join(Dir.pwd, 'controllers'),
+        default_action: :index,
         view_dir: File.join(Dir.pwd, 'views')
       }
     end
+
+    def setup_routes
+      @router = Router.new
+      @controllers = []
+      load_controllers
+    end
+
+    def load_controllers
+      @controller = nil
+      Dir.chdir(@options[:controller_dir]) do
+        files = Dir.glob(File.join('**', '*.rb'))
+        files.each do |file|
+          require File.absolute_path(file)
+          path = File.dirname(file)
+          path = '' if path == '.'
+          @router.map("/#{path}", @controller)
+        end
+      end
+      remove_instance_variable :@controller
+    end
+
   end
 end
