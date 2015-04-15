@@ -19,7 +19,16 @@ module Racket
       unless matching_routes.first.nil?
         target_klass = matching_routes.first.first.route.dest
         target = target_klass.new
-        [200, {}, [target.inspect]]
+        params = matching_routes.first.first.param_values.first.reject { |e| e.empty? }
+        action = params.empty? ? :index : params.shift.to_sym 
+        [
+          200,
+          {},
+          [
+            "<pre>Routing to #{target_klass.inspect}" \
+            " using action #{action.inspect} and params #{params}.</pre>"
+          ]
+        ]
       else
         [404, {}, 'Not found']
       end

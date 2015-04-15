@@ -52,9 +52,9 @@ module Racket
         files = Dir.glob(File.join('**', '*.rb'))
         files.each do |file|
           require File.absolute_path(file)
-          path = File.dirname(file)
-          path = '' if path == '.'
-          @router.map("/#{path}", @controller)
+          path = "/#{File.dirname(file)}"
+          path = '' if path == '/.'
+          @router.map("#{path}(/*params)", @controller)
         end
       end
       remove_instance_variable :@controller
