@@ -6,7 +6,7 @@ module Racket
     @instance = nil
 
     def self.call(env)
-      instance.instance_eval { @router.route(Request.new(env)) }
+      instance.instance_eval { @router.route(env) }
     end
 
     def self.instance

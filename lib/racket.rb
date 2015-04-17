@@ -1,5 +1,6 @@
 require_relative 'racket/application.rb'
 require_relative 'racket/controller.rb'
+require_relative 'racket/current.rb'
 require_relative 'racket/request.rb'
 require_relative 'racket/response.rb'
 require_relative 'racket/router.rb'
