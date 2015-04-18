@@ -6,6 +6,7 @@ module Racket
     def initialize
       @router = HttpRouter.new
       @actions_by_controller = {}
+      @templates_by_path = {}
     end
 
     # Caches available actions for each controller class. This also works for controller classes
@@ -25,6 +26,27 @@ module Racket
       cache_actions(klass)
     end
 
+    # @todo: Allow the user to set custom handlers for different errors
+    def render_404(message = '404 Not found')
+      [404, { 'Content-Type' => 'text/plain' }, message]
+    end
+
+    def template(path, num_params)
+      url_path = path
+      1.upto(num_params) { url_path = File.dirname(url_path) }
+      return @templates_by_path[url_path] if @templates_by_path.key?(url_path)
+      file_path = File.join(Application.instance.options[:view_dir], url_path)
+      action = File.basename(file_path)
+      file_path = File.dirname(file_path)
+      return @templates_by_path[url_path] = nil unless
+        File.exists?(file_path) && File.directory?(file_path)
+      Dir.chdir(file_path) do
+        files = Dir.glob("#{action}.*")
+        return @templates_by_path[url_path] = nil if files.empty?
+        @templates_by_path[url_path] = File.join(file_path, files.first)
+      end
+    end
+
     def route(env)
       # Find controller in map
       # If controller exists, call it
@@ -37,16 +59,20 @@ module Racket
         params = matching_routes.first.first.param_values.first.reject { |e| e.empty? }
         action = params.empty? ? :index : params.shift.to_sym
         # Check if action is available on target
-        return [404, {}, 'No such action'] unless @actions_by_controller[target_klass].include?(action)
+        return render_404 unless @actions_by_controller[target_klass].include?(action)
         meth = target.method(action)
         if meth.arity.zero?
           result = meth.call
         else
           result = meth.call(params[0...meth.arity])
         end
-        [200, {}, [result]]
+        template = template(target.request.path, params.length)
+        # @todo Render view using tilt if a template was found
+        # render_view(target, template) unless template.nil? 
+        target.response.write(result)
+        target.response.finish
       else
-        [404, {}, 'Not found']
+        render_404
       end
     end
 
