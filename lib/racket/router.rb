@@ -35,7 +35,7 @@ module Racket
       url_path = path
       1.upto(num_params) { url_path = File.dirname(url_path) }
       return @templates_by_path[url_path] if @templates_by_path.key?(url_path)
-      file_path = File.join(Application.instance.options[:view_dir], url_path)
+      file_path = File.join(Application.options[:view_dir], url_path)
       action = File.basename(file_path)
       file_path = File.dirname(file_path)
       return @templates_by_path[url_path] = nil unless
@@ -68,7 +68,7 @@ module Racket
         end
         template = template(target.request.path, params.length)
         # @todo Render view using tilt if a template was found
-        # render_view(target, template) unless template.nil? 
+        # render_view(target, template) unless template.nil?
         target.response.write(result)
         target.response.finish
       else
