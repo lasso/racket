@@ -1,2 +1,5 @@
+.yardoc
+doc
 Gemfile.lock
+spec
 vendor

@@ -1,4 +1,5 @@
 require 'http_router'
+require 'tilt'
 
 module Racket
   class Router
@@ -42,9 +43,25 @@ module Racket
         File.exists?(file_path) && File.directory?(file_path)
       Dir.chdir(file_path) do
         files = Dir.glob("#{action}.*")
-        return @templates_by_path[url_path] = nil if files.empty?
+        if files.empty?
+          # Look for default view
+          files = Dir.glob("_default.*")
+          return @templates_by_path[url_path] = nil if files.empty?
+          return  @templates_by_path[url_path] = File.join(file_path, files.first)
+        end
         @templates_by_path[url_path] = File.join(file_path, files.first)
       end
+    end
+
+    # Renders a template or (if template is nil or false) a result
+    #
+    # @param [Racket::Controller] target
+    # @param [String] template
+    # @param [String] str
+    # @return nil
+    def render_template_or_string(target, template, str = nil)
+      target.response.write(template ? Tilt.new(template).render(target) : str.to_s)
+      nil
     end
 
     def route(env)
@@ -67,9 +84,7 @@ module Racket
           result = meth.call(params[0...meth.arity])
         end
         template = template(target.request.path, params.length)
-        # @todo Render view using tilt if a template was found
-        # render_view(target, template) unless template.nil?
-        target.response.write(result)
+        render_template_or_string(target, template, result)
         target.response.finish
       else
         render_404
