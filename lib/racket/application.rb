@@ -58,6 +58,10 @@ module Racket
       self
     end
 
+    def self.view_cache
+      current.view_cache
+    end
+
     # Reloads the application, making any changes to the controller configuration visible
     # to the application.
     #
@@ -66,6 +70,10 @@ module Racket
       setup_routes
       # @todo: Clear cached views/layouts
       nil
+    end
+
+    def view_cache
+      @view_cache ||= ViewCache.new(options[:layout_dir], options[:view_dir])
     end
 
     private
@@ -85,6 +93,8 @@ module Racket
       {
         controller_dir: File.join(Dir.pwd, 'controllers'),
         default_action: :index,
+        default_layout: '_default.*',
+        layout_dir: File.join(Dir.pwd, 'layouts'),
         view_dir: File.join(Dir.pwd, 'views')
       }
     end
