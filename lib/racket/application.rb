@@ -41,6 +41,10 @@ module Racket
       default
     end
 
+    def self.get_route(controller, action, params)
+      router.get_route(controller, action, params)
+    end
+
     private_class_method :current
 
     # Initializes a new Racket::Application object with default options.
@@ -66,6 +70,8 @@ module Racket
     def self.router
       current.router
     end
+
+    private_class_method :router
 
     # Initializes a new Racket::Application object with options specified by +options+.
     #
@@ -131,7 +137,7 @@ module Racket
           require File.absolute_path(file)
           path = "/#{File.dirname(file)}"
           path = '' if path == '/.'
-          @router.map("#{path}(/*params)", options[:last_added_controller])
+          @router.map(path, options[:last_added_controller])
         end
       end
       options.delete(:last_added_controller)

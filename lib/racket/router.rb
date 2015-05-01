@@ -25,24 +25,35 @@ module Racket
 
     def initialize
       @router = HttpRouter.new
+      @routes_by_controller = {}
       @actions_by_controller = {}
     end
 
     # Caches available actions for each controller class. This also works for controller classes
     # that inherit from other controller classes.
-    def cache_actions(klass)
+    def cache_actions(controller)
       actions = Set.new
-      current = klass
+      current = controller
       while current < Controller
         actions.merge(current.instance_methods(false))
         current = current.superclass
       end
-      @actions_by_controller[klass] = actions.to_a
+      @actions_by_controller[controller] = actions.to_a
     end
 
-    def map(path, klass)
-      @router.add(path).to(klass)
-      cache_actions(klass)
+    def get_route(controller, action, params)
+      route = ''
+      route << @routes_by_controller[controller] if @routes_by_controller.key?(controller)
+      action = action.to_s
+      route << "/#{action}" unless action.empty?
+      route << "/#{params.join('/')}" unless params.empty?
+      route
+    end
+
+    def map(path, controller)
+      @router.add("#{path}(/*params)").to(controller)
+      @routes_by_controller[controller] = path
+      cache_actions(controller)
     end
 
     # @todo: Allow the user to set custom handlers for different errors

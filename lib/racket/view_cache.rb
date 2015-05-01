@@ -84,9 +84,10 @@ module Racket
         if files.empty?
           if default_file
             files = Dir.glob("_default.*")
-            return nil if files.empty?
+            return nil if files.empty? # No default file found
             return File.join(file_path, files.first)
           end
+          return nil # Neither default file or specified file found
         end
         File.join(file_path, files.first)
       end

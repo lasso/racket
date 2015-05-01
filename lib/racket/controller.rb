@@ -29,6 +29,14 @@ module Racket
       Application.options[:default_action]
     end
 
+    def rs(action, *params)
+      Application.get_route(self.class, action, params)
+    end
+
+    def r(controller, action, *params)
+      Application.get_route(controller, action, params)
+    end
+
     def render(action)
       __execute(action)
       Application.view_cache.render(self)
