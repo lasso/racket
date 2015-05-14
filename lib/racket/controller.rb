@@ -25,12 +25,37 @@ module Racket
       Application.options[:last_added_controller].push(klass)
     end
 
+    # Returns the default action for the current controller class.
+    #
+    # @return [Symbol]
     def self.default_action
-      @default_action || Application.options[:default_action]
+      get_inherited_option(:default_action) || Application.options[:default_action]
     end
 
-    def self.use_default_action(sym)
-      @default_action = sym
+    # Returns an option for the current controller class or any of the controller classes
+    # it is inheriting from.
+    #
+    # @param [Symbol] option_name The option to retrieve
+    # @return [Object]
+    def self.get_inherited_option(option_name)
+      val = get_option(option_name)
+      return val if val
+      return nil if superclass == Controller # End of the line
+      superclass.get_inherited_option(option_name)
+    end
+
+    # Returns an option for the current controller class.
+    #
+    # @param [Symbol] option_name The option to retrieve
+    # @return [Object]
+    def self.get_option(option_name)
+      @options ||= {}
+      return @options.fetch(option_name.to_sym, nil)
+    end
+
+    def self.set_option(option_name, option_value)
+      @options ||= {}
+      @options[option_name.to_sym] = option_value
     end
 
     def rs(action, *params)
