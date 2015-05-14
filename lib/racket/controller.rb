@@ -22,11 +22,15 @@ module Racket
   class Controller
 
     def self.inherited(klass)
-      Application.options[:last_added_controller] = klass
+      Application.options[:last_added_controller].push(klass)
     end
 
-    def default_action
-      Application.options[:default_action]
+    def self.default_action
+      @default_action || Application.options[:default_action]
+    end
+
+    def self.use_default_action(sym)
+      @default_action = sym
     end
 
     def rs(action, *params)

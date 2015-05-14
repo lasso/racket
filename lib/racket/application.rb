@@ -18,6 +18,8 @@ You should have received a copy of the GNU Affero General Public License
 along with Racket.  If not, see <http://www.gnu.org/licenses/>.
 =end
 
+require 'logger'
+
 module Racket
   class Application
 
@@ -57,6 +59,14 @@ module Racket
       self
     end
 
+    def self.inform_dev(msg, level = :info)
+      current.inform(msg, level) if options[:mode] == :dev
+    end
+
+    def inform_all(msg, level = :info)
+      current.inform(msg, level)
+    end
+
     # Returns options for the currently running Racket::Application
     #
     # @return [Hash]
@@ -86,6 +96,11 @@ module Racket
 
     def self.view_cache
       current.view_cache
+    end
+
+    # Writes a message to the logger if there is one present
+    def inform(msg, level)
+      options[:logger].send(level, msg) if options[:logger]
     end
 
     # Reloads the application, making any changes to the controller configuration visible
@@ -121,6 +136,8 @@ module Racket
         default_action: :index,
         default_layout: '_default.*',
         layout_dir: File.join(Dir.pwd, 'layouts'),
+        logger: Logger.new($stdout),
+        mode: :live,
         view_dir: File.join(Dir.pwd, 'views')
       }
     end
@@ -129,18 +146,26 @@ module Racket
     #
     # @return [nil]
     def load_controllers
-      options[:last_added_controller] = nil
+      Application.inform_dev('Loading controllers.')
+      options[:last_added_controller] = []
       @controller = nil
       Dir.chdir(@options[:controller_dir]) do
         files = Dir.glob(File.join('**', '*.rb'))
+        # Sort by longest path so that the longer paths gets matched first
+        # HttpRouter claims to be doing this already, but this "hack" is needed in order
+        # for the router to work.
+        files.sort! do |a, b|
+          b.split('/').length <=> a.split('/').length
+        end
         files.each do |file|
           require File.absolute_path(file)
           path = "/#{File.dirname(file)}"
           path = '' if path == '/.'
-          @router.map(path, options[:last_added_controller])
+          @router.map(path, options[:last_added_controller].pop)
         end
       end
       options.delete(:last_added_controller)
+      Application.inform_dev('Done loading controllers.')
       nil
     end
 

@@ -51,8 +51,10 @@ module Racket
     end
 
     def map(path, controller)
+      controller_base_path = path.empty? ? '/' : path
+      Application.inform_dev("Mapping #{controller} to #{controller_base_path}.")
       @router.add("#{path}(/*params)").to(controller)
-      @routes_by_controller[controller] = path
+      @routes_by_controller[controller] = controller_base_path
       cache_actions(controller)
     end
 
@@ -69,7 +71,7 @@ module Racket
       unless matching_routes.first.nil?
         target_klass = matching_routes.first.first.route.dest
         params = matching_routes.first.first.param_values.first.reject { |e| e.empty? }
-        action = params.empty? ? target.default_action : params.shift.to_sym
+        action = params.empty? ? target_klass.default_action : params.shift.to_sym
 
         # Check if action is available on target
         return render_404 unless @actions_by_controller[target_klass].include?(action)
