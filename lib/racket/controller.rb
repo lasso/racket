@@ -84,6 +84,15 @@ module Racket
       Application.get_route(controller, action, params)
     end
 
+    # Redirects the client.
+    #
+    # @param [String] target
+    # @param [Fixnum] status
+    # @return [Object]
+    def redirect(target, status = 302)
+      response.redirect(target, status)
+    end
+
     # Renders an action.
     #
     # @param [Symbol] action
@@ -97,10 +106,8 @@ module Racket
 
     def __execute(action)
       meth = method(action)
-      response.action_result = case meth.arity
-        when 0 then meth.call
-        else meth.call(params[0...meth.arity])
-      end
+      params = request.params[0...meth.parameters.length]
+      response.action_result = meth.call(*params)
     end
 
   end
