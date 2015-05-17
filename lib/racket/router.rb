@@ -47,6 +47,7 @@ module Racket
       action = action.to_s
       route << "/#{action}" unless action.empty?
       route << "/#{params.join('/')}" unless params.empty?
+      route = route[1..-1] if route.start_with?('//') # Special case for root path
       route
     end
 
