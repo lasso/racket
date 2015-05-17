@@ -19,6 +19,7 @@ along with Racket.  If not, see <http://www.gnu.org/licenses/>.
 =end
 
 require 'logger'
+require 'rack'
 
 module Racket
   class Application
@@ -43,11 +44,11 @@ module Racket
       default
     end
 
+    private_class_method :current
+
     def self.get_route(controller, action, params)
       router.get_route(controller, action, params)
     end
-
-    private_class_method :current
 
     # Initializes a new Racket::Application object with default options.
     #
