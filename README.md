@@ -21,8 +21,9 @@ Probably not. At the moment it is good _enough_ for my needs, but I plan to add 
 as I start porting more of my old apps from Ramaze.
 
 ## Where are the tests?
-Not committed yet. I am using [Bacon](https://github.com/chneukirchen/bacon) for my internal testing and as soon as I
-get a decent test suite together I will commit it to this repo.
+I am still working on them. At the moment the tests cover about 90 per cent of the code base, but that's just because I have been a bit lazy. A cool 100 per cent is the goal.
+
+I am using [bacon](https://github.com/chneukirchen/bacon) and [rack-test](https://github.com/brynary/rack-test) for testing. Run the tests by typing `bacon spec/racket.rb`in the root directory. Code coverage reports are provided by [simplecov](https://rubygems.org/gems/simplecov). After the tests have run the an HTML report can be found in the `coverage` directory. 
 
 ## Alright, I want to try using this stuff. Where are the docs?
 Unfortunately there aren't any docs yet. The main reason is that most things are not finished yet, I am still
