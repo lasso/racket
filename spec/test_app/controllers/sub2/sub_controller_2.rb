@@ -5,11 +5,11 @@ class SubController2 < Racket::Controller
   end
 
   def current_action
-    request.action
+    racket.action
   end
 
   def current_params
-    request.params.to_json
+    racket.params.to_json
   end
 
 end

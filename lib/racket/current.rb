@@ -19,20 +19,20 @@ along with Racket.  If not, see <http://www.gnu.org/licenses/>.
 =end
 
 module Racket
+  module Current
+    State = Struct.new(:action, :action_result, :params)
 
-  class Current
-
-    def self.get(env)
-      mod = Module.new
+    def self.init(env, action, params)
+      racket = State.new
+      racket.action = action
+      racket.params = params
       request = Request.new(env)
       response = Response.new
-      mod.class_eval do
+      Module.new do
+        define_method(:racket) { racket }
         define_method(:request) { request }
         define_method(:response) { response }
       end
-      mod
     end
-
   end
-
 end

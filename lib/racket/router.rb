@@ -79,13 +79,11 @@ module Racket
 
         # Initialize target
         target = target_klass.new
-        env['racket.action'] = action
-        env['racket.params'] = params
         # @fixme: File.dirname should not be used on urls!
         1.upto(params.count) do
           env['PATH_INFO'] = File.dirname(env['PATH_INFO'])
         end
-        target.extend(Current.get(env))
+        target.extend(Current.init(env, action, params))
         target.render(action)
       else
         render_404

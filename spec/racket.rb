@@ -1,4 +1,5 @@
 require 'simplecov'
+require 'stringio'
 
 SimpleCov.start do
   add_filter 'spec/test_app'
@@ -113,6 +114,15 @@ Dir.chdir(TEST_APP_DIR) do
       get '/sub1/route_to_nonexisting'
       last_response.status.should.equal(200)
       last_response.body.should.equal('/sub3/inherited/nonono/with/params')
+    end
+
+    it 'should be able to log messages' do
+      _logger = app.options[:logger]
+      sio = StringIO.new
+      app.options[:logger] = Logger.new(sio)
+      app.inform_all('Informational message');
+      sio.string.index('Informational message').should.equal(49)
+      app.options[:logger] = _logger
     end
 
   end

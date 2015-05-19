@@ -64,7 +64,7 @@ module Racket
       current.inform(msg, level) if options[:mode] == :dev
     end
 
-    def inform_all(msg, level = :info)
+    def self.inform_all(msg, level = :info)
       current.inform(msg, level)
     end
 

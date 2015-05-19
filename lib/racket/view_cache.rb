@@ -37,7 +37,7 @@ module Racket
       controller.response.write(
         template ?
         Tilt.new(template).render(controller) :
-        controller.response.action_result
+        controller.racket.action_result
       )
       controller.response.finish
     end

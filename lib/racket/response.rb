@@ -20,8 +20,5 @@ along with Racket.  If not, see <http://www.gnu.org/licenses/>.
 
 module Racket
   class Response < Rack::Response
-
-    attr_accessor :action_result
-
   end
 end
