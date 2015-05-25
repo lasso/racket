@@ -1,7 +1,7 @@
-class SubController2 < Racket::Controller
+class DefaultSubController2 < Racket::Controller
 
   def index
-    'SubController2::index'
+    "#{self.class}::#{__method__}"
   end
 
   def current_action

@@ -20,12 +20,13 @@ along with Racket.  If not, see <http://www.gnu.org/licenses/>.
 
 module Racket
   module Current
-    State = Struct.new(:action, :action_result, :params)
+    State = Struct.new(:action, :action_result, :params, :redirected)
 
     def self.init(env, action, params)
       racket = State.new
       racket.action = action
       racket.params = params
+      racket.redirected = false
       request = Request.new(env)
       response = Response.new
       Module.new do

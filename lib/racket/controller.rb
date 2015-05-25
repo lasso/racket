@@ -90,6 +90,7 @@ module Racket
     # @param [Fixnum] status
     # @return [Object]
     def redirect(target, status = 302)
+      racket.redirected = true
       response.redirect(target, status)
     end
 

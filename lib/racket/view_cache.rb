@@ -38,7 +38,7 @@ module Racket
         template ?
         Tilt.new(template).render(controller) :
         controller.racket.action_result
-      )
+      ) unless controller.racket.redirected
       controller.response.finish
     end
 

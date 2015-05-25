@@ -1,7 +1,7 @@
-class RootController < Racket::Controller
+class DefaultRootController < Racket::Controller
 
   def index
-    'RootController::index'
+    "#{self.class}::#{__method__}"
   end
 
   def my_first_route
