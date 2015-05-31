@@ -7,7 +7,7 @@ class CustomSubController3 < Racket::Controller
   end
 
   def a_secret_place
-    redirect(rs(__method__, self.class.get_option(:top_secret)))
+    redirect(rs(__method__, controller_option(:top_secret)))
   end
 
 end

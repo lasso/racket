@@ -12,4 +12,8 @@ class CustomSubController2 < Racket::Controller
     racket.params.to_json
   end
 
+  def template
+    @message = 'Message from template'
+  end
+
 end

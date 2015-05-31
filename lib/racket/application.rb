@@ -33,18 +33,8 @@ module Racket
     # @param [Hash] env Rack environment
     # @return [Array] A Rack response array
     def self.call(env)
-      current.router.route(env)
+      @current.router.route(env)
     end
-
-    # Returns the currently running Racket::Application object.
-    #
-    # @return [Racket::Application]
-    def self.current
-      return @current if @current
-      default
-    end
-
-    private_class_method :current
 
     def self.get_route(controller, action, params)
       router.get_route(controller, action, params)
@@ -61,25 +51,25 @@ module Racket
     end
 
     def self.inform_dev(msg, level = :info)
-      current.inform(msg, level) if options[:mode] == :dev
+      @current.inform(msg, level) if options[:mode] == :dev
     end
 
     def self.inform_all(msg, level = :info)
-      current.inform(msg, level)
+      @current.inform(msg, level)
     end
 
     # Returns options for the currently running Racket::Application
     #
     # @return [Hash]
     def self.options
-      current.options
+      @current.options
     end
 
     # Returns the router associated with the currenntly running Racket::Application
     #
     # @return [Racket::Router]
     def self.router
-      current.router
+      @current.router
     end
 
     private_class_method :router
@@ -96,7 +86,7 @@ module Racket
     end
 
     def self.view_cache
-      current.view_cache
+      @current.view_cache
     end
 
     # Writes a message to the logger if there is one present

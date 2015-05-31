@@ -21,4 +21,10 @@ describe 'The custom Racket test Application' do
     last_response.status.should.equal(404)
     last_response.body.should.equal('404 Not found')
   end
+
+  it 'should be able to render a template' do
+    get '/sub2/template'
+    last_response.status.should.equal(200)
+    last_response.body.should.match(/Message from template/)
+  end
 end
