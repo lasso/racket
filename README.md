@@ -1,6 +1,7 @@
 # Racket - The noisy Rack MVC framework
 
-[![Build Status](https://travis-ci.org/lasso/racket.svg?branch=master)](https://travis-ci.org/lasso/racket)
+[![Build Status](https://travis-ci.org/lasso/racket.svg?branch=master)](https://travis-ci.org/lasso/racket)&nbsp;&nbsp;&nbsp;&nbsp;[![codecov.io](https://codecov.io/github/lasso/racket/coverage.svg?branch=master)](https://codecov.io/github/lasso/racket?branch=master)
+
 
 ## Say what?
 Yes. It is yet another framework built on rack. Using MVC. Doing silly stuff while you look the other way.
@@ -25,7 +26,7 @@ as I start porting more of my old apps from Ramaze.
 ## Where are the tests?
 I am still working on them. At the moment the tests cover about 98 per cent of the code base, but that's just because I have been a bit lazy. A cool 100 per cent is the goal.
 
-I am using [bacon](https://github.com/chneukirchen/bacon) and [rack-test](https://github.com/brynary/rack-test) for testing. Run the tests by typing `bacon spec/racket.rb`in the root directory. Code coverage reports are provided by [simplecov](https://rubygems.org/gems/simplecov). After the tests have run the an HTML report can be found in the `coverage` directory. 
+I am using [bacon](https://github.com/chneukirchen/bacon) and [rack-test](https://github.com/brynary/rack-test) for testing. Run the tests by typing `bacon spec/racket.rb`in the root directory. Code coverage reports are provided by [simplecov](https://rubygems.org/gems/simplecov). After the tests have run the an HTML report can be found in the `coverage` directory. Or you can just trust [Travis CI](https://travis-ci.org/lasso/racket) and [Codecov](https://codecov.io/github/lasso/racket) who run the tests automatically on each commit.
 
 ## Alright, I want to try using this stuff. Where are the docs?
 Unfortunately there aren't any docs yet. The main reason is that most things are not finished yet, I am still
