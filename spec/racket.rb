@@ -3,10 +3,11 @@ require 'stringio'
 
 SimpleCov.start do
   add_filter 'spec'
-  if ENV['CI'] == 'true'
-    require 'codecov'
-    formatter = SimpleCov::Formatter::Codecov
-  end
+end
+
+if ENV['CI'] == 'true'
+  require 'codecov'
+  SimpleCov.formatter = SimpleCov::Formatter::Codecov
 end
 
 TEST_DEFAULT_APP_DIR = File.absolute_path(File.join(File.dirname(__FILE__), 'test_default_app'))
