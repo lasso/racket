@@ -19,8 +19,9 @@ Gem::Specification.new do |s|
   s.add_dependency('tilt', '~>2.0')
 
   s.add_development_dependency('bacon', '~>1.2')
+  s.add_development_dependency('codecov', '~>0.0.8')
   s.add_development_dependency('rack-test', '~>0.6')
-  s.add_development_dependency('rake', '~>10.4')
+  s.add_development_dependency('rake')
   s.add_development_dependency('simplecov', '~>0.10')
-  s.add_development_dependency('yard', '~>0')
+  s.add_development_dependency('yard')
 end
