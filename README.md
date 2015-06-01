@@ -24,7 +24,7 @@ Probably not. At the moment it is good _enough_ for my needs, but I plan to add 
 as I start porting more of my old apps from Ramaze.
 
 ## Where are the tests?
-I am still working on them. At the moment the tests cover about 98 per cent of the code base, but that's just because I have been a bit lazy. A cool 100 per cent is the goal.
+I am still working on them. At the moment the tests cover about 97 per cent of the code base, but that's just because I have been a bit lazy. A cool 100 per cent is the goal.
 
 I am using [bacon](https://github.com/chneukirchen/bacon) and [rack-test](https://github.com/brynary/rack-test) for testing. Run the tests by typing `bacon spec/racket.rb`in the root directory. Code coverage reports are provided by [simplecov](https://rubygems.org/gems/simplecov). After the tests have run the an HTML report can be found in the `coverage` directory. Or you can just trust [Travis CI](https://travis-ci.org/lasso/racket) and [Codecov](https://codecov.io/github/lasso/racket) who run the tests automatically on each commit.
 

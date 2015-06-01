@@ -23,10 +23,7 @@ module Racket
     State = Struct.new(:action, :action_result, :params, :redirected)
 
     def self.init(env, action, params)
-      racket = State.new
-      racket.action = action
-      racket.params = params
-      racket.redirected = false
+      racket = State.new(action, nil, params, false)
       request = Request.new(env)
       response = Response.new
       Module.new do
