@@ -28,13 +28,6 @@ module Racket
       Application.options[:last_added_controller].push(klass)
     end
 
-    # Returns the default action for the current controller class.
-    #
-    # @return [Symbol]
-    def self.default_action
-      get_option(:default_action) || Application.options[:default_action]
-    end
-
     # Returns an option for the current controller class or any of the controller classes
     # it is inheriting from.
     #
@@ -43,7 +36,8 @@ module Racket
     def self.get_option(key)
       @options ||= {}
       return @options[key] if @options.key?(key)
-      return nil if superclass == Controller # End of the line
+      # We are running out of controller options, do one final lookup in Application.options
+      return Application.options.fetch(key, nil) if superclass == Controller
       superclass.get_option(key)
     end
 

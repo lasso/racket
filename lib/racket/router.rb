@@ -72,7 +72,7 @@ module Racket
       unless matching_routes.first.nil?
         target_klass = matching_routes.first.first.route.dest
         params = matching_routes.first.first.param_values.first.reject { |e| e.empty? }
-        action = params.empty? ? target_klass.default_action : params.shift.to_sym
+        action = params.empty? ? target_klass.get_option(:default_action) : params.shift.to_sym
 
         # Check if action is available on target
         return render_404 unless @actions_by_controller[target_klass].include?(action)

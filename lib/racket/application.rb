@@ -126,6 +126,7 @@ module Racket
         controller_dir: File.join(Dir.pwd, 'controllers'),
         default_action: :index,
         default_layout: '_default.*',
+        default_view: nil,
         layout_dir: File.join(Dir.pwd, 'layouts'),
         logger: Logger.new($stdout),
         mode: :live,

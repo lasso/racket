@@ -31,14 +31,25 @@ module Racket
       @templates_by_path = {}
     end
 
+    # Renders a controller based on the request path and the variables set in the
+    # controller instance.
+    #
+    # @param [Controller] controller
+    # @return [Hash]
     def render(controller)
-      # @todo: layout!
-      template = find_template(controller.request.path)
-      controller.response.write(
-        template ?
-        Tilt.new(template).render(controller) :
-        controller.racket.action_result
-      ) unless controller.racket.redirected
+      unless controller.racket.redirected
+        template =
+          find_template(controller.request.path, controller.controller_option(:default_view))
+        if template
+          output = Tilt.new(template).render(controller)
+          layout =
+            find_layout(controller.request.path, controller.controller_option(:default_layout))
+          output = Tilt.new(layout).render(controller) { output } if layout
+        else
+          output = controller.racket.action_result
+        end
+        controller.response.write(output)
+      end
       controller.response.finish
     end
 
@@ -49,11 +60,11 @@ module Racket
     # cached, meaning that the filesystem lookup for a specific url_path will only happen once.
     #
     # @param [String] url_path
+    # @param [String|nil] default_layout
     # @return [String|nil]
-    def find_layout(url_path)
+    def find_layout(url_path, default_layout)
       return @layouts_by_path[url_path] if @layouts_by_path.key?(url_path)
-      @layouts_by_path[url_path] =
-        find_matching_file(@layout_base_dir, url_path, Application.options[:default_layout])
+      @layouts_by_path[url_path] = find_matching_file(@layout_base_dir, url_path, default_layout)
     end
 
     # Tries to locate a template matching +url_path+ in the file system and returns the path if a
@@ -61,10 +72,11 @@ module Racket
     # cached, meaning that the filesystem lookup for a specific url_path will only happen once.
     #
     # @param [String] url_path
+    # @param [String|nil] default_view
     # @return [String|nil]
-    def find_template(url_path)
+    def find_template(url_path, default_view)
       return @templates_by_path[url_path] if @templates_by_path.key?(url_path)
-      @templates_by_path[url_path] = find_matching_file(@template_base_dir, url_path)
+      @templates_by_path[url_path] = find_matching_file(@template_base_dir, url_path, default_view)
     end
 
     # Locates a file in the filesystem matching an URL path. If there exists a matching file, the
@@ -74,7 +86,7 @@ module Racket
     # @param [String] url_path
     # @param [String|nil] default_file
     # @return [String|nil]
-    def find_matching_file(base_file_path, url_path, default_file = nil)
+    def find_matching_file(base_file_path, url_path, default_file)
       file_path = File.join(base_file_path, url_path)
       action = File.basename(file_path)
       file_path = File.dirname(file_path)
@@ -83,7 +95,7 @@ module Racket
         files = Dir.glob("#{action}.*")
         if files.empty?
           if default_file
-            files = Dir.glob("_default.*")
+            files = Dir.glob(default_file)
             return nil if files.empty? # No default file found
             return File.join(file_path, files.first)
           end

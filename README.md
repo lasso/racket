@@ -24,9 +24,9 @@ Probably not. At the moment it is good _enough_ for my needs, but I plan to add 
 as I start porting more of my old apps from Ramaze.
 
 ## Where are the tests?
-I am still working on them. At the moment the tests cover about 97 per cent of the code base, but that's just because I have been a bit lazy. A cool 100 per cent is the goal.
+Have a look in the `spec` directory. The code base have tests covering 100 per cent of the code and I am planning on keeping it that way. At the moment the code is tested using ruby 2.0, ruby 2.1.6 and 2.2.2, but more versions might be added later.
 
-I am using [bacon](https://github.com/chneukirchen/bacon) and [rack-test](https://github.com/brynary/rack-test) for testing. Run the tests by typing `bacon spec/racket.rb`in the root directory. Code coverage reports are provided by [simplecov](https://rubygems.org/gems/simplecov). After the tests have run the an HTML report can be found in the `coverage` directory. Or you can just trust [Travis CI](https://travis-ci.org/lasso/racket) and [Codecov](https://codecov.io/github/lasso/racket) who run the tests automatically on each commit.
+I am using [bacon](https://github.com/chneukirchen/bacon) and [rack-test](https://github.com/brynary/rack-test) for testing. Run the tests by typing `bacon spec/racket.rb`in the root directory. Code coverage reports are provided by [simplecov](https://rubygems.org/gems/simplecov). After the tests have run the an HTML report can be found in the `coverage` directory. If you are not interested in running the tests yourself you could also have a look at the test status at [Travis CI](https://travis-ci.org/lasso/racket) and the code coverage at [Codecov](https://codecov.io/github/lasso/racket). Their stats get updated on every commit.
 
 ## Alright, I want to try using this stuff. Where are the docs?
 Unfortunately there aren't any docs yet. The main reason is that most things are not finished yet, I am still
