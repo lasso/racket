@@ -20,7 +20,7 @@ describe 'The default Racket test Application' do
     routes_by_controller[DefaultSubController3].should.equal('/sub3')
     routes_by_controller[DefaultInheritedController].should.equal('/sub3/inherited')
 
-    actions_by_controller[DefaultRootController].length.should.equal(3)
+    actions_by_controller[DefaultRootController].length.should.equal(4)
     actions_by_controller[DefaultRootController].include?(:index).should.equal(true)
     actions_by_controller[DefaultRootController].include?(:my_first_route).should.equal(true)
     actions_by_controller[DefaultRootController].include?(:my_second_route).should.equal(true)
@@ -124,5 +124,36 @@ describe 'The default Racket test Application' do
     sio.string.should.match(%r(Hey, listen up!))
     app.options[:mode] = _mode
     app.options[:logger] = _logger
+  end
+
+  it 'should be able to set and clear session variables' do
+    get '/session_as_json'
+    last_response.headers.keys.should.not.include('Set-Cookie')
+    response = JSON.parse(last_response.body)
+    response.class.should.equal(Hash)
+    response.keys.should.be.empty
+    get '/session_as_json?foo=bar'
+    last_response.headers.keys.should.include('Set-Cookie')
+    last_response.headers['Set-Cookie'].should.match(%r(racket.session=))
+    response = JSON.parse(last_response.body)
+    response.class.should.equal(Hash)
+    response.keys.length.should.equal(2)
+    response.keys.should.include('foo')
+    response.keys.should.include('session_id')
+    get '/session_as_json?baz=quux'
+    last_response.headers.keys.should.include('Set-Cookie')
+    last_response.headers['Set-Cookie'].should.match(%r(racket.session=))
+    response = JSON.parse(last_response.body)
+    response.class.should.equal(Hash)
+    response.keys.length.should.equal(3)
+    response.keys.should.include('foo')
+    response.keys.should.include('baz')
+    response.keys.should.include('session_id')
+    get '/session_as_json?drop_session'
+    last_response.headers.keys.should.include('Set-Cookie')
+    last_response.headers['Set-Cookie'].should.match(%r(racket.session=))
+    response = JSON.parse(last_response.body)
+    response.class.should.equal(Hash)
+    response.keys.should.be.empty
   end
 end

@@ -22,6 +22,7 @@ require 'logger'
 require 'rack'
 
 module Racket
+  # Racket main application class.
   class Application
 
     attr_reader :options, :router
@@ -33,9 +34,15 @@ module Racket
     # @param [Hash] env Rack environment
     # @return [Array] A Rack response array
     def self.call(env)
-      @current.router.route(env)
+      @current.call(env)
     end
 
+    # Returns a route to the specified controller/action/parameter combination
+    #
+    # @param [Class] controller
+    # @param [Symbol] action
+    # @param [Array] params
+    # @return [String]
     def self.get_route(controller, action, params)
       router.get_route(controller, action, params)
     end
@@ -50,12 +57,23 @@ module Racket
       self
     end
 
-    def self.inform_dev(msg, level = :info)
-      @current.inform(msg, level) if options[:mode] == :dev
+    # Sends a message to the logger, but only if the application is running in dev mode.
+    #
+    # @param [String] message
+    # @param [Symbol] level
+    # @return nil
+    def self.inform_dev(message, level = :info)
+      @current.inform(message, level) if options[:mode] == :dev
+      nil
     end
 
-    def self.inform_all(msg, level = :info)
-      @current.inform(msg, level)
+    # Sends a message to the logger.
+    #
+    # @param [String] message
+    # @param [Symbol] level
+    # @return nil
+    def self.inform_all(message, level = :info)
+      @current.inform(message, level)
     end
 
     # Returns options for the currently running Racket::Application
@@ -85,13 +103,29 @@ module Racket
       self
     end
 
+    # Returns the view cache of the currently running application.
+    #
+    # @return [ViewCache]
     def self.view_cache
       @current.view_cache
     end
 
+    # Internal dispatch handler. Should not be called directly.
+    #
+    # @param [Hash] env Rack environment
+    # @return [Array] A Rack response array
+    def call(env)
+      app.call(env)
+    end
+
     # Writes a message to the logger if there is one present
-    def inform(msg, level)
-      options[:logger].send(level, msg) if options[:logger]
+    #
+    # @param [String] message
+    # @param [Symbol] level
+    # @return nil
+    def inform(message, level)
+      options[:logger].send(level, message) if options[:logger]
+      nil
     end
 
     # Reloads the application, making any changes to the controller configuration visible
@@ -104,11 +138,29 @@ module Racket
       nil
     end
 
+    # Returns the ViewCache object associated with the current application.
+    #
+    # @return [ViewCache]
     def view_cache
       @view_cache ||= ViewCache.new(options[:layout_dir], options[:view_dir])
     end
 
     private
+
+    def app
+      @app ||= build_app
+    end
+
+    def build_app
+      instance = self
+      Rack::Builder.new do
+        instance.options[:middleware].each_pair do |klass, opts|
+          Application.inform_dev("Loading middleware #{klass} with options #{opts}.")
+          use klass, opts
+        end
+        run lambda { |env| instance.router.route(env) }
+      end
+    end
 
     # Creates a new instance of Racket::Application
     #
@@ -129,6 +181,13 @@ module Racket
         default_view: nil,
         layout_dir: File.join(Dir.pwd, 'layouts'),
         logger: Logger.new($stdout),
+        middleware: {
+          Rack::Session::Cookie => {
+            key: 'racket.session',
+            old_secret: SecureRandom.hex(16),
+            secret: SecureRandom.hex(16)
+          }
+        },
         mode: :live,
         view_dir: File.join(Dir.pwd, 'views')
       }
