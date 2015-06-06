@@ -17,12 +17,12 @@ class DefaultRootController < Racket::Controller
   def session_as_json
     request.GET.each_pair do |key, value|
       if key == 'drop_session'
-        request.session.clear
+        session.clear
       else
-        request.session[key] = value
+        session[key] = value
       end
     end
-    request.session.to_hash.to_json
+    session.to_hash.to_json
   end
 
 end

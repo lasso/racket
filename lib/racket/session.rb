@@ -18,11 +18,9 @@ You should have received a copy of the GNU Affero General Public License
 along with Racket.  If not, see <http://www.gnu.org/licenses/>.
 =end
 
-require_relative 'racket/application.rb'
-require_relative 'racket/controller.rb'
-require_relative 'racket/current.rb'
-require_relative 'racket/request.rb'
-require_relative 'racket/response.rb'
-require_relative 'racket/router.rb'
-require_relative 'racket/session.rb'
-require_relative 'racket/view_cache.rb'
+module Racket
+  # Racket::Session is just a thin wrapper around Rack::Session::Abstract::SessionHash to bring it
+  # into the Racket namespace.
+  class Session < SimpleDelegator
+  end
+end

@@ -37,7 +37,7 @@ module Racket
       @current.call(env)
     end
 
-    # Returns a route to the specified controller/action/parameter combination
+    # Returns a route to the specified controller/action/parameter combination.
     #
     # @param [Class] controller
     # @param [Symbol] action
@@ -76,14 +76,14 @@ module Racket
       @current.inform(message, level)
     end
 
-    # Returns options for the currently running Racket::Application
+    # Returns options for the currently running Racket::Application.
     #
     # @return [Hash]
     def self.options
       @current.options
     end
 
-    # Returns the router associated with the currenntly running Racket::Application
+    # Returns the router associated with the currenntly running Racket::Application.
     #
     # @return [Racket::Router]
     def self.router
@@ -118,7 +118,7 @@ module Racket
       app.call(env)
     end
 
-    # Writes a message to the logger if there is one present
+    # Writes a message to the logger if there is one present.
     #
     # @param [String] message
     # @param [Symbol] level
@@ -162,7 +162,7 @@ module Racket
       end
     end
 
-    # Creates a new instance of Racket::Application
+    # Creates a new instance of Racket::Application.
     #
     # @param [Hash] options
     # @return [Racket::Application]
@@ -170,7 +170,7 @@ module Racket
       @options = default_options.merge(options)
     end
 
-    # Returns a list of default options for Racket::Application
+    # Returns a list of default options for Racket::Application.
     #
     # @return [Hash]
     def default_options
@@ -193,7 +193,7 @@ module Racket
       }
     end
 
-    # Loads controllers and associates each controller with a route
+    # Loads controllers and associates each controller with a route.
     #
     # @return [nil]
     def load_controllers
@@ -220,7 +220,7 @@ module Racket
       nil
     end
 
-    # Initializes routing
+    # Initializes routing.
     #
     # @return [nil]
     def setup_routes

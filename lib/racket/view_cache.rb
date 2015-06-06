@@ -21,7 +21,7 @@ along with Racket.  If not, see <http://www.gnu.org/licenses/>.
 require 'tilt'
 
 module Racket
-
+  # Handles rendering in Racket applications.
   class ViewCache
 
     def initialize(layout_base_dir, template_base_dir)

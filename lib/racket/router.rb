@@ -21,8 +21,8 @@ along with Racket.  If not, see <http://www.gnu.org/licenses/>.
 require 'http_router'
 
 module Racket
+  # Handles routing in Racket applications.
   class Router
-
     def initialize
       @router = HttpRouter.new
       @routes_by_controller = {}
@@ -31,6 +31,9 @@ module Racket
 
     # Caches available actions for each controller class. This also works for controller classes
     # that inherit from other controller classes.
+    #
+    # @param [Class]
+    # @return [nil]
     def cache_actions(controller)
       actions = Set.new
       current = controller
@@ -39,8 +42,15 @@ module Racket
         current = current.superclass
       end
       @actions_by_controller[controller] = actions.to_a
+      nil
     end
 
+    # Returns a route to the specified controller/action/parameter combination.
+    #
+    # @param [Class] controller
+    # @param [Symbol] action
+    # @param [Array] params
+    # @return [String]
     def get_route(controller, action, params)
       route = ''
       route << @routes_by_controller[controller] if @routes_by_controller.key?(controller)
@@ -51,12 +61,18 @@ module Racket
       route
     end
 
+    # Maps a controller to the specified path.
+    #
+    # @param [String] path
+    # @param [Class] controller
+    # @return [nil]
     def map(path, controller)
       controller_base_path = path.empty? ? '/' : path
       Application.inform_dev("Mapping #{controller} to #{controller_base_path}.")
       @router.add("#{path}(/*params)").to(controller)
       @routes_by_controller[controller] = controller_base_path
       cache_actions(controller)
+      nil
     end
 
     # @todo: Allow the user to set custom handlers for different errors
@@ -64,6 +80,10 @@ module Racket
       [404, { 'Content-Type' => 'text/plain' }, message]
     end
 
+    # Routes a request and renders it.
+    #
+    # @param [Hash] env Rack environment
+    # @return [Array] A Rack response triplet
     def route(env)
       # Find controller in map
       # If controller exists, call it

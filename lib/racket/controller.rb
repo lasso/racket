@@ -100,7 +100,7 @@ module Racket
 
     def __execute(action)
       meth = method(action)
-      params = request.params[0...meth.parameters.length]
+      params = racket.params[0...meth.parameters.length]
       racket.action_result = meth.call(*params)
     end
 

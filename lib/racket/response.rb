@@ -19,6 +19,7 @@ along with Racket.  If not, see <http://www.gnu.org/licenses/>.
 =end
 
 module Racket
+  # Represents a response from the application
   class Response < Rack::Response
   end
 end
