@@ -32,7 +32,7 @@ module Racket
     # Caches available actions for each controller class. This also works for controller classes
     # that inherit from other controller classes.
     #
-    # @param [Class]
+    # @param [Class] controller
     # @return [nil]
     def cache_actions(controller)
       actions = Set.new

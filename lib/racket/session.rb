@@ -19,8 +19,19 @@ along with Racket.  If not, see <http://www.gnu.org/licenses/>.
 =end
 
 module Racket
-  # Racket::Session is just a thin wrapper around Rack::Session::Abstract::SessionHash to bring it
-  # into the Racket namespace.
+  # Racket::Session is just a thin wrapper around whetever object that is implementing the session
+  # storage. By default this is an instance of Rack::Session::Abstract::SessionHash, but
+  # Racket::Session will happily wrap anything found in the rack environment.
+  #
+  # To provide your own session handler and have it wrapped by Racket::Session, just add your
+  # session handler as a middleware and make sure it writes the current session to the key
+  # rack.session in the rack environment.
   class Session < SimpleDelegator
+    # Look the same regardless of what the underlying implementation is.
+    def inspect
+      "#<#{self.class}:#{object_id}>"
+    end
+    alias :to_s inspect
+    alias :to_str inspect
   end
 end

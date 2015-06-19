@@ -30,3 +30,15 @@ require_relative 'racket/router.rb'
 require_relative 'racket/session.rb'
 require_relative 'racket/view_cache.rb'
 require_relative 'racket/utils.rb'
+
+module Racket
+  # Requires a file using the current application directory as a base path.
+  #
+  # @param [Object] args
+  # @return nil
+  def require(*args)
+    Application.require(*args)
+    nil
+  end
+  module_function :require
+end

@@ -28,4 +28,13 @@ describe 'The custom Racket test Application' do
     last_response.body.should.match(/Message from template/)
     last_response.body.should.match(/A groovy layout/)
   end
+
+  it 'should be able to require custom files' do
+    Module.constants.should.not.include(:Blob)
+    Racket.require 'extra/blob'
+    Module.constants.should.include(:Blob)
+    Module.constants.should.not.include(:InnerBlob)
+    Racket.require 'extra', 'blob', 'inner_blob'
+    Module.constants.should.include(:InnerBlob)
+  end
 end

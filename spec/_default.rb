@@ -20,7 +20,7 @@ describe 'The default Racket test Application' do
     routes_by_controller[DefaultSubController3].should.equal('/sub3')
     routes_by_controller[DefaultInheritedController].should.equal('/sub3/inherited')
 
-    actions_by_controller[DefaultRootController].length.should.equal(4)
+    actions_by_controller[DefaultRootController].length.should.equal(5)
     actions_by_controller[DefaultRootController].include?(:index).should.equal(true)
     actions_by_controller[DefaultRootController].include?(:my_first_route).should.equal(true)
     actions_by_controller[DefaultRootController].include?(:my_second_route).should.equal(true)
@@ -155,6 +155,10 @@ describe 'The default Racket test Application' do
     response = JSON.parse(last_response.body)
     response.class.should.equal(Hash)
     response.keys.should.be.empty
+    get '/session_strings'
+    response = JSON.parse(last_response.body)
+    response.length.should.equal(3)
+    response.each { |elem| elem.should.match(%r(Racket::Session)) }
   end
 
   it 'should be able to build paths correctly' do

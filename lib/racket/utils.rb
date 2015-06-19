@@ -1,7 +1,6 @@
 module Racket
-
+  # Collects utilities needed by different objects in Racket.
   class Utils
-
     # Builds and returns a path in the file system from the provided arguments. The first element
     # in the argument list can be either absolute or relative, all other arguments must be relative,
     # otherwise they will be removed from the final path.
@@ -22,7 +21,5 @@ module Racket
       end
       path.cleanpath.expand_path.to_s
     end
-
   end
-
 end

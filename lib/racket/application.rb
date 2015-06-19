@@ -82,6 +82,15 @@ module Racket
       @current.options
     end
 
+    # Requires a file using the current application directory as a base path.
+    #
+    # @param [Object] args
+    # @return nil
+    def self.require(*args)
+      @current.require(*args)
+      nil
+    end
+
     # Returns the router associated with the currenntly running Racket::Application.
     #
     # @return [Racket::Router]
@@ -134,6 +143,15 @@ module Racket
     def reload
       setup_routes
       # @todo: Clear cached views/layouts
+      nil
+    end
+
+    # Requires a file using the current application directory as a base path.
+    #
+    # @param [Object] args
+    # @return nil
+    def require(*args)
+      ::Kernel.require Utils.build_path(*args)
       nil
     end
 
@@ -211,7 +229,7 @@ module Racket
           b.split('/').length <=> a.split('/').length
         end
         files.each do |file|
-          require File.expand_path(file)
+          ::Kernel.require File.expand_path(file)
           path = "/#{File.dirname(file)}"
           path = '' if path == '/.'
           @router.map(path, options[:last_added_controller].pop)
