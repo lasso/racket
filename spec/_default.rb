@@ -156,4 +156,12 @@ describe 'The default Racket test Application' do
     response.class.should.equal(Hash)
     response.keys.should.be.empty
   end
+
+  it 'should be able to build paths correctly' do
+    Racket::Utils.build_path.should.equal(Pathname.pwd.to_s)
+    Racket::Utils.build_path('foo', 'bar', 'baz').should.equal(
+      File.join(Pathname.pwd.to_s, 'foo', 'bar', 'baz')
+    )
+  end
+
 end

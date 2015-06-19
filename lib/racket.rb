@@ -18,6 +18,9 @@ You should have received a copy of the GNU Affero General Public License
 along with Racket.  If not, see <http://www.gnu.org/licenses/>.
 =end
 
+require 'pathname'
+require 'rack'
+
 require_relative 'racket/application.rb'
 require_relative 'racket/controller.rb'
 require_relative 'racket/current.rb'
@@ -26,3 +29,4 @@ require_relative 'racket/response.rb'
 require_relative 'racket/router.rb'
 require_relative 'racket/session.rb'
 require_relative 'racket/view_cache.rb'
+require_relative 'racket/utils.rb'

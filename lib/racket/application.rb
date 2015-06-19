@@ -19,7 +19,6 @@ along with Racket.  If not, see <http://www.gnu.org/licenses/>.
 =end
 
 require 'logger'
-require 'rack'
 
 module Racket
   # Racket main application class.
@@ -174,12 +173,13 @@ module Racket
     #
     # @return [Hash]
     def default_options
+      root_dir = Utils.build_path(Dir.pwd)
       {
-        controller_dir: File.join(Dir.pwd, 'controllers'),
+        controller_dir: Utils.build_path(root_dir, 'controllers'),
         default_action: :index,
         default_layout: '_default.*',
         default_view: nil,
-        layout_dir: File.join(Dir.pwd, 'layouts'),
+        layout_dir: Utils.build_path(root_dir, 'layouts'),
         logger: Logger.new($stdout),
         middleware: {
           Rack::Session::Cookie => {
@@ -189,7 +189,8 @@ module Racket
           }
         },
         mode: :live,
-        view_dir: File.join(Dir.pwd, 'views')
+        root_dir: root_dir,
+        view_dir: Utils.build_path(root_dir, 'views')
       }
     end
 
@@ -201,7 +202,8 @@ module Racket
       options[:last_added_controller] = []
       @controller = nil
       Dir.chdir(@options[:controller_dir]) do
-        files = Dir.glob(File.join('**', '*.rb'))
+        files = Pathname.glob(File.join('**', '*.rb'))
+        files.map! { |file| file.to_s }
         # Sort by longest path so that the longer paths gets matched first
         # HttpRouter claims to be doing this already, but this "hack" is needed in order
         # for the router to work.
@@ -209,7 +211,7 @@ module Racket
           b.split('/').length <=> a.split('/').length
         end
         files.each do |file|
-          require File.absolute_path(file)
+          require File.expand_path(file)
           path = "/#{File.dirname(file)}"
           path = '' if path == '/.'
           @router.map(path, options[:last_added_controller].pop)

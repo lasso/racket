@@ -92,16 +92,16 @@ module Racket
       file_path = File.dirname(file_path)
       return nil unless File.exists?(file_path) && File.directory?(file_path)
       Dir.chdir(file_path) do
-        files = Dir.glob("#{action}.*")
+        files = Pathname.glob("#{action}.*")
         if files.empty?
           if default_file
-            files = Dir.glob(default_file)
+            files = Pathname.glob(default_file)
             return nil if files.empty? # No default file found
-            return File.join(file_path, files.first)
+            return File.join(file_path, files.first.to_s)
           end
           return nil # Neither default file or specified file found
         end
-        File.join(file_path, files.first)
+        File.join(file_path, files.first.to_s)
       end
     end
 
