@@ -37,4 +37,12 @@ describe 'The custom Racket test Application' do
     Racket.require 'extra', 'blob', 'inner_blob'
     Module.constants.should.include(:InnerBlob)
   end
+
+  it 'should be able to use before/after hooks' do
+    get '/sub2/hook_action'
+    last_response.headers.key?('X-Hook-Action').should.equal(true)
+    last_response.headers['X-Hook-Action'].should.equal('run')
+    response = JSON.parse(last_response.body)
+    response.should.equal(["Data added in before block", "Data added in action"])
+  end
 end

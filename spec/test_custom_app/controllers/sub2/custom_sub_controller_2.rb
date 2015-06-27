@@ -16,4 +16,17 @@ class CustomSubController2 < Racket::Controller
     @message = 'Message from template'
   end
 
+  def hook_action
+    @action = 'Data added in action'
+    [@before, @action].to_json
+  end
+
+  before do
+    @before = 'Data added in before block'
+  end
+
+  after :hook_action do
+    response.headers['X-Hook-Action'] = 'run'
+  end
+
 end

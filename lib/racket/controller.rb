@@ -23,6 +23,43 @@ module Racket
   # Base controller class. Your controllers should inherit this class.
   class Controller
 
+    # Adds a hook to one or more actions.
+    #
+    # @param [Symbol] type
+    # @param [Array] methods
+    # @param [Proc] blk
+    # @return [nil]
+    def self.add_hook(type, methods, blk)
+      puts "\nAdding hook of type #{type} for methods #{methods}"
+      key = "#{type}_hooks".to_sym
+      meths = public_instance_methods(false)
+      meths = meths & methods.map { |method| method.to_sym} unless methods.empty?
+      hooks = get_option(key) || {}
+      meths.each { |meth| hooks[meth] = blk }
+      set_option(key, hooks)
+      nil
+    end
+
+    private_class_method :add_hook
+
+    # Adds a before hook to one or more actions. Actions should be given as a list of symbols.
+    # If no symbols are provided, *all* actions on the controller is affected.
+    #
+    # @param [Array] methods
+    # @return [nil]
+    def self.after(*methods, &blk)
+      add_hook(:after, methods, blk) if block_given?
+    end
+
+    # Adds an after hook to one or more actions. Actions should be given as a list of symbols.
+    # If no symbols are provided, *all* actions on the controller is affected.
+    #
+    # @param [Array] methods
+    # @return [nil]
+    def self.before(*methods, &blk)
+      add_hook(:before, methods, blk) if block_given?
+    end
+
     # :nodoc:
     def self.inherited(klass)
       Application.options[:last_added_controller].push(klass)
@@ -99,9 +136,13 @@ module Racket
     private
 
     def __execute(action)
+      before_hooks = controller_option(:before_hooks) || {}
+      self.instance_eval &before_hooks[action] if before_hooks.key?(action)
       meth = method(action)
       params = racket.params[0...meth.parameters.length]
       racket.action_result = meth.call(*params)
+      after_hooks = controller_option(:after_hooks) || {}
+      self.instance_eval &after_hooks[action] if after_hooks.key?(action)
     end
 
   end
