@@ -30,7 +30,6 @@ module Racket
     # @param [Proc] blk
     # @return [nil]
     def self.add_hook(type, methods, blk)
-      puts "\nAdding hook of type #{type} for methods #{methods}"
       key = "#{type}_hooks".to_sym
       meths = public_instance_methods(false)
       meths = meths & methods.map { |method| method.to_sym} unless methods.empty?
