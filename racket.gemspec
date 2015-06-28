@@ -1,15 +1,21 @@
 require 'rake'
+require_relative 'lib/racket'
+
+files = FileList['lib/**/*.rb'].to_a
+files.concat(FileList['spec/**/*'].to_a)
+files.concat(FileList['COPYING.AGPL', 'Rakefile', 'README.md'].to_a)
 
 Gem::Specification.new do |s|
   s.name                  = 'racket'
+  s.email                 = 'lasso@lassoweb.se'
   s.homepage              = 'https://github.com/lasso/racket'
   s.license               = 'GNU AFFERO GENERAL PUBLIC LICENSE, version 3'
   s.authors               = ['Lars Olsson']
-  s.version               = '0.0.1'
-  s.date                  = '2015-04-06'
+  s.version               = Racket.version
+  s.date                  = '2015-06-28'
   s.summary               = 'Racket - The noisy Rack MVC framework'
-  s.description           = 'Racket - The noisy Rack MVC framework'
-  s.files                 = FileList['lib/**/*.rb', '[A-Z]*'].to_a
+  s.description           = 'Racket is a small MVC framework built atop of rack.'
+  s.files                 = files
   s.platform              = Gem::Platform::RUBY
   s.require_path          = 'lib'
   s.required_ruby_version = '>= 2.0.0'

@@ -40,5 +40,13 @@ module Racket
     Application.require(*args)
     nil
   end
-  module_function :require
+
+  # Returns the current version of Racket.
+  #
+  # @return [String]
+  def version
+    '0.0.2'
+  end
+
+  module_function :require, :version
 end
