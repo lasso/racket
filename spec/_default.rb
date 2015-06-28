@@ -5,6 +5,10 @@ describe 'The default Racket test Application' do
     @app ||= Racket::Application.default
   end
 
+  it 'should report the correct version' do
+    Racket.version.should.equal(Racket::Version.current)
+  end
+
   it 'has mapped controllers correctly' do
     routes_by_controller = actions_by_controller = nil
     routes = app.instance_eval do

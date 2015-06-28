@@ -18,36 +18,16 @@ You should have received a copy of the GNU Affero General Public License
 along with Racket.  If not, see <http://www.gnu.org/licenses/>.
 =end
 
-require 'pathname'
-require 'rack'
-
-require_relative 'racket/application.rb'
-require_relative 'racket/controller.rb'
-require_relative 'racket/current.rb'
-require_relative 'racket/request.rb'
-require_relative 'racket/response.rb'
-require_relative 'racket/router.rb'
-require_relative 'racket/session.rb'
-require_relative 'racket/view_cache.rb'
-require_relative 'racket/utils.rb'
-require_relative 'racket/version.rb'
-
 module Racket
-  # Requires a file using the current application directory as a base path.
-  #
-  # @param [Object] args
-  # @return nil
-  def require(*args)
-    Application.require(*args)
-    nil
-  end
+  module Version
+    MAJOR = 0
+    MINOR = 0
+    TEENY = 2
 
-  # Returns the current version of Racket.
-  #
-  # @return [String]
-  def version
-    Version.current
-  end
+    def current
+      [MAJOR, MINOR, TEENY].join('.')
+    end
 
-  module_function :require, :version
+    module_function :current
+  end
 end

@@ -1,5 +1,5 @@
 require 'rake'
-require_relative 'lib/racket'
+require_relative 'lib/racket/version.rb'
 
 files = FileList['lib/**/*.rb'].to_a
 files.concat(FileList['spec/**/*'].to_a)
@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
   s.homepage              = 'https://github.com/lasso/racket'
   s.license               = 'GNU AFFERO GENERAL PUBLIC LICENSE, version 3'
   s.authors               = ['Lars Olsson']
-  s.version               = Racket.version
+  s.version               = Racket::Version.current
   s.date                  = '2015-06-28'
   s.summary               = 'Racket - The noisy Rack MVC framework'
   s.description           = 'Racket is a small MVC framework built atop of rack.'
