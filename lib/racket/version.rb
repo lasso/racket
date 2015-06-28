@@ -22,7 +22,7 @@ module Racket
   module Version
     MAJOR = 0
     MINOR = 0
-    TEENY = 2
+    TEENY = 3
 
     def current
       [MAJOR, MINOR, TEENY].join('.')
