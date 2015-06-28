@@ -6,7 +6,7 @@ files.concat(FileList['spec/**/*'].to_a)
 files.concat(FileList['COPYING.AGPL', 'Rakefile', 'README.md'].to_a)
 
 Gem::Specification.new do |s|
-  s.name                  = 'racket'
+  s.name                  = 'racket-mvc'
   s.email                 = 'lasso@lassoweb.se'
   s.homepage              = 'https://github.com/lasso/racket'
   s.license               = 'GNU AFFERO GENERAL PUBLIC LICENSE, version 3'
