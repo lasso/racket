@@ -85,28 +85,30 @@ module Racket
     # @param [Hash] env Rack environment
     # @return [Array] A Rack response triplet
     def route(env)
-      # Find controller in map
-      # If controller exists, call it
-      # Otherwise, send a 404
-      matching_routes = @router.recognize(env)
-      unless matching_routes.first.nil?
-        target_klass = matching_routes.first.first.route.dest
-        params = matching_routes.first.first.param_values.first.reject { |e| e.empty? }
-        action = params.empty? ? target_klass.get_option(:default_action) : params.shift.to_sym
+      catch :response do # Catches early exits from Controller.respond.
+        # Find controller in map
+        # If controller exists, call it
+        # Otherwise, send a 404
+        matching_routes = @router.recognize(env)
+        unless matching_routes.first.nil?
+          target_klass = matching_routes.first.first.route.dest
+          params = matching_routes.first.first.param_values.first.reject { |e| e.empty? }
+          action = params.empty? ? target_klass.get_option(:default_action) : params.shift.to_sym
 
-        # Check if action is available on target
-        return render_404 unless @actions_by_controller[target_klass].include?(action)
+          # Check if action is available on target
+          return render_404 unless @actions_by_controller[target_klass].include?(action)
 
-        # Initialize target
-        target = target_klass.new
-        # @fixme: File.dirname should not be used on urls!
-        1.upto(params.count) do
-          env['PATH_INFO'] = File.dirname(env['PATH_INFO'])
+          # Initialize target
+          target = target_klass.new
+          # @fixme: File.dirname should not be used on urls!
+          1.upto(params.count) do
+            env['PATH_INFO'] = File.dirname(env['PATH_INFO'])
+          end
+          target.extend(Current.init(env, action, params))
+          target.render(action)
+        else
+          render_404
         end
-        target.extend(Current.init(env, action, params))
-        target.render(action)
-      else
-        render_404
       end
     end
 

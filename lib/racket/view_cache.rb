@@ -37,19 +37,17 @@ module Racket
     # @param [Controller] controller
     # @return [Hash]
     def render(controller)
-      unless controller.racket.redirected
-        template =
-          find_template(controller.request.path, controller.controller_option(:default_view))
-        if template
-          output = Tilt.new(template).render(controller)
-          layout =
-            find_layout(controller.request.path, controller.controller_option(:default_layout))
-          output = Tilt.new(layout).render(controller) { output } if layout
-        else
-          output = controller.racket.action_result
-        end
-        controller.response.write(output)
+      template =
+        find_template(controller.request.path, controller.controller_option(:default_view))
+      if template
+        output = Tilt.new(template).render(controller)
+        layout =
+          find_layout(controller.request.path, controller.controller_option(:default_layout))
+        output = Tilt.new(layout).render(controller) { output } if layout
+      else
+        output = controller.racket.action_result
       end
+      controller.response.write(output)
       controller.response.finish
     end
 

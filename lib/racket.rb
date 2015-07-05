@@ -30,7 +30,6 @@ require_relative 'racket/router.rb'
 require_relative 'racket/session.rb'
 require_relative 'racket/view_cache.rb'
 require_relative 'racket/utils.rb'
-require_relative 'racket/version.rb'
 
 module Racket
   # Requires a file using the current application directory as a base path.
@@ -46,6 +45,7 @@ module Racket
   #
   # @return [String]
   def version
+    require_relative 'racket/version.rb'
     Version.current
   end
 

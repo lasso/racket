@@ -25,7 +25,7 @@ module Racket
   class Current
     # Holds Racket internal state, available to the controller instance but mostly used for keeping
     # track of things that don't belong to the actual request.
-    State = Struct.new(:action, :action_result, :params, :redirected)
+    State = Struct.new(:action, :action_result, :params)
 
     # Called whenever a new request needs to be processed.
     #
@@ -34,7 +34,7 @@ module Racket
     # @param [Array] params Parameters sent to the action
     # @return [Module] A module encapsulating all state relating to the current request
     def self.init(env, action, params)
-      racket = State.new(action, nil, params, false)
+      racket = State.new(action, nil, params)
       request = Request.new(env)
       response = Response.new
       session = Session.new(env['rack.session']) if env.key?('rack.session')

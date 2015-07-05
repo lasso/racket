@@ -29,7 +29,7 @@ module Racket
     # @param [Array] methods
     # @param [Proc] blk
     # @return [nil]
-    def self.add_hook(type, methods, blk)
+    def self.__register_hook(type, methods, blk)
       key = "#{type}_hooks".to_sym
       meths = public_instance_methods(false)
       meths = meths & methods.map { |method| method.to_sym} unless methods.empty?
@@ -39,7 +39,7 @@ module Racket
       nil
     end
 
-    private_class_method :add_hook
+    private_class_method :__register_hook
 
     # Adds a before hook to one or more actions. Actions should be given as a list of symbols.
     # If no symbols are provided, *all* actions on the controller is affected.
@@ -47,7 +47,7 @@ module Racket
     # @param [Array] methods
     # @return [nil]
     def self.after(*methods, &blk)
-      add_hook(:after, methods, blk) if block_given?
+      __register_hook(:after, methods, blk) if block_given?
     end
 
     # Adds an after hook to one or more actions. Actions should be given as a list of symbols.
@@ -56,7 +56,7 @@ module Racket
     # @param [Array] methods
     # @return [nil]
     def self.before(*methods, &blk)
-      add_hook(:before, methods, blk) if block_given?
+      __register_hook(:before, methods, blk) if block_given?
     end
 
     # :nodoc:
@@ -113,14 +113,28 @@ module Racket
       Application.get_route(controller, action, params)
     end
 
-    # Redirects the client.
+    # Redirects the client. After hooks are
     #
-    # @param [String] target
-    # @param [Fixnum] status
+    # @param [String] target URL to redirect to
+    # @param [Fixnum] status HTTP status to send
+    # @param [true|false] run_after_hook Whether after hook should be run before redirecting
     # @return [Object]
-    def redirect(target, status = 302)
-      racket.redirected = true
+    def redirect(target, status = 302, run_after_hook = true)
       response.redirect(target, status)
+      respond(response.status, response.headers, '', run_after_hook);
+    end
+
+    # Stop processing request and send a custom response. After calling this method, no further
+    # processing of the request is done unless +run_after_hook+ is set to true. If +run_after_hook+
+    # is set to true, any after hook associated with the action (but no other code) will be run.
+    #
+    # @param [Fixnum] status
+    # @param [Hash] headers
+    # @param [String] body
+    # @param [true|false] run_after_hook Whether after hook should be run
+    def respond(status = 200, headers = {}, body = '', run_after_hook = false)
+      __run_hook(:after, racket.action) if run_after_hook
+      throw :response, [status, headers, body]
     end
 
     # Renders an action.
@@ -135,13 +149,16 @@ module Racket
     private
 
     def __execute(action)
-      before_hooks = controller_option(:before_hooks) || {}
-      self.instance_eval &before_hooks[action] if before_hooks.key?(action)
+      __run_hook(:before, action)
       meth = method(action)
       params = racket.params[0...meth.parameters.length]
       racket.action_result = meth.call(*params)
-      after_hooks = controller_option(:after_hooks) || {}
-      self.instance_eval &after_hooks[action] if after_hooks.key?(action)
+      __run_hook(:after, action)
+    end
+
+    def __run_hook(type, action)
+      hooks = controller_option("#{type}_hooks".to_sym) || {}
+      self.instance_eval &hooks[action] if hooks.key?(action)
     end
 
   end
