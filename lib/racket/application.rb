@@ -52,6 +52,7 @@ module Racket
     def self.default
       fail 'Application has already been initialized!' if @current
       @current = self.new
+      @current.setup_static_server
       @current.reload
       self
     end
@@ -107,6 +108,7 @@ module Racket
     def self.using(options)
       fail 'Application has already been initialized!' if @current
       @current = self.new(options)
+      @current.setup_static_server
       @current.reload
       self
     end
@@ -155,6 +157,22 @@ module Racket
       nil
     end
 
+    def serve_static_file(env)
+      return nil if @static_server.nil?
+      @static_server.call(env)
+    end
+
+    # Initializes static server (if a public dir is specified).
+    #
+    # @return [nil]
+    def setup_static_server
+      @static_server = nil
+      return nil unless (public_dir = options[:public_dir]) && Utils.dir_readable?(public_dir)
+      Application.inform_dev("Setting up static server to serve files from #{public_dir}.")
+      @static_server = Rack::File.new(public_dir)
+      nil
+    end
+
     # Returns the ViewCache object associated with the current application.
     #
     # @return [ViewCache]
@@ -171,11 +189,16 @@ module Racket
     def build_app
       instance = self
       Rack::Builder.new do
-        instance.options[:middleware].each_pair do |klass, opts|
+        instance.options[:middleware].each do |middleware|
+          klass, opts = middleware
           Application.inform_dev("Loading middleware #{klass} with options #{opts}.")
           use klass, opts
         end
-        run lambda { |env| instance.router.route(env) }
+        run lambda { |env|
+          static_result = instance.serve_static_file(env)
+          return static_result if static_result && static_result.first < 400
+          instance.router.route(env)
+        }
       end
     end
 
@@ -199,14 +222,18 @@ module Racket
         default_view: nil,
         layout_dir: Utils.build_path(root_dir, 'layouts'),
         logger: Logger.new($stdout),
-        middleware: {
-          Rack::Session::Cookie => {
-            key: 'racket.session',
-            old_secret: SecureRandom.hex(16),
-            secret: SecureRandom.hex(16)
-          }
-        },
+        middleware: [
+          [
+            Rack::Session::Cookie,
+            {
+              key: 'racket.session',
+              old_secret: SecureRandom.hex(16),
+              secret: SecureRandom.hex(16)
+            }
+          ]
+        ],
         mode: :live,
+        public_dir: Utils.build_path(root_dir, 'public'),
         root_dir: root_dir,
         view_dir: Utils.build_path(root_dir, 'views')
       }

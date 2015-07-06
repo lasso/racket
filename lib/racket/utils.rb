@@ -21,5 +21,10 @@ module Racket
       end
       path.cleanpath.expand_path.to_s
     end
+
+    def self.dir_readable?(path)
+      pathname = Pathname.new(path)
+      pathname.exist? && pathname.directory? && pathname.readable?
+    end
   end
 end

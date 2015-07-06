@@ -172,4 +172,11 @@ describe 'The default Racket test Application' do
     )
   end
 
+  it 'should be able to serve static files' do
+    get '/hello.txt'
+    last_response.status.should.equal(200)
+    last_response.headers['Content-Type'].should.equal('text/plain')
+    last_response.body.should.equal("Hello there\n")
+  end
+
 end
