@@ -33,7 +33,7 @@ module Racket
     # @param [Hash] env Rack environment
     # @return [Array] A Rack response array
     def self.call(env)
-      @current.call(env)
+      current.call(env)
     end
 
     # Returns a route to the specified controller/action/parameter combination.
@@ -52,19 +52,9 @@ module Racket
     def self.default
       fail 'Application has already been initialized!' if @current
       @current = self.new
-      @current.setup_static_server
-      @current.reload
+      current.setup_static_server
+      current.reload
       self
-    end
-
-    # Sends a message to the logger, but only if the application is running in dev mode.
-    #
-    # @param [String] message
-    # @param [Symbol] level
-    # @return nil
-    def self.inform_dev(message, level = :info)
-      @current.inform(message, level) if options[:mode] == :dev
-      nil
     end
 
     # Sends a message to the logger.
@@ -73,30 +63,45 @@ module Racket
     # @param [Symbol] level
     # @return nil
     def self.inform_all(message, level = :info)
-      @current.inform(message, level)
+      current.inform_all(message, level)
     end
+
+    # Sends a message to the logger, but only if the application is running in dev mode.
+    #
+    # @param [String] message
+    # @param [Symbol] level
+    # @return nil
+    def self.inform_dev(message, level = :debug)
+      current.inform_dev(message, level)
+    end
+
+    def self.current
+      fail 'No instance found' unless @current
+      @current
+    end
+
+    private_class_method :current
 
     # Returns options for the currently running Racket::Application.
     #
     # @return [Hash]
     def self.options
-      @current.options
+      current.options
     end
 
     # Requires a file using the current application directory as a base path.
     #
     # @param [Object] args
-    # @return nil
+    # @return [nil]
     def self.require(*args)
-      @current.require(*args)
-      nil
+      current.require(*args) && nil
     end
 
     # Returns the router associated with the currenntly running Racket::Application.
     #
     # @return [Racket::Router]
     def self.router
-      @current.router
+      current.router
     end
 
     private_class_method :router
@@ -108,8 +113,8 @@ module Racket
     def self.using(options)
       fail 'Application has already been initialized!' if @current
       @current = self.new(options)
-      @current.setup_static_server
-      @current.reload
+      current.setup_static_server
+      current.reload
       self
     end
 
@@ -117,7 +122,7 @@ module Racket
     #
     # @return [ViewCache]
     def self.view_cache
-      @current.view_cache
+      current.view_cache
     end
 
     # Internal dispatch handler. Should not be called directly.
@@ -128,14 +133,12 @@ module Racket
       app.call(env)
     end
 
-    # Writes a message to the logger if there is one present.
-    #
-    # @param [String] message
-    # @param [Symbol] level
-    # @return nil
-    def inform(message, level)
-      options[:logger].send(level, message) if options[:logger]
-      nil
+    def inform_all(message, level = :info)
+      inform(message, level)
+    end
+
+    def inform_dev(message, level = :debug)
+      (inform(message, level) if options[:mode] == :dev) && nil
     end
 
     # Reloads the application, making any changes to the controller configuration visible
@@ -168,7 +171,7 @@ module Racket
     def setup_static_server
       @static_server = nil
       return nil unless (public_dir = options[:public_dir]) && Utils.dir_readable?(public_dir)
-      Application.inform_dev("Setting up static server to serve files from #{public_dir}.")
+      inform_dev("Setting up static server to serve files from #{public_dir}.")
       @static_server = Rack::File.new(public_dir)
       nil
     end
@@ -191,15 +194,24 @@ module Racket
       Rack::Builder.new do
         instance.options[:middleware].each do |middleware|
           klass, opts = middleware
-          Application.inform_dev("Loading middleware #{klass} with options #{opts}.")
+          instance.inform_dev("Loading middleware #{klass} with options #{opts}.")
           use klass, opts
         end
         run lambda { |env|
           static_result = instance.serve_static_file(env)
-          return static_result if static_result && static_result.first < 400
+          return static_result unless static_result.nil? || static_result.first >= 400
           instance.router.route(env)
         }
       end
+    end
+
+    # Writes a message to the logger if there is one present.
+    #
+    # @param [String] message
+    # @param [Symbol] level
+    # @return nil
+    def inform(message, level)
+      (options[:logger].send(level, message) if options[:logger]) && nil
     end
 
     # Creates a new instance of Racket::Application.
@@ -243,7 +255,7 @@ module Racket
     #
     # @return [nil]
     def load_controllers
-      Application.inform_dev('Loading controllers.')
+      inform_dev('Loading controllers.')
       options[:last_added_controller] = []
       @controller = nil
       Dir.chdir(@options[:controller_dir]) do
@@ -263,7 +275,7 @@ module Racket
         end
       end
       options.delete(:last_added_controller)
-      Application.inform_dev('Done loading controllers.')
+      inform_dev('Done loading controllers.')
       nil
     end
 
