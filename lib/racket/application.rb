@@ -24,172 +24,13 @@ module Racket
   # Racket main application class.
   class Application
 
-    attr_reader :options, :router
+    @options = nil
 
-    @current = nil
-
-    # Called whenever Rack sends a request to the application.
-    #
-    # @param [Hash] env Rack environment
-    # @return [Array] A Rack response array
-    def self.call(env)
-      current.call(env)
-    end
-
-    # Returns a route to the specified controller/action/parameter combination.
-    #
-    # @param [Class] controller
-    # @param [Symbol] action
-    # @param [Array] params
-    # @return [String]
-    def self.get_route(controller, action, params)
-      router.get_route(controller, action, params)
-    end
-
-    # Initializes a new Racket::Application object with default options.
-    #
-    # @return [Class]
-    def self.default
-      fail 'Application has already been initialized!' if @current
-      @current = self.new
-      current.setup_static_server
-      current.reload
-      self
-    end
-
-    # Sends a message to the logger.
-    #
-    # @param [String] message
-    # @param [Symbol] level
-    # @return nil
-    def self.inform_all(message, level = :info)
-      current.inform_all(message, level)
-    end
-
-    # Sends a message to the logger, but only if the application is running in dev mode.
-    #
-    # @param [String] message
-    # @param [Symbol] level
-    # @return nil
-    def self.inform_dev(message, level = :debug)
-      current.inform_dev(message, level)
-    end
-
-    def self.current
-      fail 'No instance found' unless @current
-      @current
-    end
-
-    private_class_method :current
-
-    # Returns options for the currently running Racket::Application.
-    #
-    # @return [Hash]
-    def self.options
-      current.options
-    end
-
-    # Requires a file using the current application directory as a base path.
-    #
-    # @param [Object] args
-    # @return [nil]
-    def self.require(*args)
-      current.require(*args) && nil
-    end
-
-    # Returns the router associated with the currenntly running Racket::Application.
-    #
-    # @return [Racket::Router]
-    def self.router
-      current.router
-    end
-
-    private_class_method :router
-
-    # Initializes a new Racket::Application object with options specified by +options+.
-    #
-    # @param [Hash] options
-    # @return [Class]
-    def self.using(options)
-      fail 'Application has already been initialized!' if @current
-      @current = self.new(options)
-      current.setup_static_server
-      current.reload
-      self
-    end
-
-    # Returns the view cache of the currently running application.
-    #
-    # @return [ViewCache]
-    def self.view_cache
-      current.view_cache
-    end
-
-    # Internal dispatch handler. Should not be called directly.
-    #
-    # @param [Hash] env Rack environment
-    # @return [Array] A Rack response array
-    def call(env)
-      app.call(env)
-    end
-
-    def inform_all(message, level = :info)
-      inform(message, level)
-    end
-
-    def inform_dev(message, level = :debug)
-      (inform(message, level) if options[:mode] == :dev) && nil
-    end
-
-    # Reloads the application, making any changes to the controller configuration visible
-    # to the application.
-    #
-    # @return [nil]
-    def reload
-      setup_routes
-      # @todo: Clear cached views/layouts
-      nil
-    end
-
-    # Requires a file using the current application directory as a base path.
-    #
-    # @param [Object] args
-    # @return nil
-    def require(*args)
-      ::Kernel.require Utils.build_path(*args)
-      nil
-    end
-
-    def serve_static_file(env)
-      return nil if @static_server.nil?
-      @static_server.call(env)
-    end
-
-    # Initializes static server (if a public dir is specified).
-    #
-    # @return [nil]
-    def setup_static_server
-      @static_server = nil
-      return nil unless (public_dir = options[:public_dir]) && Utils.dir_readable?(public_dir)
-      inform_dev("Setting up static server to serve files from #{public_dir}.")
-      @static_server = Rack::File.new(public_dir)
-      nil
-    end
-
-    # Returns the ViewCache object associated with the current application.
-    #
-    # @return [ViewCache]
-    def view_cache
-      @view_cache ||= ViewCache.new(options[:layout_dir], options[:view_dir])
-    end
-
-    private
-
-    def app
+    def self.app
       @app ||= build_app
     end
 
-    def build_app
+    def self.build_app
       instance = self
       Rack::Builder.new do
         instance.options[:middleware].each do |middleware|
@@ -205,27 +46,18 @@ module Racket
       end
     end
 
-    # Writes a message to the logger if there is one present.
+    # Called whenever Rack sends a request to the application.
     #
-    # @param [String] message
-    # @param [Symbol] level
-    # @return nil
-    def inform(message, level)
-      (options[:logger].send(level, message) if options[:logger]) && nil
-    end
-
-    # Creates a new instance of Racket::Application.
-    #
-    # @param [Hash] options
-    # @return [Racket::Application]
-    def initialize(options = {})
-      @options = default_options.merge(options)
+    # @param [Hash] env Rack environment
+    # @return [Array] A Rack response array
+    def self.call(env)
+      app.call(env)
     end
 
     # Returns a list of default options for Racket::Application.
     #
     # @return [Hash]
-    def default_options
+    def self.default_options
       root_dir = Utils.build_path(Dir.pwd)
       {
         controller_dir: Utils.build_path(root_dir, 'controllers'),
@@ -251,12 +83,60 @@ module Racket
       }
     end
 
+    # Returns a route to the specified controller/action/parameter combination.
+    #
+    # @param [Class] controller
+    # @param [Symbol] action
+    # @param [Array] params
+    # @return [String]
+    def self.get_route(controller, action, params)
+      @router.get_route(controller, action, params)
+    end
+
+    # Initializes a new Racket::Application object with default options.
+    #
+    # @return [Class]
+    def self.default
+      fail 'Application has already been initialized!' if @options
+      @options = default_options
+      setup_static_server
+      reload
+      self
+    end
+
+    # Writes a message to the logger if there is one present.
+    #
+    # @param [String] message
+    # @param [Symbol] level
+    # @return nil
+    def self.inform(message, level)
+      (@options[:logger].send(level, message) if @options[:logger]) && nil
+    end
+
+    # Sends a message to the logger.
+    #
+    # @param [String] message
+    # @param [Symbol] level
+    # @return nil
+    def self.inform_all(message, level = :info)
+      inform(message, level)
+    end
+
+    # Sends a message to the logger, but only if the application is running in dev mode.
+    #
+    # @param [String] message
+    # @param [Symbol] level
+    # @return nil
+    def self.inform_dev(message, level = :debug)
+      (inform(message, level) if @options[:mode] == :dev) && nil
+    end
+
     # Loads controllers and associates each controller with a route.
     #
     # @return [nil]
-    def load_controllers
+    def self.load_controllers
       inform_dev('Loading controllers.')
-      options[:last_added_controller] = []
+      @options[:last_added_controller] = []
       @controller = nil
       Dir.chdir(@options[:controller_dir]) do
         files = Pathname.glob(File.join('**', '*.rb'))
@@ -271,22 +151,91 @@ module Racket
           ::Kernel.require File.expand_path(file)
           path = "/#{File.dirname(file)}"
           path = '' if path == '/.'
-          @router.map(path, options[:last_added_controller].pop)
+          @router.map(path, @options[:last_added_controller].pop)
         end
       end
-      options.delete(:last_added_controller)
-      inform_dev('Done loading controllers.')
-      nil
+      @options.delete(:last_added_controller)
+      inform_dev('Done loading controllers.') && nil
+    end
+
+    # Returns options for the currently running Racket::Application.
+    #
+    # @return [Hash]
+    def self.options
+      @options
+    end
+
+    # Reloads the application, making any changes to the controller configuration visible
+    # to the application.
+    #
+    # @return [nil]
+    def self.reload
+      setup_routes
+      @view_cache = nil
+    end
+
+    # Requires a file using the current application directory as a base path.
+    #
+    # @param [Object] args
+    # @return [nil]
+    def self.require(*args)
+      (::Kernel.require Utils.build_path(*args)) && nil
+    end
+
+    # Returns the router associated with the currenntly running Racket::Application.
+    #
+    # @return [Racket::Router]
+    def self.router
+      @router
+    end
+
+    # Serves a static file (if Racket is configured to serve static files).
+    #
+    # @param [Hash] env Rack environment
+    # @return [Array|nil] A Rack response array if Rack::File handled the file, nil otherwise.
+    def self.serve_static_file(env)
+      return nil if @static_server.nil?
+      @static_server.call(env)
     end
 
     # Initializes routing.
     #
     # @return [nil]
-    def setup_routes
+    def self.setup_routes
       @router = Router.new
       load_controllers
-      nil
     end
 
+    # Initializes static server (if a public dir is specified).
+    #
+    # @return [nil]
+    def self.setup_static_server
+      @static_server = nil
+      return nil unless (public_dir = @options[:public_dir]) && Utils.dir_readable?(public_dir)
+      inform_dev("Setting up static server to serve files from #{public_dir}.")
+      (@static_server = Rack::File.new(public_dir)) && nil
+    end
+
+    # Initializes a new Racket::Application object with options specified by +options+.
+    #
+    # @param [Hash] options
+    # @return [Class]
+    def self.using(options)
+      fail 'Application has already been initialized!' if @options
+      @options = default_options.merge(options)
+      setup_static_server
+      reload
+      self
+    end
+
+    # Returns the view cache of the currently running application.
+    #
+    # @return [ViewCache]
+    def self.view_cache
+      @view_cache ||= ViewCache.new(@options[:layout_dir], @options[:view_dir])
+    end
+
+    private_class_method  :app, :build_app, :default_options, :inform, :load_controllers,
+                          :setup_routes, :setup_static_server
   end
 end

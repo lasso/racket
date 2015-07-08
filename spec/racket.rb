@@ -19,6 +19,6 @@ require 'bacon'
 
 Dir.chdir(TEST_DEFAULT_APP_DIR) { require_relative '_default.rb' }
 
-Racket::Application.class_eval { @current = nil }
+Racket::Application.class_eval { @options = nil }
 
 Dir.chdir(TEST_CUSTOM_APP_DIR) { require_relative '_custom.rb' }
