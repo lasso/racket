@@ -26,13 +26,14 @@ module Racket
 
     @options = nil
 
-    def self.app
-      @app ||= build_app
-    end
-
-    def self.build_app
+    # Returns the internal application object. When called for the first time this method will use
+    # Rack::Builder to build
+    #
+    # @return [Rack::Builder]
+    def self.application
+      return @application if @application
       instance = self
-      Rack::Builder.new do
+      @application = Rack::Builder.new do
         instance.options[:middleware].each do |middleware|
           klass, opts = middleware
           instance.inform_dev("Loading middleware #{klass} with options #{opts}.")
@@ -51,7 +52,7 @@ module Racket
     # @param [Hash] env Rack environment
     # @return [Array] A Rack response array
     def self.call(env)
-      app.call(env)
+      application.call(env.dup)
     end
 
     # Returns a list of default options for Racket::Application.
@@ -95,13 +96,10 @@ module Racket
 
     # Initializes a new Racket::Application object with default options.
     #
+    # @param [true|false] reboot
     # @return [Class]
-    def self.default
-      fail 'Application has already been initialized!' if @options
-      @options = default_options
-      setup_static_server
-      reload
-      self
+    def self.default(reboot = false)
+      init({}, reboot)
     end
 
     # Writes a message to the logger if there is one present.
@@ -129,6 +127,25 @@ module Racket
     # @return nil
     def self.inform_dev(message, level = :debug)
       (inform(message, level) if @options[:mode] == :dev) && nil
+    end
+
+    # Initializes the Racket application.
+    #
+    # @param [Hash] options
+    # @param [true|false] reboot
+    # @return [Class]
+    def self.init(options, reboot)
+      if @options
+        if reboot
+          instance_variables.each { |ivar| ivar = nil }
+        else
+          fail 'Application has already been initialized!'
+        end
+      end
+      @options = default_options.merge(options)
+      setup_static_server
+      reload
+      self
     end
 
     # Loads controllers and associates each controller with a route.
@@ -219,13 +236,10 @@ module Racket
     # Initializes a new Racket::Application object with options specified by +options+.
     #
     # @param [Hash] options
+    # @param [true|false] reboot
     # @return [Class]
-    def self.using(options)
-      fail 'Application has already been initialized!' if @options
-      @options = default_options.merge(options)
-      setup_static_server
-      reload
-      self
+    def self.using(options, reboot = false)
+      init(options, reboot)
     end
 
     # Returns the view cache of the currently running application.
@@ -235,7 +249,7 @@ module Racket
       @view_cache ||= ViewCache.new(@options[:layout_dir], @options[:view_dir])
     end
 
-    private_class_method  :app, :build_app, :default_options, :inform, :load_controllers,
+    private_class_method  :application, :default_options, :inform, :init, :load_controllers,
                           :setup_routes, :setup_static_server
   end
 end

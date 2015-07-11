@@ -1,4 +1,4 @@
-describe 'The default Racket test Application' do
+describe 'A default Racket test Application' do
   extend Rack::Test::Methods
 
   def app

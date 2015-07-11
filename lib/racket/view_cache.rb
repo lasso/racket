@@ -88,7 +88,7 @@ module Racket
       file_path = File.join(base_file_path, url_path)
       action = File.basename(file_path)
       file_path = File.dirname(file_path)
-      return nil unless File.exists?(file_path) && File.directory?(file_path)
+      return nil unless Utils.dir_readable?(file_path)
       Dir.chdir(file_path) do
         files = Pathname.glob("#{action}.*")
         if files.empty?

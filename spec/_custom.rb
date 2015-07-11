@@ -1,7 +1,7 @@
-describe 'The custom Racket test Application' do
+describe 'A custom Racket test Application' do
   extend Rack::Test::Methods
   def app
-    @app ||= Racket::Application.using(default_layout: 'zebra.*', view_dir: 'templates')
+    @app ||= Racket::Application.using({ default_layout: 'zebra.*', view_dir: 'templates' }, true)
   end
 
   it 'should set requested options' do
