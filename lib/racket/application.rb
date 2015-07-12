@@ -32,12 +32,17 @@ module Racket
     # @return [Rack::Builder]
     def self.application
       return @application if @application
+      @options[:middleware].unshift([Rack::ShowExceptions]) if dev_mode?
       instance = self
       @application = Rack::Builder.new do
         instance.options[:middleware].each do |middleware|
           klass, opts = middleware
           instance.inform_dev("Loading middleware #{klass} with options #{opts}.")
-          use klass, opts
+          if opts
+            use klass, opts
+          else
+            use klass
+          end
         end
         run lambda { |env|
           static_result = instance.serve_static_file(env)
@@ -84,6 +89,13 @@ module Racket
       }
     end
 
+    # Returns whether the application runs in dev mode.
+    #
+    # @return [true|false]
+    def self.dev_mode?
+      @options[:mode] == :dev
+    end
+
     # Returns a route to the specified controller/action/parameter combination.
     #
     # @param [Class] controller
@@ -126,7 +138,7 @@ module Racket
     # @param [Symbol] level
     # @return nil
     def self.inform_dev(message, level = :debug)
-      (inform(message, level) if @options[:mode] == :dev) && nil
+      (inform(message, level) if dev_mode?) && nil
     end
 
     # Initializes the Racket application.
@@ -135,13 +147,8 @@ module Racket
     # @param [true|false] reboot
     # @return [Class]
     def self.init(options, reboot)
-      if @options
-        if reboot
-          instance_variables.each { |ivar| ivar = nil }
-        else
-          fail 'Application has already been initialized!'
-        end
-      end
+      instance_variables.each { |ivar| instance_variable_set(ivar, nil) } if reboot
+      fail 'Application has already been initialized!' if @options
       @options = default_options.merge(options)
       setup_static_server
       reload

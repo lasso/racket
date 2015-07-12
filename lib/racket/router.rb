@@ -76,8 +76,14 @@ module Racket
     end
 
     # @todo: Allow the user to set custom handlers for different errors
-    def render_404(message = '404 Not found')
-      [404, { 'Content-Type' => 'text/plain' }, message]
+    def render_error(code, error = nil)
+      # If running in dev mode, let Rack::ShowExceptions handle the error.
+      raise error if error && Application.dev_mode?
+
+      # Not running in dev mode, let us handle the error ourselves.
+      body = "#{code} #{Rack::Utils::HTTP_STATUS_CODES[code]}"
+      headers = { 'Content-Type' => 'text/plain' }
+      [code, headers, body]
     end
 
     # Routes a request and renders it.
@@ -85,30 +91,34 @@ module Racket
     # @param [Hash] env Rack environment
     # @return [Array] A Rack response triplet
     def route(env)
-      catch :response do # Catches early exits from Controller.respond.
-        # Find controller in map
-        # If controller exists, call it
-        # Otherwise, send a 404
-        matching_routes = @router.recognize(env)
-        unless matching_routes.first.nil?
-          target_klass = matching_routes.first.first.route.dest
-          params = matching_routes.first.first.param_values.first.reject { |e| e.empty? }
-          action = params.empty? ? target_klass.get_option(:default_action) : params.shift.to_sym
+      begin
+        catch :response do # Catches early exits from Controller.respond.
+          # Find controller in map
+          # If controller exists, call it
+          # Otherwise, send a 404
+          matching_routes = @router.recognize(env)
+          unless matching_routes.first.nil?
+            target_klass = matching_routes.first.first.route.dest
+            params = matching_routes.first.first.param_values.first.reject { |e| e.empty? }
+            action = params.empty? ? target_klass.get_option(:default_action) : params.shift.to_sym
 
-          # Check if action is available on target
-          return render_404 unless @actions_by_controller[target_klass].include?(action)
+            # Check if action is available on target
+            return render_error(404) unless @actions_by_controller[target_klass].include?(action)
 
-          # Initialize target
-          target = target_klass.new
-          # @fixme: File.dirname should not be used on urls!
-          1.upto(params.count) do
-            env['PATH_INFO'] = File.dirname(env['PATH_INFO'])
+            # Initialize target
+            target = target_klass.new
+            # @fixme: File.dirname should not be used on urls!
+            1.upto(params.count) do
+              env['PATH_INFO'] = File.dirname(env['PATH_INFO'])
+            end
+            target.extend(Current.init(env, action, params))
+            target.render(action)
+          else
+            render_error(404)
           end
-          target.extend(Current.init(env, action, params))
-          target.render(action)
-        else
-          render_404
         end
+      rescue => err
+        render_error(500, err)
       end
     end
 

@@ -1,7 +1,10 @@
 describe 'A custom Racket test Application' do
   extend Rack::Test::Methods
   def app
-    @app ||= Racket::Application.using({ default_layout: 'zebra.*', view_dir: 'templates' }, true)
+    @app ||= Racket::Application.using(
+      { default_layout: 'zebra.*', logger: nil, mode: :dev, view_dir: 'templates' },
+      true
+    )
   end
 
   it 'should set requested options' do
@@ -19,7 +22,7 @@ describe 'A custom Racket test Application' do
   it 'should return a 404 on a nonexisting url' do
     get '/nosuchurl'
     last_response.status.should.equal(404)
-    last_response.body.should.equal('404 Not found')
+    last_response.body.should.equal('404 Not Found')
   end
 
   it 'should be able to render a template and a layout' do
@@ -44,5 +47,12 @@ describe 'A custom Racket test Application' do
     last_response.headers['X-Hook-Action'].should.equal('run')
     response = JSON.parse(last_response.body)
     response.should.equal(["Data added in before block", "Data added in action"])
+  end
+
+  it 'should let Rack::ShowExceptions handle the error' do
+    get '/sub1/epic_fail'
+    last_response.status.should.equal(500)
+    last_response.headers['Content-Type'].should.equal('text/plain')
+    last_response.body.should.match(%r(^RuntimeError: Epic fail!))
   end
 end

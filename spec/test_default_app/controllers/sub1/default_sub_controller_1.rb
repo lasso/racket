@@ -12,4 +12,8 @@ class DefaultSubController1 < Racket::Controller
     r(DefaultInheritedController, :nonono, :with, :params)
   end
 
+  def epic_fail
+    fail 'Epic fail!'
+  end
+
 end

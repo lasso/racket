@@ -11,5 +11,9 @@ class CustomSubController1 < Racket::Controller
   def route_to_nonexisting
     r(CustomInheritedController, :nonono, :with, :params)
   end
+  
+  def epic_fail
+    fail 'Epic fail!'
+  end
 
 end

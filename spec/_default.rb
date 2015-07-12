@@ -28,7 +28,7 @@ describe 'A default Racket test Application' do
     actions_by_controller[DefaultRootController].include?(:index).should.equal(true)
     actions_by_controller[DefaultRootController].include?(:my_first_route).should.equal(true)
     actions_by_controller[DefaultRootController].include?(:my_second_route).should.equal(true)
-    actions_by_controller[DefaultSubController1].length.should.equal(3)
+    actions_by_controller[DefaultSubController1].length.should.equal(4)
     actions_by_controller[DefaultSubController1].include?(:route_to_root).should.equal(true)
     actions_by_controller[DefaultSubController1].include?(:route_to_nonexisting).should.equal(true)
     actions_by_controller[DefaultSubController2].length.should.equal(3)
@@ -79,11 +79,11 @@ describe 'A default Racket test Application' do
   it 'should return 404 on calling nonexisting action' do
     get '/nonono'
     last_response.status.should.equal(404)
-    last_response.body.should.equal('404 Not found')
+    last_response.body.should.equal('404 Not Found')
 
     get '/sub2/nonono'
     last_response.status.should.equal(404)
-    last_response.body.should.equal('404 Not found')
+    last_response.body.should.equal('404 Not Found')
   end
 
   it 'should be able to find routes within the same controller' do
@@ -177,6 +177,13 @@ describe 'A default Racket test Application' do
     last_response.status.should.equal(200)
     last_response.headers['Content-Type'].should.equal('text/plain')
     last_response.body.should.equal("Hello there\n")
+  end
+
+  it 'should handle exceptions correctly' do
+    get '/sub1/epic_fail'
+    last_response.status.should.equal(500)
+    last_response.headers['Content-Type'].should.equal('text/plain')
+    last_response.body.should.equal('500 Internal Server Error')
   end
 
 end
