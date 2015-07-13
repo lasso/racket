@@ -12,7 +12,7 @@ Gem::Specification.new do |s|
   s.license               = 'GNU AFFERO GENERAL PUBLIC LICENSE, version 3'
   s.authors               = ['Lars Olsson']
   s.version               = Racket::Version.current
-  s.date                  = '2015-06-28'
+  s.date                  = Time.now.strftime('%Y-%m-%d')
   s.summary               = 'Racket - The noisy Rack MVC framework'
   s.description           = 'Racket is a small MVC framework built atop of rack.'
   s.files                 = files

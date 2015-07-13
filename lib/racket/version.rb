@@ -27,7 +27,7 @@ module Racket
     # Minor version
     MINOR = 0
     # Teeny version
-    TEENY = 4
+    TEENY = 5
 
     # Returns the current version of Racket as a string.
     #

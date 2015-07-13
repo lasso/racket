@@ -76,14 +76,14 @@ module Racket
     end
 
     # @todo: Allow the user to set custom handlers for different errors
-    def render_error(code, error = nil)
+    def render_error(status, error = nil)
       # If running in dev mode, let Rack::ShowExceptions handle the error.
       raise error if error && Application.dev_mode?
 
       # Not running in dev mode, let us handle the error ourselves.
-      body = "#{code} #{Rack::Utils::HTTP_STATUS_CODES[code]}"
-      headers = { 'Content-Type' => 'text/plain' }
-      [code, headers, body]
+      response = Response.new([], status, { 'Content-Type' => 'text/plain' })
+      response.write("#{status} #{Rack::Utils::HTTP_STATUS_CODES[status]}")
+      response.finish
     end
 
     # Routes a request and renders it.
