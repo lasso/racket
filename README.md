@@ -20,18 +20,26 @@ Yes. Writing Rack frameworks is easy! And since I am able to decide exactly what
 need to adopt to a large ecosystem of concepts I do not like.
 
 ## So, is it any good?
-Probably not. At the moment it is good _enough_ for my needs, but I plan to add more features/make stuff faster
-as I start porting more of my old apps from Ramaze.
+Let us just say it is good _enough_ for my needs at the moment. I plan to add more features/make stuff faster
+whenever I am finished porting most of my old apps from Ramaze.
 
 ## Where are the tests?
-Have a look in the `spec` directory. The code base have tests covering 100 per cent of the code and I am planning on keeping it that way. At the moment the code is tested using ruby 2.0, ruby 2.1.6 and 2.2.2, but more versions might be added later.
+Have a look in the `spec` directory. The code base have tests covering 100 per cent of the code and I am planning on keeping it that way. At the moment the code is tested on the following platforms (using [Travis CI](https://travis-ci.org/)):
 
-I am using [bacon](https://github.com/chneukirchen/bacon) and [rack-test](https://github.com/brynary/rack-test) for testing. Run the tests by typing `bacon spec/racket.rb`in the root directory. Code coverage reports are provided by [simplecov](https://rubygems.org/gems/simplecov). After the tests have run the an HTML report can be found in the `coverage` directory. If you are not interested in running the tests yourself you could also have a look at the test status at [Travis CI](https://travis-ci.org/lasso/racket) and the code coverage at [Codecov](https://codecov.io/github/lasso/racket). Their stats get updated on every commit.
+- ruby 2.0
+- ruby 2.1.6
+- ruby 2.2.2
+- jruby (latest version, 1.9 mode only)
+- rbx-2 (latest version)
+
+I am using [bacon](https://github.com/chneukirchen/bacon) and [rack-test](https://github.com/brynary/rack-test) for testing. Run the tests by typing `rake test`in the root directory. Code coverage reports are provided by [simplecov](https://rubygems.org/gems/simplecov). After the tests have run the an HTML report can be found in the `coverage` directory.
+
+If you are not interested in running the tests yourself you could have a look at the test status at [Travis CI](https://travis-ci.org/lasso/racket) and the code coverage at [Codecov](https://codecov.io/github/lasso/racket). Their stats get updated on every commit.
 
 ## Alright, I want to try using this stuff. Where are the docs?
-Unfortunately there aren't any docs yet. The main reason is that most things are not finished yet, I am still
-moving stuff around like crazy. There **will** be a wiki later and I also plan on documenting the code itself heavily
-(using [Yard](http://yardoc.org/)).
+At the moment there is not much documentation available, but I have started working on the [wiki](https://github.com/lasso/racket/wiki).
+
+The code itself is documented using [Yard](http://yardoc.org/). The docs are not generated automatically, you need to run `rake doc` in the root directory to generate them. After running the rake task the documentation will be available in the `doc` directory.
 
 ## Why is the code licenced under the GNU Affero General Public License? I want a more liberal licence!
 Because I think it is a Good Thing&trade; to share code. The
