@@ -26,6 +26,7 @@ whenever I am finished porting most of my old apps from Ramaze.
 ## Where are the tests?
 Have a look in the `spec` directory. The code base have tests covering 100 per cent of the code and I am planning on keeping it that way. At the moment the code is tested on the following platforms (using [Travis CI](https://travis-ci.org/)):
 
+- ruby 1.9.3
 - ruby 2.0
 - ruby 2.1.6
 - ruby 2.2.2
