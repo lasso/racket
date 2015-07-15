@@ -28,12 +28,15 @@ module Racket
     MINOR = 0
     # Teeny version
     TEENY = 5
+    # Prerelease ?
+    PRERELEASE = false
 
     # Returns the current version of Racket as a string.
     #
     # @return [String]
     def current
-      [MAJOR, MINOR, TEENY].join('.')
+      current = [MAJOR, MINOR, TEENY]
+      ((current.push('pre') if PRERELEASE) || current).join('.')
     end
 
     module_function :current
