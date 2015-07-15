@@ -41,7 +41,7 @@ module Racket
         actions.merge(current.instance_methods(false))
         current = current.superclass
       end
-      (@actions_by_controller[controller] = actions.to_a) || nil
+      (@actions_by_controller[controller] = actions.to_a) && nil
     end
 
     # Returns a route to the specified controller/action/parameter combination.
@@ -70,8 +70,7 @@ module Racket
       Application.inform_dev("Mapping #{controller} to #{controller_base_path}.")
       @router.add("#{path}(/*params)").to(controller)
       @routes_by_controller[controller] = controller_base_path
-      cache_actions(controller)
-      nil
+      cache_actions(controller) && nil
     end
 
     # @todo: Allow the user to set custom handlers for different errors
@@ -104,11 +103,13 @@ module Racket
             # Check if action is available on target
             return render_error(404) unless @actions_by_controller[target_klass].include?(action)
 
-            # Initialize target
-            target = target_klass.new
+            # Rewrite PATH_INFO to reflect that we split out the parameters
             env['PATH_INFO'] = env['PATH_INFO']
                                  .split('/')[0...-params.count]
                                  .join('/') unless params.empty?
+
+            # Initialize and render target
+            target = target_klass.new
             target.extend(Current.init(env, action, params))
             target.render(action)
           else
@@ -119,6 +120,5 @@ module Racket
         render_error(500, err)
       end
     end
-
   end
 end
