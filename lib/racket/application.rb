@@ -38,11 +38,7 @@ module Racket
         instance.options[:middleware].each do |middleware|
           klass, opts = middleware
           instance.inform_dev("Loading middleware #{klass} with options #{opts}.")
-          if opts
-            use klass, opts
-          else
-            use klass
-          end
+          use *middleware
         end
         run lambda { |env|
           static_result = instance.serve_static_file(env)

@@ -1,5 +1,13 @@
 require 'rake'
-require File.expand_path('./lib/racket/version.rb')
+
+mod = Module.new
+mod.module_eval(
+  File.read(
+    File.join(File.dirname(__FILE__), 'lib', 'racket', 'version.rb')
+  )
+)
+version = mod::Racket::Version.current
+mod = nil
 
 files = FileList['lib/**/*.rb'].to_a
 files.concat(FileList['spec/**/*'].to_a)
@@ -11,10 +19,10 @@ Gem::Specification.new do |s|
   s.homepage              = 'https://github.com/lasso/racket'
   s.license               = 'GNU AFFERO GENERAL PUBLIC LICENSE, version 3'
   s.authors               = ['Lars Olsson']
-  s.version               = Racket::Version.current
+  s.version               = version
   s.date                  = Time.now.strftime('%Y-%m-%d')
   s.summary               = 'Racket - The noisy Rack MVC framework'
-  s.description           = 'Racket is a small MVC framework built atop of rack.'
+  s.description           = 'Racket is a small MVC framework built on top of rack.'
   s.files                 = files
   s.platform              = Gem::Platform::RUBY
   s.require_path          = 'lib'
