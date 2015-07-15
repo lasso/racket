@@ -41,8 +41,7 @@ module Racket
         actions.merge(current.instance_methods(false))
         current = current.superclass
       end
-      @actions_by_controller[controller] = actions.to_a
-      nil
+      (@actions_by_controller[controller] = actions.to_a) || nil
     end
 
     # Returns a route to the specified controller/action/parameter combination.
@@ -107,10 +106,9 @@ module Racket
 
             # Initialize target
             target = target_klass.new
-            # @fixme: File.dirname should not be used on urls!
-            1.upto(params.count) do
-              env['PATH_INFO'] = File.dirname(env['PATH_INFO'])
-            end
+			env['PATH_INFO'] = env['PATH_INFO']
+                                 .split('/')[0...-params.count]
+                                 .join('/') unless params.empty?
             target.extend(Current.init(env, action, params))
             target.render(action)
           else
