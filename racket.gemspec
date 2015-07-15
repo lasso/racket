@@ -1,5 +1,5 @@
 require 'rake'
-require_relative 'lib/racket/version.rb'
+require File.expand_path('./lib/racket/version.rb')
 
 files = FileList['lib/**/*.rb'].to_a
 files.concat(FileList['spec/**/*'].to_a)
@@ -18,7 +18,7 @@ Gem::Specification.new do |s|
   s.files                 = files
   s.platform              = Gem::Platform::RUBY
   s.require_path          = 'lib'
-  s.required_ruby_version = '>= 2.0.0'
+  s.required_ruby_version = '>= 1.9.3'
 
   s.add_dependency('http_router', '~>0')
   s.add_dependency('rack', '~>1.6')
