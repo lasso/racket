@@ -106,7 +106,7 @@ module Racket
 
             # Initialize target
             target = target_klass.new
-			env['PATH_INFO'] = env['PATH_INFO']
+            env['PATH_INFO'] = env['PATH_INFO']
                                  .split('/')[0...-params.count]
                                  .join('/') unless params.empty?
             target.extend(Current.init(env, action, params))
