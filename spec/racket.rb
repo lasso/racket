@@ -1,5 +1,6 @@
 require 'simplecov'
 require 'stringio'
+require 'tilt/erb'
 
 SimpleCov.start do
   add_filter 'spec'
