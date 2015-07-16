@@ -17,6 +17,10 @@ describe 'A custom Racket test Application' do
     last_response.status.should.equal(302)
     last_response.headers['Location'].should.equal('/sub3/a_secret_place/42')
     last_response.body.length.should.equal(0)
+    get '/sub3/not_so_secret'
+    last_response.status.should.equal(302)
+    last_response.headers['Location'].should.equal('/sub3/not_so_secret/21')
+    last_response.body.length.should.equal(0)
   end
 
   it 'should return a 404 on a nonexisting url' do

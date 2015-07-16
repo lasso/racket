@@ -112,7 +112,7 @@ module Racket
         # Initialize and render target
         target = target_klass.new
         target.extend(Current.init(env, action, params))
-        target.render(action)
+        target.__run
       end
       rescue => err
         render_error(500, err)

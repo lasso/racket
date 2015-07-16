@@ -10,4 +10,12 @@ class CustomSubController3 < Racket::Controller
     redirect(rs(__method__, controller_option(:top_secret)))
   end
 
+  def not_so_secret
+    redirect!(rs(__method__, 21))
+  end
+
+  after :not_so_secret do
+    fail 'Should not happen!'
+  end
+
 end

@@ -109,52 +109,69 @@ module Racket
       Application.get_route(controller, action, params)
     end
 
-    # Redirects the client. After hooks are
+    # Redirects the client. After hooks are run.
     #
     # @param [String] target URL to redirect to
     # @param [Fixnum] status HTTP status to send
-    # @param [true|false] run_after_hook Whether after hook should be run before redirecting
     # @return [Object]
-    def redirect(target, status = 302, run_after_hook = true)
+    def redirect(target, status = 302)
       response.redirect(target, status)
-      respond(response.status, response.headers, '', run_after_hook)
+      respond(response.status, response.headers, '')
     end
 
-    # Stop processing request and send a custom response. After calling this method, no further
-    # processing of the request is done unless +run_after_hook+ is set to true. If +run_after_hook+
-    # is set to true, any after hook associated with the action (but no other code) will be run.
+    # Redirects the client. After hooks are *NOT* run.
+    #
+    # @param [String] target URL to redirect to
+    # @param [Fixnum] status HTTP status to send
+    # @return [Object]
+    def redirect!(target, status = 302)
+      response.redirect(target, status)
+      respond!(response.status, response.headers, '')
+    end
+
+    # Stop processing request and send a custom response. After calling this method, after hooks
+    # (but no rendering) will be run.
     #
     # @param [Fixnum] status
     # @param [Hash] headers
     # @param [String] body
-    # @param [true|false] run_after_hook Whether after hook should be run
-    def respond(status = 200, headers = {}, body = '', run_after_hook = false)
-      __run_hook(:after, racket.action) if run_after_hook
+    def respond(status = 200, headers = {}, body = '')
+      __run_hook(:after)
+      respond!(status, headers, body)
+    end
+
+    # Stop processing request and send a custom response. After calling this method, no further
+    # processing of the request is done.
+    #
+    # @param [Fixnum] status
+    # @param [Hash] headers
+    # @param [String] body
+    def respond!(status = 200, headers = {}, body = '')
       throw :response, [status, headers, body]
     end
 
-    # Renders an action.
+    # Calls hooks, action and renderer.
     #
-    # @param [Symbol] action
     # @return [String]
-    def render(action)
-      __execute(action)
+    def __run
+      __run_hook(:before)
+      __run_action
+      __run_hook(:after)
       Application.view_cache.render(self)
     end
 
     private
 
-    def __execute(action)
-      __run_hook(:before, action)
-      meth = method(action)
+    def __run_action
+      meth = method(racket.action)
       params = racket.params[0...meth.parameters.length]
-      racket.action_result = meth.call(*params)
-      __run_hook(:after, action)
+      (racket.action_result = meth.call(*params)) && nil
     end
 
-    def __run_hook(type, action)
+    def __run_hook(type)
       hooks = controller_option("#{type}_hooks".to_sym) || {}
-      instance_eval(&hooks[action]) if hooks.key?(action)
+      blk = hooks.fetch(racket.action, nil)
+      (instance_eval(&blk) if blk) && nil
     end
   end
 end
