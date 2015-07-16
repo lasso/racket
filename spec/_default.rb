@@ -11,7 +11,7 @@ describe 'A default Racket test Application' do
 
   it 'has mapped controllers correctly' do
     routes_by_controller = actions_by_controller = nil
-    routes = app.instance_eval do
+    app.instance_eval do
       router.instance_eval do
         routes_by_controller = @routes_by_controller
         actions_by_controller = @actions_by_controller

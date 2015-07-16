@@ -1,29 +1,26 @@
-=begin
-Racket - The noisy Rack MVC framework
-Copyright (C) 2015  Lars Olsson <lasso@lassoweb.se>
-
-This file is part of Racket.
-
-Racket is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-Racket is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with Racket.  If not, see <http://www.gnu.org/licenses/>.
-=end
+# Racket - The noisy Rack MVC framework
+# Copyright (C) 2015  Lars Olsson <lasso@lassoweb.se>
+#
+# This file is part of Racket.
+#
+# Racket is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Racket is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with Racket.  If not, see <http://www.gnu.org/licenses/>.
 
 require 'logger'
 
 module Racket
   # Racket main application class.
   class Application
-
     @options = nil
 
     # Returns the internal application object. When called for the first time this method will use
@@ -38,7 +35,7 @@ module Racket
         instance.options[:middleware].each do |middleware|
           klass, opts = middleware
           instance.inform_dev("Loading middleware #{klass} with options #{opts}.")
-          use *middleware
+          use(*middleware)
         end
         run lambda { |env|
           static_result = instance.serve_static_file(env)
@@ -159,8 +156,7 @@ module Racket
       @options[:last_added_controller] = []
       @controller = nil
       Dir.chdir(@options[:controller_dir]) do
-        files = Pathname.glob(File.join('**', '*.rb'))
-        files.map! { |file| file.to_s }
+        files = Pathname.glob(File.join('**', '*.rb')).map!(&:to_s)
         # Sort by longest path so that the longer paths gets matched first
         # HttpRouter claims to be doing this already, but this "hack" is needed in order
         # for the router to work.
@@ -252,7 +248,7 @@ module Racket
       @view_cache ||= ViewCache.new(@options[:layout_dir], @options[:view_dir])
     end
 
-    private_class_method  :application, :default_options, :inform, :init, :load_controllers,
-                          :setup_routes, :setup_static_server
+    private_class_method :application, :default_options, :inform, :init, :load_controllers,
+                         :setup_routes, :setup_static_server
   end
 end
