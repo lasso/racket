@@ -48,6 +48,16 @@ module Racket
       controller.response.finish
     end
 
+    # Renders a template file in the specified context.
+    #
+    # @param [String] template
+    # @param [Object] context
+    # @return [String|nil]
+    def render_file(template, context = nil)
+      return nil unless Utils.file_readable?(template)
+      Tilt.new(template).render(context)
+    end
+
     private
 
     # Tries to locate a layout matching +url_path+ in the file system and returns the path if a
@@ -92,11 +102,13 @@ module Racket
           if default_file
             files = Pathname.glob(default_file)
             return nil if files.empty? # No default file found
-            return File.join(file_path, files.first.to_s)
+            final_path = File.join(file_path, files.first.to_s)
+            return Utils.file_readable?(final_path) ? final_path : nil
           end
           return nil # Neither default file or specified file found
         end
-        File.join(file_path, files.first.to_s)
+        final_path = File.join(file_path, files.first.to_s)
+        return Utils.file_readable?(final_path) ? final_path : nil
       end
     end
   end

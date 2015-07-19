@@ -44,5 +44,10 @@ module Racket
       pathname = Pathname.new(path)
       pathname.exist? && pathname.directory? && pathname.readable?
     end
+
+    def self.file_readable?(path)
+      pathname = Pathname.new(path)
+      pathname.exist? && pathname.file? && pathname.readable?
+    end
   end
 end

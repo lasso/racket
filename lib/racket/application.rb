@@ -66,6 +66,7 @@ module Racket
         layout_dir: Utils.build_path(root_dir, 'layouts'),
         logger: Logger.new($stdout),
         middleware: [
+          [Rack::ContentType],
           [
             Rack::Session::Cookie,
             {
@@ -107,6 +108,15 @@ module Racket
       init({}, reboot)
     end
 
+    # Expands all paths defined in the application.
+    #
+    # @return [nil]
+    def self.expand_paths
+      [:controller_dir, :layout_dir, :public_dir, :view_dir].each do |dir|
+        @options[dir] = Utils.build_path(@options[dir])
+      end && nil
+    end
+
     # Writes a message to the logger if there is one present.
     #
     # @param [String] message
@@ -143,6 +153,7 @@ module Racket
       instance_variables.each { |ivar| instance_variable_set(ivar, nil) } if reboot
       fail 'Application has already been initialized!' if @options
       @options = default_options.merge(options)
+      expand_paths
       setup_static_server
       reload
       self
@@ -248,7 +259,7 @@ module Racket
       @view_cache ||= ViewCache.new(@options[:layout_dir], @options[:view_dir])
     end
 
-    private_class_method :application, :default_options, :inform, :init, :load_controllers,
-                         :setup_routes, :setup_static_server
+    private_class_method :application, :default_options, :expand_paths, :inform, :init,
+                         :load_controllers, :setup_routes, :setup_static_server
   end
 end

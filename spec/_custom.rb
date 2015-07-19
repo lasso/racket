@@ -9,7 +9,7 @@ describe 'A custom Racket test Application' do
 
   it 'should set requested options' do
     app.options[:default_layout].should.equal('zebra.*')
-    app.options[:view_dir].should.equal('templates')
+    app.options[:view_dir].should.equal(Racket::Utils.build_path('templates'))
   end
 
   it 'should be able to get/set options on controller' do
@@ -58,5 +58,12 @@ describe 'A custom Racket test Application' do
     last_response.status.should.equal(500)
     last_response.headers['Content-Type'].should.equal('text/plain')
     last_response.body.should.match(%r(^RuntimeError: Epic fail!))
+  end
+
+  it 'should be able to render custom files' do
+    get '/sub3/render_a_file'
+    last_response.status.should.equal(200)
+    last_response.headers['Content-Type'].should.equal('text/html')
+    last_response.body.should.equal("The secret is 42!\n")
   end
 end

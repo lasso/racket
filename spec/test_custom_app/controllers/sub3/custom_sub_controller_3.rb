@@ -18,4 +18,13 @@ class CustomSubController3 < Racket::Controller
     fail 'Should not happen!'
   end
 
+  def render_a_file
+    obj = Object.new
+    obj.instance_eval { @secret = 42 }
+    Racket::Application.view_cache.render_file(
+      Racket::Utils.build_path('files', 'secret.erb'),
+      obj
+    )
+  end
+
 end
