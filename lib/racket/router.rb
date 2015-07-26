@@ -16,6 +16,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Racket.  If not, see <http://www.gnu.org/licenses/>.
 
+require 'set'
+
 require 'http_router'
 
 module Racket
@@ -33,7 +35,7 @@ module Racket
     # @param [Class] controller
     # @return [nil]
     def cache_actions(controller)
-      actions = Set.new
+      actions = SortedSet.new
       current = controller
       while current < Controller
         actions.merge(current.instance_methods(false))
@@ -111,7 +113,7 @@ module Racket
 
         # Initialize and render target
         target = target_klass.new
-        target.extend(Current.init(env, action, params))
+        target.extend(Current.init(env, target_klass, action, params))
         target.__run
       end
       rescue => err

@@ -29,12 +29,15 @@ module Racket
     # @return [Rack::Builder]
     def self.application
       return @application if @application
+      @options[:middleware].unshift(@options[:session_handler]) if @options[:session_handler]
+      @options[:middleware].unshift([Rack::ContentType, @options[:default_content_type]]) if
+        @options[:default_content_type]
       @options[:middleware].unshift([Rack::ShowExceptions]) if dev_mode?
       instance = self
       @application = Rack::Builder.new do
         instance.options[:middleware].each do |middleware|
           klass, opts = middleware
-          instance.inform_dev("Loading middleware #{klass} with options #{opts}.")
+          instance.inform_dev("Loading middleware #{klass} with options #{opts.inspect}.")
           use(*middleware)
         end
         run lambda { |env|
@@ -61,24 +64,24 @@ module Racket
       {
         controller_dir: Utils.build_path(root_dir, 'controllers'),
         default_action: :index,
+        default_content_type: 'text/html',
+        default_controller_helpers: [:routing],
         default_layout: '_default.*',
         default_view: nil,
         layout_dir: Utils.build_path(root_dir, 'layouts'),
         logger: Logger.new($stdout),
-        middleware: [
-          [Rack::ContentType],
-          [
-            Rack::Session::Cookie,
-            {
-              key: 'racket.session',
-              old_secret: SecureRandom.hex(16),
-              secret: SecureRandom.hex(16)
-            }
-          ]
-        ],
+        middleware: [],
         mode: :live,
         public_dir: Utils.build_path(root_dir, 'public'),
         root_dir: root_dir,
+        session_handler: [
+          Rack::Session::Cookie,
+          {
+            key: 'racket.session',
+            old_secret: SecureRandom.hex(16),
+            secret: SecureRandom.hex(16)
+          }
+        ],
         view_dir: Utils.build_path(root_dir, 'views')
       }
     end
@@ -108,12 +111,12 @@ module Racket
       init({}, reboot)
     end
 
-    # Expands all paths defined in the application.
+    # Expands all paths defined in the application, but only if it is set to something usable.
     #
     # @return [nil]
     def self.expand_paths
       [:controller_dir, :layout_dir, :public_dir, :view_dir].each do |dir|
-        @options[dir] = Utils.build_path(@options[dir])
+        @options[dir] = Utils.build_path(@options[dir]) if @options[dir]
       end && nil
     end
 

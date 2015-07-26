@@ -29,4 +29,6 @@ class CustomSubController2 < Racket::Controller
     response.headers['X-Hook-Action'] = 'run'
   end
 
+  helper :nonexisting
+
 end

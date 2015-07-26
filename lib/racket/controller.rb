@@ -55,6 +55,18 @@ module Racket
       __register_hook(:before, methods, blk) if block_given?
     end
 
+    # Adds one or more helpers to the controller. All controllers get som default helpers
+    # (see Application.default_options), but this is the preferred way of adding your own helpers.
+    #
+    # @param [Array] helpers An array of symbols representing classes living in the Racket::Helpers
+    #  namespace.
+    def self.helper(*helpers)
+      existing_helpers = get_option(:controller_helpers) || []
+      helpers.map! { |helper| helper.to_sym }
+      helpers.reject! { |helper| existing_helpers.include?(helper) }
+      set_option(:controller_helpers, existing_helpers | helpers)
+    end
+
     # :nodoc:
     def self.inherited(klass)
       Application.options[:last_added_controller].push(klass)
@@ -79,7 +91,7 @@ module Racket
     # @param [Object] value
     def self.set_option(key, value)
       @options ||= {}
-      @options[key] = value
+      (@options[key] = value) && nil
     end
 
     # Returns an option from the current controller class.
@@ -88,25 +100,6 @@ module Racket
     # @return
     def controller_option(key)
       self.class.get_option(key)
-    end
-
-    # Returns a route to an action within the current controller.
-    #
-    # @param [Symbol] action
-    # @param [Array] params
-    # @return [String]
-    def rs(action, *params)
-      Application.get_route(self.class, action, params)
-    end
-
-    # Returns a route to an action within another controller.
-    #
-    # @param [Class] controller
-    # @param [Symbol] action
-    # @param [Array] params
-    # @return [String]
-    def r(controller, action, *params)
-      Application.get_route(controller, action, params)
     end
 
     # Redirects the client. After hooks are run.
