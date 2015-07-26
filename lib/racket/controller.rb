@@ -36,9 +36,10 @@ module Racket
             end
           end
           helper_modules[helper] = Racket::Helpers.const_get(helper_module)
+          Application.inform_dev("Added helper module #{helper.inspect} to class #{self}.")
         rescue NameError
           Application.inform_dev(
-            "Failed to load helper module #{helper.inspect} for class #{self}.", :warn
+            "Failed to add helper module #{helper.inspect} to class #{self}.", :warn
           )
         end
       end

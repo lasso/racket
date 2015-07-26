@@ -25,11 +25,11 @@ module Racket
     # track of things that don't belong to the actual request.
     State = Struct.new(:action, :action_result, :params)
 
-    @default_controller_helpers = nil
-
     # Called whenever a new request needs to be processed.
     #
     # @param [Hash] env Rack environment
+    # @param [Class] klass Target klass, needed because we are copying stuff from the class to the
+    #   instance.
     # @param [Symbol] action Keeps track of which action was called on the controller
     # @param [Array] params Parameters sent to the action
     # @return [Module] A module encapsulating all state relating to the current request

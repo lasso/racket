@@ -48,16 +48,6 @@ module Racket
       controller.response.finish
     end
 
-    # Renders a template file in the specified context.
-    #
-    # @param [String] template
-    # @param [Object] context
-    # @return [String|nil]
-    def render_file(template, context = nil)
-      return nil unless Utils.file_readable?(template)
-      Tilt.new(template).render(context)
-    end
-
     private
 
     # Tries to locate a layout matching +url_path+ in the file system and returns the path if a
