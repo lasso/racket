@@ -19,6 +19,34 @@
 module Racket
   # Base controller class. Your controllers should inherit this class.
   class Controller
+    def self.__load_helpers(helpers)
+      helper_dir = Application.options.fetch(:helper_dir, nil)
+      helper_modules = {}
+      helpers.each do |helper|
+        helper_module = helper.to_s.split('_').collect(&:capitalize).join.to_sym
+        begin
+          begin
+            require "racket/helpers/#{helper}"
+          rescue LoadError
+            if helper_dir
+              begin
+                require Utils.build_path(helper_dir, helper)
+              rescue LoadError
+              end
+            end
+          end
+          helper_modules[helper] = Racket::Helpers.const_get(helper_module)
+        rescue NameError
+          Application.inform_dev(
+            "Failed to load helper module #{helper.inspect} for class #{self}.", :warn
+          )
+        end
+      end
+      helper_modules
+    end
+
+    private_class_method :__load_helpers
+
     # Adds a hook to one or more actions.
     #
     # @param [Symbol] type
@@ -55,16 +83,28 @@ module Racket
       __register_hook(:before, methods, blk) if block_given?
     end
 
-    # Adds one or more helpers to the controller. All controllers get som default helpers
-    # (see Application.default_options), but this is the preferred way of adding your own helpers.
+    # Adds one or more helpers to the controller. All controllers get some default helpers
+    # (see Application.default_options), but if you have your own helpers you want to load this
+    # is the preferred method.
+    #
+    # By default Racket will look for your helpers in the helpers directory, but you can specify
+    # another location by setting the helper_dir option.
     #
     # @param [Array] helpers An array of symbols representing classes living in the Racket::Helpers
     #  namespace.
     def self.helper(*helpers)
-      existing_helpers = get_option(:controller_helpers) || []
+      helper_modules = {}
+      existing_helpers = get_option(:helpers)
+      if existing_helpers.nil?
+        # No helpers has been loaded yet. Load the default helpers.
+        existing_helpers = Application.options.fetch(:default_controller_helpers, [])
+        helper_modules.merge!(__load_helpers(existing_helpers))
+      end
+      # Load new helpers
       helpers.map! { |helper| helper.to_sym }
-      helpers.reject! { |helper| existing_helpers.include?(helper) }
-      set_option(:controller_helpers, existing_helpers | helpers)
+      helpers.reject! { |helper| helper_modules.key?(helper) }
+      helper_modules.merge!(__load_helpers(helpers))
+      set_option(:helpers, helper_modules)
     end
 
     # :nodoc:

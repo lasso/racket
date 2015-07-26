@@ -17,9 +17,9 @@
 # along with Racket.  If not, see <http://www.gnu.org/licenses/>.
 
 module Racket
-  # Helper module
+  # Helpers module
   module Helpers
-    # Module for handling routing
+    # Helper module that handles routing
     module Routing
       # Returns a route to an action within another controller.
       #

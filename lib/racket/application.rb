@@ -68,6 +68,7 @@ module Racket
         default_controller_helpers: [:routing],
         default_layout: '_default.*',
         default_view: nil,
+        helper_dir: Utils.build_path(root_dir, 'helpers'),
         layout_dir: Utils.build_path(root_dir, 'layouts'),
         logger: Logger.new($stdout),
         middleware: [],
@@ -115,7 +116,7 @@ module Racket
     #
     # @return [nil]
     def self.expand_paths
-      [:controller_dir, :layout_dir, :public_dir, :view_dir].each do |dir|
+      [:controller_dir, :helper_dir, :layout_dir, :public_dir, :view_dir].each do |dir|
         @options[dir] = Utils.build_path(@options[dir]) if @options[dir]
       end && nil
     end
