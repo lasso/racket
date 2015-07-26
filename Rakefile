@@ -1,4 +1,11 @@
+require 'rubygems'
+require 'bundler/setup'
+
 task default: %w[test]
+
+task :build_gem do
+  exec 'gem build racket.gemspec'
+end
 
 task :doc do
   exec 'yard'
