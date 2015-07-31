@@ -8,4 +8,4 @@ rvm:
   - jruby-9.0.0.0
   - rbx-2
 env:
-  - JRUBY_OPTS="--debug --server -Dcext.enabled=false -Xcli.debug=true -Xcompile.invokedynamic=false"
+  - JRUBY_OPTS="-Xcli.debug=true --debug"
