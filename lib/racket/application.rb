@@ -100,7 +100,7 @@ module Racket
     # @param [Symbol] action
     # @param [Array] params
     # @return [String]
-    def self.get_route(controller, action, params)
+    def self.get_route(controller, action = nil, *params)
       @router.get_route(controller, action, params)
     end
 

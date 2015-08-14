@@ -51,10 +51,11 @@ module Racket
     # @param [Array] params
     # @return [String]
     def get_route(controller, action, params)
+      fail "Cannot find controller #{controller}" unless @routes_by_controller.key?(controller)
+      params.flatten!
       route = ''
-      route << @routes_by_controller[controller] if @routes_by_controller.key?(controller)
-      action = action.to_s
-      route << "/#{action}" unless action.empty?
+      route << @routes_by_controller[controller]
+      route << "/#{action}" unless action.nil?
       route << "/#{params.join('/')}" unless params.empty?
       route = route[1..-1] if route.start_with?('//') # Special case for root path
       route
