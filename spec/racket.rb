@@ -15,6 +15,10 @@ TEST_DEFAULT_APP_DIR = File.absolute_path(File.join(File.dirname(__FILE__), 'tes
 TEST_CUSTOM_APP_DIR = File.absolute_path(File.join(File.dirname(__FILE__), 'test_custom_app'))
 
 require 'racket'
+
+# Make sure some files that are loaded dynamically get coverage as well.
+require 'racket/helpers/file.rb'
+
 require 'rack/test'
 require 'bacon'
 

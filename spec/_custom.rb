@@ -66,4 +66,44 @@ describe 'A custom Racket test Application' do
     last_response.headers['Content-Type'].should.equal('text/html')
     last_response.body.should.equal("The secret is 42!\n")
   end
+
+  it 'should be able to send files with auto mime type' do
+    get '/sub1/send_existing_file_auto_mime'
+    last_response.status.should.equal(200)
+    last_response.headers['Content-Type'].should.equal('text/plain')
+    last_response.headers.key?('Content-Disposition').should.equal(false)
+    last_response.body.should.equal("This is plain text.\n")
+  end
+
+  it 'should be able to send files with custom mime type' do
+    get '/sub1/send_existing_file_custom_mime'
+    last_response.status.should.equal(200)
+    last_response.headers['Content-Type'].should.equal('text/skv')
+    last_response.headers.key?('Content-Disposition').should.equal(false)
+    last_response.body.should.equal("This is plain text.\n")
+  end
+
+  it 'should be able to send unnamed files with Content-Disposition' do
+    get '/sub1/send_existing_file_unnamed_attachment'
+    last_response.status.should.equal(200)
+    last_response.headers['Content-Type'].should.equal('text/plain')
+    last_response.headers['Content-Disposition'].should.equal('attachment')
+    last_response.body.should.equal("This is plain text.\n")
+  end
+
+  it 'should be able to send named files with Content-Disposition' do
+    get '/sub1/send_existing_file_named_attachment'
+    last_response.status.should.equal(200)
+    last_response.headers['Content-Type'].should.equal('text/plain')
+    last_response.headers['Content-Disposition'].should.equal('attachment; filename="bazinga!.txt"')
+    last_response.body.should.equal("This is plain text.\n")
+  end
+
+  it 'should respond with 404 when trying to send non-existing files' do
+    get '/sub1/send_nonexisting_file'
+    last_response.status.should.equal(404)
+    last_response.headers['Content-Type'].should.equal('text/plain')
+    last_response.headers.key?('Content-Disposition').should.equal(false)
+    last_response.body.should.equal("Not Found")
+  end
 end
