@@ -23,10 +23,10 @@ module Racket
     # Major version
     MAJOR = 0
     # Minor version
-    MINOR = 1
+    MINOR = 2
     # Teeny version
-    TEENY = 1
-    # Prerelease ?
+    TEENY = 0
+    # Is it a prerelease?
     PRERELEASE = false
 
     # Returns the current version of Racket as a string.

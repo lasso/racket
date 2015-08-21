@@ -34,7 +34,7 @@ describe 'Racket::Request should override Rack::Request correctly' do
   end
 
   describe 'Racket::Request should redefine methods for handling GET/POST data' do
-    [:get_params, :post_params].each do |meth|
+    [:get, :get_params, :post, :post_params].each do |meth|
       it "should define #{meth}" do
         r.respond_to?(meth).should.equal(true)
       end
