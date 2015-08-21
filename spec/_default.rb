@@ -31,7 +31,7 @@ describe 'A default Racket test Application' do
     actions_by_controller[DefaultSubController1].length.should.equal(4)
     actions_by_controller[DefaultSubController1].include?(:route_to_root).should.equal(true)
     actions_by_controller[DefaultSubController1].include?(:route_to_nonexisting).should.equal(true)
-    actions_by_controller[DefaultSubController2].length.should.equal(3)
+    actions_by_controller[DefaultSubController2].length.should.equal(5)
     actions_by_controller[DefaultSubController2].include?(:index).should.equal(true)
     actions_by_controller[DefaultSubController2].include?(:current_action).should.equal(true)
     actions_by_controller[DefaultSubController2].include?(:current_params).should.equal(true)
@@ -170,6 +170,28 @@ describe 'A default Racket test Application' do
     Racket::Utils.build_path('foo', 'bar', 'baz').should.equal(
       File.join(Pathname.pwd.to_s, 'foo', 'bar', 'baz')
     )
+  end
+
+  it 'should handle GET parameters correctly' do
+    get '/sub2/get_some_data/?data1=foo&data3=bar'
+    last_response.status.should.equal(200)
+    response = JSON.parse(last_response.body, symbolize_names: true)
+    response.class.should.equal(Hash)
+    response.keys.sort.should.equal([:data1, :data2, :data3])
+    response[:data1].should.equal('foo')
+    response[:data2].should.equal(nil)
+    response[:data3].should.equal('bar')
+  end
+
+  it 'should handle POST parameters correctly' do
+    post '/sub2/post_some_data', { data1: 'foo', data3: 'bar' }
+    last_response.status.should.equal(200)
+    response = JSON.parse(last_response.body, symbolize_names: true)
+    response.class.should.equal(Hash)
+    response.keys.sort.should.equal([:data1, :data2, :data3])
+    response[:data1].should.equal('foo')
+    response[:data2].should.equal(nil)
+    response[:data3].should.equal('bar')
   end
 
   it 'should be able to serve static files' do

@@ -21,17 +21,35 @@ module Racket
   # methods relating to GET/POST parameters and sessions.
   class Request < Rack::Request
     # Remove methods that use merged GET and POST data.
-    undef_method :[], :[]=, :delete_param, :params, :update_param
+    undef_method :[], :[]=, :delete_param, :params, :update_param, :values_at
 
     # Remove session methods.
     undef_method :session, :session_options
 
-    # Rename methods for handling GET parameters
+    # Redefine methods for handling GET parameters
     alias_method(:get_params, :GET)
     undef_method :GET
 
-    # Rename methods for handling POST parameters
+    # Returns a value from the GET parameter hash.
+    #
+    # @param [Object] key
+    # @param [Object] default
+    # @return [Object]
+    def get(key, default = nil)
+      get_params.fetch(key.to_s, default)
+    end
+
+    # Redefine methods for handling POST parameters
     alias_method(:post_params, :POST)
     undef_method :POST
+
+    # Returns a value from the POST parameter hash.
+    #
+    # @param [Object] key
+    # @param [Object] default
+    # @return [Object]
+    def post(key, default = nil)
+      post_params.fetch(key.to_s, default)
+    end
   end
 end

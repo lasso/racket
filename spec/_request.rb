@@ -9,7 +9,7 @@ describe 'Racket::Request should override Rack::Request correctly' do
       :host_with_port, :ip, :link?, :logger, :media_type, :media_type_params, :options?,
       :parseable_data?, :patch?, :path, :path_info, :path_info=, :port, :post?, :put?,
       :query_string, :referer, :referrer, :request_method, :scheme, :script_name, :script_name=,
-      :ssl?, :trace?, :trusted_proxy?, :unlink?, :url, :user_agent, :values_at, :xhr?
+      :ssl?, :trace?, :trusted_proxy?, :unlink?, :url, :user_agent, :xhr?
     ].each do |meth|
       it "should inherit #{meth} from Rack::Request" do
         r.respond_to?(meth).should.equal(true)
@@ -18,7 +18,7 @@ describe 'Racket::Request should override Rack::Request correctly' do
   end
 
   describe 'Racket::Request should not inherit methods that use merged GET and POST data' do
-    [:[], :[]=, :delete_param, :params, :update_param].each do |meth|
+    [:[], :[]=, :delete_param, :params, :update_param, :values_at].each do |meth|
       it "should not inherit #{meth} from Rack::Request" do
         r.respond_to?(meth).should.equal(false)
       end
