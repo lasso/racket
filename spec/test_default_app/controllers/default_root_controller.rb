@@ -15,7 +15,7 @@ class DefaultRootController < Racket::Controller
   end
 
   def session_as_json
-    request.GET.each_pair do |key, value|
+    request.get_params.each_pair do |key, value|
       if key == 'drop_session'
         session.clear
       else

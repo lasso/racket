@@ -22,6 +22,8 @@ require 'racket/helpers/file.rb'
 require 'rack/test'
 require 'bacon'
 
+require_relative '_request.rb'
+
 Dir.chdir(TEST_DEFAULT_APP_DIR) { require_relative '_default.rb' }
 Dir.chdir(TEST_CUSTOM_APP_DIR) { require_relative '_custom.rb' }
 

@@ -17,14 +17,21 @@
 # along with Racket.  If not, see <http://www.gnu.org/licenses/>.
 
 module Racket
-  # Represents an incoming request. Mostly matches Rack::Request but removes some methods that
-  # don't fit with racket.
+  # Represents an incoming request. Mostly matches Rack::Request but removes/redefines
+  # methods relating to GET/POST parameters and sessions.
   class Request < Rack::Request
-    # Force explicit use of request.GET and request.POST
-    # For racket params, use racket.params
-    undef_method :params
+    # Remove methods that use merged GET and POST data.
+    undef_method :[], :[]=, :delete_param, :params, :update_param
 
-    # Unless sessions are loaded explicitly, session methods should not be available
+    # Remove session methods.
     undef_method :session, :session_options
+
+    # Rename methods for handling GET parameters
+    alias_method(:get_params, :GET)
+    undef_method :GET
+
+    # Rename methods for handling POST parameters
+    alias_method(:post_params, :POST)
+    undef_method :POST
   end
 end
