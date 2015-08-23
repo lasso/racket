@@ -26,7 +26,7 @@ require_relative 'racket/request.rb'
 require_relative 'racket/response.rb'
 require_relative 'racket/router.rb'
 require_relative 'racket/session.rb'
-require_relative 'racket/view_cache.rb'
+require_relative 'racket/view_manager.rb'
 require_relative 'racket/utils.rb'
 
 # Racket main namespace

@@ -202,7 +202,7 @@ module Racket
     # @return [nil]
     def self.reload
       setup_routes
-      @view_cache = nil
+      @view_manager = nil
     end
 
     # Requires a file using the current application directory as a base path.
@@ -258,9 +258,9 @@ module Racket
 
     # Returns the view cache of the currently running application.
     #
-    # @return [ViewCache]
-    def self.view_cache
-      @view_cache ||= ViewCache.new(@options[:layout_dir], @options[:view_dir])
+    # @return [Racket::ViewManager]
+    def self.view_manager
+      @view_manager ||= ViewManager.new(@options[:layout_dir], @options[:view_dir])
     end
 
     private_class_method :application, :default_options, :expand_paths, :inform, :init,
