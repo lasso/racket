@@ -106,4 +106,16 @@ describe 'A custom Racket test Application' do
     last_response.headers.key?('Content-Disposition').should.equal(false)
     last_response.body.should.equal("Not Found")
   end
+
+  it 'should be able to handle dynamic layouts and views' do
+    get '/sub4/foo'
+    last_response.status.should.equal(200)
+    last_response.body.should.equal("LAYOUT: myfoo: FOO\n\n")
+    get '/sub4/bar'
+    last_response.status.should.equal(200)
+    last_response.body.should.equal("LAYOUT: mybar: BAR\n\n")
+    get '/sub4/baz'
+    last_response.status.should.equal(200)
+    last_response.body.should.equal("LAYOUT: default: BAZ\n\n")
+  end
 end

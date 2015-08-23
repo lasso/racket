@@ -66,7 +66,7 @@ module Racket
         default_action: :index,
         default_content_type: 'text/html',
         default_controller_helpers: [:routing, :view],
-        default_layout: '_default.*',
+        default_layout: nil,
         default_view: nil,
         helper_dir: Utils.build_path(root_dir, 'helpers'),
         layout_dir: Utils.build_path(root_dir, 'layouts'),
