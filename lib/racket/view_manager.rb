@@ -22,14 +22,14 @@ module Racket
   # Handles rendering in Racket applications.
   class ViewManager
 
-    attr_reader :layouts_by_path
-    attr_reader :views_by_path
+    attr_reader :layout_cache
+    attr_reader :view_cache
 
     def initialize(layout_base_dir, view_base_dir)
       @layout_base_dir = layout_base_dir
       @view_base_dir = view_base_dir
-      @layouts_by_path = {}
-      @views_by_path = {}
+      @layout_cache = {}
+      @view_cache = {}
     end
 
     # Renders a controller based on the request path and the variables set in the
@@ -71,14 +71,9 @@ module Racket
     # @param [Racket::Controller] controller
     # @return [String]
     def call_template_proc(proc, controller)
-      proc_args =
-        case proc.arity
-        when 0 then []
-        when 1 then [controller.racket.action]
-        when 2 then [controller.racket.action, controller.racket.params]
-        when 3 then [controller.racket.action, controller.racket.params, controller.request]
-        else fail ArgumentError, 'Template proc must take 0-3 parameters.'
-        end
+      possible_proc_args = [controller.racket.action, controller.racket.params, controller.request]
+      proc_args = []
+      1.upto(proc.arity) { proc_args.push(possible_proc_args.shift) }
       proc.call(*proc_args).to_s
     end
 
@@ -90,7 +85,7 @@ module Racket
     # @param [Racket::Controller] controller
     # @return [String|nil]
     def get_layout(path, controller)
-      unless @layouts_by_path.key?(path)
+      unless @layout_cache.key?(path)
         layout = lookup_template(@layout_base_dir, path)
         layout =
           lookup_default_template(
@@ -99,9 +94,9 @@ module Racket
         Application.inform_dev(
           "Using layout #{layout.inspect} for #{controller.class}.#{controller.racket.action}."
         )
-        @layouts_by_path[path] = layout
+        @layout_cache[path] = layout
       end
-      layout = @layouts_by_path[path]
+      layout = @layout_cache[path]
       if layout.is_a?(Proc)
         layout =
           lookup_template(
@@ -120,7 +115,7 @@ module Racket
     # @param [Racket::Controller] controller
     # @return [String|nil]
     def get_view(path, controller)
-      unless @views_by_path.key?(path)
+      unless @view_cache.key?(path)
         view = lookup_template(@view_base_dir, path)
         view =
           lookup_default_template(
@@ -129,9 +124,9 @@ module Racket
         Application.inform_dev(
           "Using view #{view.inspect} for #{controller.class}.#{controller.racket.action}."
         )
-        @views_by_path[path] = view
+        @view_cache[path] = view
       end
-      view = @views_by_path[path]
+      view = @view_cache[path]
       if view.is_a?(Proc)
         view =
           lookup_template(
