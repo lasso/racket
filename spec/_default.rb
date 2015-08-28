@@ -10,33 +10,26 @@ describe 'A default Racket test Application' do
   end
 
   it 'has mapped controllers correctly' do
-    routes_by_controller = actions_by_controller = nil
-    app.instance_eval do
-      router.instance_eval do
-        routes_by_controller = @routes_by_controller
-        actions_by_controller = @actions_by_controller
-      end
-    end
+    app.router.routes.length.should.equal(5)
+    app.router.routes[DefaultRootController].should.equal('/')
+    app.router.routes[DefaultSubController1].should.equal('/sub1')
+    app.router.routes[DefaultSubController2].should.equal('/sub2')
+    app.router.routes[DefaultSubController3].should.equal('/sub3')
+    app.router.routes[DefaultInheritedController].should.equal('/sub3/inherited')
 
-    routes_by_controller[DefaultRootController].should.equal('/')
-    routes_by_controller[DefaultSubController1].should.equal('/sub1')
-    routes_by_controller[DefaultSubController2].should.equal('/sub2')
-    routes_by_controller[DefaultSubController3].should.equal('/sub3')
-    routes_by_controller[DefaultInheritedController].should.equal('/sub3/inherited')
-
-    actions_by_controller[DefaultRootController].length.should.equal(5)
-    actions_by_controller[DefaultRootController].include?(:index).should.equal(true)
-    actions_by_controller[DefaultRootController].include?(:my_first_route).should.equal(true)
-    actions_by_controller[DefaultRootController].include?(:my_second_route).should.equal(true)
-    actions_by_controller[DefaultSubController1].length.should.equal(4)
-    actions_by_controller[DefaultSubController1].include?(:route_to_root).should.equal(true)
-    actions_by_controller[DefaultSubController1].include?(:route_to_nonexisting).should.equal(true)
-    actions_by_controller[DefaultSubController2].length.should.equal(5)
-    actions_by_controller[DefaultSubController2].include?(:index).should.equal(true)
-    actions_by_controller[DefaultSubController2].include?(:current_action).should.equal(true)
-    actions_by_controller[DefaultSubController2].include?(:current_params).should.equal(true)
-    actions_by_controller[DefaultSubController3].should.equal([:index])
-    actions_by_controller[DefaultInheritedController].should.equal([:index])
+    app.router.action_cache[DefaultRootController].length.should.equal(5)
+    app.router.action_cache[DefaultRootController].include?(:index).should.equal(true)
+    app.router.action_cache[DefaultRootController].include?(:my_first_route).should.equal(true)
+    app.router.action_cache[DefaultRootController].include?(:my_second_route).should.equal(true)
+    app.router.action_cache[DefaultSubController1].length.should.equal(4)
+    app.router.action_cache[DefaultSubController1].include?(:route_to_root).should.equal(true)
+    app.router.action_cache[DefaultSubController1].include?(:route_to_nonexisting).should.equal(true)
+    app.router.action_cache[DefaultSubController2].length.should.equal(5)
+    app.router.action_cache[DefaultSubController2].include?(:index).should.equal(true)
+    app.router.action_cache[DefaultSubController2].include?(:current_action).should.equal(true)
+    app.router.action_cache[DefaultSubController2].include?(:current_params).should.equal(true)
+    app.router.action_cache[DefaultSubController3].should.equal([:index])
+    app.router.action_cache[DefaultInheritedController].should.equal([:index])
   end
 
   it 'should set rack variables correctly' do

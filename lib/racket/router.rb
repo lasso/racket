@@ -23,38 +23,43 @@ require 'http_router'
 module Racket
   # Handles routing in Racket applications.
   class Router
+
+    attr_reader :action_cache
+    attr_reader :routes
+
     def initialize
       @router = HttpRouter.new
-      @routes_by_controller = {}
-      @actions_by_controller = {}
+      @routes = {}
+      @action_cache = {}
     end
 
     # Caches available actions for each controller class. This also works for controller classes
     # that inherit from other controller classes.
     #
-    # @param [Class] controller
+    # @param [Class] controller_class
     # @return [nil]
-    def cache_actions(controller)
+    def cache_actions(controller_class)
       actions = SortedSet.new
-      current = controller
-      while current < Controller
-        actions.merge(current.instance_methods(false))
-        current = current.superclass
+      current_class = controller_class
+      while current_class < Controller
+        actions.merge(current_class.public_instance_methods(false))
+        current_class = current_class.superclass
       end
-      (@actions_by_controller[controller] = actions.to_a) && nil
+      (@action_cache[controller_class] = actions.to_a) && nil
     end
 
     # Returns a route to the specified controller/action/parameter combination.
     #
-    # @param [Class] controller
+    # @param [Class] controller_class
     # @param [Symbol] action
     # @param [Array] params
     # @return [String]
-    def get_route(controller, action, params)
-      fail "Cannot find controller #{controller}" unless @routes_by_controller.key?(controller)
+    def get_route(controller_class, action, params)
+      fail "Cannot find controller #{controller_class}" unless
+        @routes.key?(controller_class)
       params.flatten!
       route = ''
-      route << @routes_by_controller[controller]
+      route << @routes[controller_class]
       route << "/#{action}" unless action.nil?
       route << "/#{params.join('/')}" unless params.empty?
       route = route[1..-1] if route.start_with?('//') # Special case for root path
@@ -64,14 +69,14 @@ module Racket
     # Maps a controller to the specified path.
     #
     # @param [String] path
-    # @param [Class] controller
+    # @param [Class] controller_class
     # @return [nil]
-    def map(path, controller)
-      controller_base_path = path.empty? ? '/' : path
-      Application.inform_dev("Mapping #{controller} to #{controller_base_path}.")
-      @router.add("#{path}(/*params)").to(controller)
-      @routes_by_controller[controller] = controller_base_path
-      cache_actions(controller) && nil
+    def map(path, controller_class)
+      controller_class_base_path = path.empty? ? '/' : path
+      Application.inform_dev("Mapping #{controller_class} to #{controller_class_base_path}.")
+      @router.add("#{path}(/*params)").to(controller_class)
+      @routes[controller_class] = controller_class_base_path
+      cache_actions(controller_class) && nil
     end
 
     # @todo: Allow the user to set custom handlers for different errors
@@ -105,7 +110,7 @@ module Racket
         action = params.empty? ? target_klass.get_option(:default_action) : params.shift.to_sym
 
         # Check if action is available on target
-        return render_error(404) unless @actions_by_controller[target_klass].include?(action)
+        return render_error(404) unless @action_cache[target_klass].include?(action)
 
         # Rewrite PATH_INFO to reflect that we split out the parameters
         env['PATH_INFO'] = env['PATH_INFO']
