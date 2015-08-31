@@ -1,5 +1,4 @@
 class DefaultSubController2 < Racket::Controller
-
   def index
     "#{self.class}::#{__method__}"
   end
@@ -27,5 +26,4 @@ class DefaultSubController2 < Racket::Controller
     end
     data.to_json
   end
-
 end

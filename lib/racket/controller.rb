@@ -102,7 +102,7 @@ module Racket
         helper_modules.merge!(__load_helpers(existing_helpers))
       end
       # Load new helpers
-      helpers.map! { |helper| helper.to_sym }
+      helpers.map!(&:to_sym)
       helpers.reject! { |helper| helper_modules.key?(helper) }
       helper_modules.merge!(__load_helpers(helpers))
       set_option(:helpers, helper_modules)

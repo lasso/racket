@@ -1,5 +1,4 @@
 class CustomSubController1 < Racket::Controller
-
   helper :file
 
   def index
@@ -37,5 +36,4 @@ class CustomSubController1 < Racket::Controller
   def send_nonexisting_file
     send_file('files/no_such_thing.jpg')
   end
-
 end

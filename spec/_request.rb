@@ -1,5 +1,4 @@
 describe 'Racket::Request should override Rack::Request correctly' do
-
   r = Racket::Request.new({}).freeze
 
   describe 'Racket::Request should inherit some methods from Rack::Request' do
@@ -45,5 +44,4 @@ describe 'Racket::Request should override Rack::Request correctly' do
       end
     end
   end
-
 end

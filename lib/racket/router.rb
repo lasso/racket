@@ -23,7 +23,6 @@ require 'http_router'
 module Racket
   # Handles routing in Racket applications.
   class Router
-
     attr_reader :action_cache
     attr_reader :routes
 

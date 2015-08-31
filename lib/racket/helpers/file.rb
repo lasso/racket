@@ -33,7 +33,7 @@ module Racket
           404,
           { 'Content-Type' => 'text/plain' },
           Rack::Utils::HTTP_STATUS_CODES[404]
-        ) unless Utils.file_readable? (file)
+        ) unless Utils.file_readable?(file)
         headers = {}
         mime_type = options.fetch(:mime_type, nil)
         # Calculate MIME type if it was not already specified.
@@ -44,7 +44,7 @@ module Racket
         if options.fetch(:download, false)
           filename = options.fetch(:filename, nil).to_s
           headers['Content-Disposition'] = 'attachment'
-          headers['Content-Disposition'] << sprintf('; filename="%s"', filename) unless
+          headers['Content-Disposition'] << format('; filename="%s"', filename) unless
             filename.empty?
         end
         # Send response

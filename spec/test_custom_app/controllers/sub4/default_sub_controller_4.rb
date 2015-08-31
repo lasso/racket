@@ -1,5 +1,4 @@
 class CustomSubController4 < Racket::Controller
-
   set_option  :default_layout, lambda { 'layout.erb' }
 
   set_option  :default_view,
@@ -22,5 +21,4 @@ class CustomSubController4 < Racket::Controller
   def baz
     @data = 'BAZ'
   end
-
 end

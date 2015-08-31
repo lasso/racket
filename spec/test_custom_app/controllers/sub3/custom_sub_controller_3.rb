@@ -1,5 +1,4 @@
 class CustomSubController3 < Racket::Controller
-
   set_option(:top_secret, 42)
 
   def index
@@ -23,5 +22,4 @@ class CustomSubController3 < Racket::Controller
     obj.instance_eval { @secret = 42 }
     render_template('files/secret.erb', obj)
   end
-
 end

@@ -6,9 +6,8 @@ describe 'An invalid Racket test Application' do
   end
 
   it 'should never initialize' do
-    lambda { get '/' }
+    -> { get '/' }
       .should.raise(RuntimeError)
       .message.should.equal('Application has already been initialized!')
   end
-
 end

@@ -29,7 +29,7 @@ module Racket
       if args.empty?
         path = Pathname.pwd
       else
-        args.map! { |arg| arg.to_s }
+        args.map!(&:to_s)
         path = Pathname.new(args.shift)
         path = Pathname.new(Application.options[:root_dir]).join(path) if path.relative?
         args.each do |arg|

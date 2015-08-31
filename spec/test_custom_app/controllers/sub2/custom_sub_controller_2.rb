@@ -1,5 +1,4 @@
 class CustomSubController2 < Racket::Controller
-
   def index
     "#{self.class}::#{__method__}"
   end
@@ -30,5 +29,4 @@ class CustomSubController2 < Racket::Controller
   end
 
   helper :nonexisting
-
 end

@@ -1,7 +1,6 @@
 require 'json'
 
 class DefaultRootController < Racket::Controller
-
   def index
     "#{self.class}::#{__method__}"
   end
@@ -28,5 +27,4 @@ class DefaultRootController < Racket::Controller
   def session_strings
     [session.inspect, session.to_s, session.to_str].to_json
   end
-
 end

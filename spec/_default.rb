@@ -103,7 +103,7 @@ describe 'A default Racket test Application' do
     _logger = app.options[:logger]
     sio = StringIO.new
     app.options[:logger] = Logger.new(sio)
-    app.inform_all('Informational message');
+    app.inform_all('Informational message')
     sio.string.should.match(/Informational message/)
     app.options[:logger] = _logger
   end
@@ -114,10 +114,10 @@ describe 'A default Racket test Application' do
     sio = StringIO.new
     app.options[:logger] = Logger.new(sio)
     app.options[:mode] = :live
-    app.inform_dev('Development message');
+    app.inform_dev('Development message')
     sio.string.should.be.empty
     app.options[:mode] = :dev
-    app.inform_dev('Hey, listen up!');
+    app.inform_dev('Hey, listen up!')
     sio.string.should.match(%r(Hey, listen up!))
     app.options[:mode] = _mode
     app.options[:logger] = _logger

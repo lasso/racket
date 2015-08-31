@@ -1,5 +1,4 @@
 class DefaultSubController1 < Racket::Controller
-
   def index
     "#{self.class}::#{__method__}"
   end
@@ -15,5 +14,4 @@ class DefaultSubController1 < Racket::Controller
   def epic_fail
     fail 'Epic fail!'
   end
-
 end

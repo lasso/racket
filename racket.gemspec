@@ -1,20 +1,5 @@
 require 'rake'
-
-def get_racket_version
-  mod = Module.new
-  mod.module_eval(
-    File.read(
-      File.join(File.dirname(__FILE__), 'lib', 'racket', 'version.rb')
-    )
-  )
-  mod::Racket::Version.current
-end
-
-def get_racket_files
-  files = FileList['lib/**/*.rb'].to_a
-  files.concat(FileList['spec/**/*'].to_a)
-  files.concat(FileList['COPYING.AGPL', 'Rakefile', 'README.md'].to_a)
-end
+require_relative 'rake/utils.rb'
 
 Gem::Specification.new do |s|
   s.name                  = 'racket-mvc'
@@ -22,11 +7,11 @@ Gem::Specification.new do |s|
   s.homepage              = 'https://github.com/lasso/racket'
   s.license               = 'GNU AFFERO GENERAL PUBLIC LICENSE, version 3'
   s.authors               = ['Lars Olsson']
-  s.version               = get_racket_version
+  s.version               = racket_version
   s.date                  = Time.now.strftime('%Y-%m-%d')
   s.summary               = 'Racket - The noisy Rack MVC framework'
   s.description           = 'Racket is a small MVC framework built on top of rack.'
-  s.files                 = get_racket_files
+  s.files                 = racket_files
   s.platform              = Gem::Platform::RUBY
   s.require_path          = 'lib'
   s.required_ruby_version = '>= 1.9.3'
