@@ -1,6 +1,6 @@
 require 'rubygems'
 require 'bundler/setup'
-require_relative 'rake/utils'
+require './rake/utils.rb'
 
 desc 'Run bacon tests'
 task default: [:test]

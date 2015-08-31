@@ -1,5 +1,5 @@
 require 'rake'
-require_relative 'rake/utils.rb'
+require './rake/utils.rb'
 
 Gem::Specification.new do |s|
   s.name                  = 'racket-mvc'
