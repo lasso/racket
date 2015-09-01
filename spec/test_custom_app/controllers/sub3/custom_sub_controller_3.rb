@@ -1,3 +1,4 @@
+# Custom sub controller 3
 class CustomSubController3 < Racket::Controller
   set_option(:top_secret, 42)
 

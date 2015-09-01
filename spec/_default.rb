@@ -23,7 +23,8 @@ describe 'A default Racket test Application' do
     app.router.action_cache[DefaultRootController].include?(:my_second_route).should.equal(true)
     app.router.action_cache[DefaultSubController1].length.should.equal(4)
     app.router.action_cache[DefaultSubController1].include?(:route_to_root).should.equal(true)
-    app.router.action_cache[DefaultSubController1].include?(:route_to_nonexisting).should.equal(true)
+    app.router.action_cache[DefaultSubController1].include?(:route_to_nonexisting)
+      .should.equal(true)
     app.router.action_cache[DefaultSubController2].length.should.equal(5)
     app.router.action_cache[DefaultSubController2].include?(:index).should.equal(true)
     app.router.action_cache[DefaultSubController2].include?(:current_action).should.equal(true)
@@ -39,7 +40,7 @@ describe 'A default Racket test Application' do
 
     get '/sub2/current_params/foo/bar/baz'
     last_response.status.should.equal(200)
-    JSON.parse(last_response.body).should.equal(['foo', 'bar', 'baz'])
+    JSON.parse(last_response.body).should.equal(%w(foo bar baz))
   end
 
   it 'returns the correct respnse when calling index action' do
@@ -100,17 +101,17 @@ describe 'A default Racket test Application' do
   end
 
   it 'should be able to log messages to everybody' do
-    _logger = app.options[:logger]
+    original_logger = app.options[:logger]
     sio = StringIO.new
     app.options[:logger] = Logger.new(sio)
     app.inform_all('Informational message')
     sio.string.should.match(/Informational message/)
-    app.options[:logger] = _logger
+    app.options[:logger] = original_logger
   end
 
   it 'should be able to log messages to developer' do
-    _logger = app.options[:logger]
-    _mode = app.options[:mode]
+    original_logger = app.options[:logger]
+    original_mode = app.options[:mode]
     sio = StringIO.new
     app.options[:logger] = Logger.new(sio)
     app.options[:mode] = :live
@@ -118,9 +119,9 @@ describe 'A default Racket test Application' do
     sio.string.should.be.empty
     app.options[:mode] = :dev
     app.inform_dev('Hey, listen up!')
-    sio.string.should.match(%r(Hey, listen up!))
-    app.options[:mode] = _mode
-    app.options[:logger] = _logger
+    sio.string.should.match(/Hey, listen up!/)
+    app.options[:mode] = original_mode
+    app.options[:logger] = original_logger
   end
 
   it 'should be able to set and clear session variables' do
@@ -131,7 +132,7 @@ describe 'A default Racket test Application' do
     response.keys.should.be.empty
     get '/session_as_json?foo=bar'
     last_response.headers.keys.should.include('Set-Cookie')
-    last_response.headers['Set-Cookie'].should.match(%r(racket.session=))
+    last_response.headers['Set-Cookie'].should.match(/racket.session=/)
     response = JSON.parse(last_response.body)
     response.class.should.equal(Hash)
     response.keys.length.should.equal(2)
@@ -139,7 +140,7 @@ describe 'A default Racket test Application' do
     response.keys.should.include('session_id')
     get '/session_as_json?baz=quux'
     last_response.headers.keys.should.include('Set-Cookie')
-    last_response.headers['Set-Cookie'].should.match(%r(racket.session=))
+    last_response.headers['Set-Cookie'].should.match(/racket.session=/)
     response = JSON.parse(last_response.body)
     response.class.should.equal(Hash)
     response.keys.length.should.equal(3)
@@ -148,14 +149,14 @@ describe 'A default Racket test Application' do
     response.keys.should.include('session_id')
     get '/session_as_json?drop_session'
     last_response.headers.keys.should.include('Set-Cookie')
-    last_response.headers['Set-Cookie'].should.match(%r(racket.session=))
+    last_response.headers['Set-Cookie'].should.match(/racket.session=/)
     response = JSON.parse(last_response.body)
     response.class.should.equal(Hash)
     response.keys.should.be.empty
     get '/session_strings'
     response = JSON.parse(last_response.body)
     response.length.should.equal(3)
-    response.each { |elem| elem.should.match(%r(Racket::Session)) }
+    response.each { |elem| elem.should.match(/Racket::Session/) }
   end
 
   it 'should be able to build paths correctly' do
@@ -166,7 +167,7 @@ describe 'A default Racket test Application' do
   end
 
   it 'should handle GET parameters correctly' do
-    get '/sub2/get_some_data/?data1=foo&data3=bar'
+    get '/sub2/some_get_data/?data1=foo&data3=bar'
     last_response.status.should.equal(200)
     response = JSON.parse(last_response.body, symbolize_names: true)
     response.class.should.equal(Hash)
@@ -177,7 +178,7 @@ describe 'A default Racket test Application' do
   end
 
   it 'should handle POST parameters correctly' do
-    post '/sub2/post_some_data', { data1: 'foo', data3: 'bar' }
+    post '/sub2/some_post_data', data1: 'foo', data3: 'bar'
     last_response.status.should.equal(200)
     response = JSON.parse(last_response.body, symbolize_names: true)
     response.class.should.equal(Hash)
@@ -200,5 +201,4 @@ describe 'A default Racket test Application' do
     last_response.headers['Content-Type'].should.equal('text/plain')
     last_response.body.should.equal('500 Internal Server Error')
   end
-
 end

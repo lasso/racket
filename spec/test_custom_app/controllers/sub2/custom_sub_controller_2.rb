@@ -1,3 +1,4 @@
+# Custom sub controller 2
 class CustomSubController2 < Racket::Controller
   def index
     "#{self.class}::#{__method__}"

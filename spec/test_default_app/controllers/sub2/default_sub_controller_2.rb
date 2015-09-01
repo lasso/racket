@@ -1,3 +1,4 @@
+# Default sub controller 2
 class DefaultSubController2 < Racket::Controller
   def index
     "#{self.class}::#{__method__}"
@@ -11,7 +12,7 @@ class DefaultSubController2 < Racket::Controller
     racket.params.to_json
   end
 
-  def get_some_data
+  def some_get_data
     data = {}
     [:data1, :data2, :data3].each do |d|
       data[d] = request.get(d)
@@ -19,7 +20,7 @@ class DefaultSubController2 < Racket::Controller
     data.to_json
   end
 
-  def post_some_data
+  def some_post_data
     data = {}
     [:data1, :data2, :data3].each do |d|
       data[d] = request.post(d)

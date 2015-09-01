@@ -28,12 +28,7 @@ module Racket
       # @return [Array]
       def send_file(file, options = {})
         file = Utils.build_path(file)
-        # Respond with a 404 Not Found if the file cannot be read.
-        respond!(
-          404,
-          { 'Content-Type' => 'text/plain' },
-          Rack::Utils::HTTP_STATUS_CODES[404]
-        ) unless Utils.file_readable?(file)
+        _send_file_check_file_readable(file)
         headers = {}
         mime_type = options.fetch(:mime_type, nil)
         # Calculate MIME type if it was not already specified.
@@ -41,14 +36,27 @@ module Racket
         headers['Content-Type'] = mime_type
         # Set Content-Disposition (and a file name) if the file should be downloaded
         # instead of displayed inline.
-        if options.fetch(:download, false)
-          filename = options.fetch(:filename, nil).to_s
-          headers['Content-Disposition'] = 'attachment'
-          headers['Content-Disposition'] << format('; filename="%s"', filename) unless
-            filename.empty?
-        end
+        _send_file_set_content_disposition(options, headers)
         # Send response
         respond!(200, headers, ::File.read(file))
+      end
+
+      private
+
+      def _send_file_check_file_readable(file)
+        # Respond with a 404 Not Found if the file cannot be read.
+        respond!(
+          404,
+          { 'Content-Type' => 'text/plain' },
+          Rack::Utils::HTTP_STATUS_CODES[404]
+        ) unless Utils.file_readable?(file)
+      end
+
+      def _send_file_set_content_disposition(options, headers)
+        return unless options.fetch(:download, false)
+        filename = options.fetch(:filename, nil).to_s
+        headers['Content-Disposition'] = 'attachment'
+        headers['Content-Disposition'] << format('; filename="%s"', filename) unless filename.empty?
       end
     end
   end

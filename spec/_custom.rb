@@ -50,14 +50,14 @@ describe 'A custom Racket test Application' do
     last_response.headers.key?('X-Hook-Action').should.equal(true)
     last_response.headers['X-Hook-Action'].should.equal('run')
     response = JSON.parse(last_response.body)
-    response.should.equal(["Data added in before block", "Data added in action"])
+    response.should.equal(['Data added in before block', 'Data added in action'])
   end
 
   it 'should let Rack::ShowExceptions handle the error' do
     get '/sub1/epic_fail'
     last_response.status.should.equal(500)
     last_response.headers['Content-Type'].should.equal('text/plain')
-    last_response.body.should.match(%r(^RuntimeError: Epic fail!))
+    last_response.body.should.match(/^RuntimeError: Epic fail!/)
   end
 
   it 'should be able to render custom files' do
@@ -104,7 +104,7 @@ describe 'A custom Racket test Application' do
     last_response.status.should.equal(404)
     last_response.headers['Content-Type'].should.equal('text/plain')
     last_response.headers.key?('Content-Disposition').should.equal(false)
-    last_response.body.should.equal("Not Found")
+    last_response.body.should.equal('Not Found')
   end
 
   it 'should be able to handle dynamic layouts and views' do

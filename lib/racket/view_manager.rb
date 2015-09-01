@@ -21,7 +21,6 @@ require 'tilt'
 module Racket
   # Handles rendering in Racket applications.
   class ViewManager
-
     attr_reader :layout_cache
     attr_reader :view_cache
 

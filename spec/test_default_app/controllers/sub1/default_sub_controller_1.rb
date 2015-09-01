@@ -1,3 +1,4 @@
+# Default sub controller 1
 class DefaultSubController1 < Racket::Controller
   def index
     "#{self.class}::#{__method__}"

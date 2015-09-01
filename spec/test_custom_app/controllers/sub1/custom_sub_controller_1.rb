@@ -1,3 +1,4 @@
+# Custom sub controller 1
 class CustomSubController1 < Racket::Controller
   helper :file
 

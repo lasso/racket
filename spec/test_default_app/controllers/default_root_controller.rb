@@ -1,5 +1,6 @@
 require 'json'
 
+# Default root controller
 class DefaultRootController < Racket::Controller
   def index
     "#{self.class}::#{__method__}"
