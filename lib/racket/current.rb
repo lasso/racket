@@ -35,17 +35,25 @@ module Racket
     # @return [Module] A module encapsulating all state relating to the current request
     def self.init(env, klass, action, params)
       klass.helper if klass.get_option(:helpers).nil? # Makes sure default helpers are loaded.
-      racket = State.new(action, nil, params)
-      request = Request.new(env)
-      response = Response.new
-      session = Session.new(env['rack.session']) if env.key?('rack.session')
+      properties = init_properties(action, params, env)
       Module.new do
         klass.get_option(:helpers).each_value { |helper| include helper }
-        define_method(:racket) { racket }
-        define_method(:request) { request }
-        define_method(:response) { response }
-        define_method(:session) { session } if env.key?('rack.session')
+        properties.each_pair { |key, value| define_method(key) { value } }
       end
     end
+
+    def self.init_properties(action, params, env)
+      properties =
+        {
+          racket: State.new(action, nil, params),
+          request: Request.new(env),
+          response: Response.new
+        }
+      session = env.fetch('rack.session', nil)
+      properties[:session] = Session.new(session) if session
+      properties
+    end
+
+    private_class_method :init_properties
   end
 end
