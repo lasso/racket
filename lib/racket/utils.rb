@@ -43,9 +43,7 @@ module Racket
         Module.new do
           (class << self; self; end).instance_eval do
             define_method(:===) do |error|
-              errors.each do |e|
-                return true if error.class <= e
-              end && false
+              errors.any? { |e| error.class <= e }
             end
           end
         end

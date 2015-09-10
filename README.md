@@ -30,7 +30,7 @@ Have a look in the `spec` directory. The code base have tests covering 100 per c
 - ruby 2.1.7
 - ruby 2.2.3
 - jruby 1.7 (1.9 mode only)
-- jruby 9.0.0.0
+- jruby 9.0.1.0
 - rbx-2 (latest version)
 
 I am using [bacon](https://github.com/chneukirchen/bacon) and [rack-test](https://github.com/brynary/rack-test) for testing. Run the tests by typing `rake test`in the root directory. Code coverage reports are provided by [simplecov](https://rubygems.org/gems/simplecov). After the tests have run the an HTML report can be found in the `coverage` directory.
