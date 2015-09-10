@@ -1,6 +1,6 @@
 # Racket - The noisy Rack MVC framework
 
-[![Build Status](https://travis-ci.org/lasso/racket.svg?branch=master)](https://travis-ci.org/lasso/racket)&nbsp;&nbsp;&nbsp;&nbsp;[![codecov.io](https://codecov.io/github/lasso/racket/coverage.svg?branch=master)](https://codecov.io/github/lasso/racket?branch=master)&nbsp;&nbsp;&nbsp;&nbsp;[![Gem Version](https://badge.fury.io/rb/racket-mvc.svg)](http://badge.fury.io/rb/racket-mvc)
+[![Build Status](https://travis-ci.org/lasso/racket.svg?branch=master)](https://travis-ci.org/lasso/racket)&nbsp;&nbsp;&nbsp;&nbsp;[![Code Climate](https://codeclimate.com/github/lasso/racket/badges/gpa.svg)](https://codeclimate.com/github/lasso/racket)&nbsp;&nbsp;&nbsp;&nbsp;[![codecov.io](https://codecov.io/github/lasso/racket/coverage.svg?branch=master)](https://codecov.io/github/lasso/racket?branch=master)&nbsp;&nbsp;&nbsp;&nbsp;[![Gem Version](https://badge.fury.io/rb/racket-mvc.svg)](http://badge.fury.io/rb/racket-mvc)
 
 ## Say what?
 Yes. It is yet another framework built on rack. Using MVC. Doing silly stuff while you look the other way.
