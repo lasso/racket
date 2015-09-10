@@ -24,24 +24,17 @@ module Racket
       helper_modules = {}
       helpers.each do |helper|
         helper_module = helper.to_s.split('_').collect(&:capitalize).join.to_sym
-        begin
-          begin
-            require "racket/helpers/#{helper}"
-          rescue LoadError
-            if helper_dir
-              begin
-                require Utils.build_path(helper_dir, helper)
-              rescue LoadError
-              end
-            end
-          end
+        Utils.run_block(NameError) do
+          Utils.run_block(LoadError) { require "racket/helpers/#{helper}" } ||
+            (helper_dir &&
+              Utils.run_block(LoadError) { require Utils.build_path(helper_dir, helper) }
+            )
           helper_modules[helper] = Racket::Helpers.const_get(helper_module)
           Application.inform_dev("Added helper module #{helper.inspect} to class #{self}.")
-        rescue NameError
+        end ||
           Application.inform_dev(
             "Failed to add helper module #{helper.inspect} to class #{self}.", :warn
           )
-        end
       end
       helper_modules
     end

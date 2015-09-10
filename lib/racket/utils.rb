@@ -19,6 +19,41 @@
 module Racket
   # Collects utilities needed by different objects in Racket.
   class Utils
+    # Handles exceptions dynamically
+    class ExceptionHandler
+      # Runs a block.
+      # If no exceptions are raised, this method returns true.
+      # If any of the provided error types are raised, this method returns false.
+      # If any other exception is raised, this method will just forward the exception.
+      #
+      # @param [Array] errors
+      # @return [true|flase]
+      def self.run_block(errors)
+        fail 'Need a block' unless block_given?
+        begin
+          yield
+          true
+        rescue boolean_module(errors)
+          false
+        end
+      end
+
+      # Returns an anonymous module that can be used to rescue exceptions dynamically.
+      def self.boolean_module(errors)
+        Module.new do
+          (class << self; self; end).instance_eval do
+            define_method(:===) do |error|
+              errors.each do |e|
+                return true if error.class <= e
+              end && false
+            end
+          end
+        end
+      end
+
+      private_class_method :boolean_module
+    end
+
     # Builds and returns a path in the file system from the provided arguments. The first element
     # in the argument list can be either absolute or relative, all other arguments must be relative,
     # otherwise they will be removed from the final path.
@@ -49,6 +84,17 @@ module Racket
     def self.file_readable?(path)
       pathname = Pathname.new(path)
       pathname.exist? && pathname.file? && pathname.readable?
+    end
+
+    # Runs a block.
+    # If no exceptions are raised, this method returns true.
+    # If any of the provided error types are raised, this method returns false.
+    # If any other exception is raised, this method will just forward the exception.
+    #
+    # @param [Array] errors
+    # @return [true|flase]
+    def self.run_block(*errors, &block)
+      ExceptionHandler.run_block(errors, &block)
     end
   end
 end
