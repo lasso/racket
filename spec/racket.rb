@@ -11,8 +11,9 @@ if ENV['CI'] == 'true'
   SimpleCov.formatter = SimpleCov::Formatter::Codecov
 end
 
-TEST_DEFAULT_APP_DIR = File.absolute_path(File.join(File.dirname(__FILE__), 'test_default_app'))
-TEST_CUSTOM_APP_DIR = File.absolute_path(File.join(File.dirname(__FILE__), 'test_custom_app'))
+TEST_DIR = File.absolute_path(File.dirname(__FILE__))
+TEST_DEFAULT_APP_DIR = File.join(TEST_DIR, 'test_default_app')
+TEST_CUSTOM_APP_DIR = File.join(TEST_DIR, 'test_custom_app')
 
 require 'racket'
 
@@ -22,9 +23,9 @@ require 'racket/helpers/file.rb'
 require 'rack/test'
 require 'bacon'
 
-require_relative '_request.rb'
+require File.join(TEST_DIR, '_request.rb')
 
-Dir.chdir(TEST_DEFAULT_APP_DIR) { require_relative '_default.rb' }
-Dir.chdir(TEST_CUSTOM_APP_DIR) { require_relative '_custom.rb' }
+Dir.chdir(TEST_DEFAULT_APP_DIR) { require File.join(TEST_DIR, '_default.rb') }
+Dir.chdir(TEST_CUSTOM_APP_DIR) { require File.join(TEST_DIR, '_custom.rb') }
 
-require_relative '_invalid.rb'
+require File.join(TEST_DIR, '_invalid.rb')
