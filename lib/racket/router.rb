@@ -54,8 +54,7 @@ module Racket
     # @param [Array] params
     # @return [String]
     def get_route(controller_class, action, params)
-      fail "Cannot find controller #{controller_class}" unless
-        @routes.key?(controller_class)
+      fail "Cannot find controller #{controller_class}" unless @routes.key?(controller_class)
       params.flatten!
       route = ''
       route << @routes[controller_class]

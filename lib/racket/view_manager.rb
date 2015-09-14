@@ -76,6 +76,26 @@ module Racket
       proc.call(*proc_args).to_s
     end
 
+    # Returns a cached template. If the template has not been cached yet, this method will run a
+    # lookup against the provided parameters.
+    #
+    # @param [String] path
+    # @param [Racket::Controller] controller
+    # @param [Symbol] type
+    def ensure_in_cache(path, controller, type)
+      store = instance_variable_get("@#{type}_cache".to_sym)
+      return store[path] if store.key?(path)
+      base_dir = instance_variable_get("@#{type}_base_dir".to_sym)
+      default_template = controller.controller_option("default_#{type}".to_sym)
+      template = lookup_template(base_dir, path)
+      template =
+        lookup_default_template(base_dir, File.dirname(path), default_template) unless template
+      Application.inform_dev(
+        "Using #{type} #{template.inspect} for #{controller.class}.#{controller.racket.action}."
+      )
+      store[path] = template
+    end
+
     # Tries to locate a layout matching +path+ in the file system and returns the path if a
     # matching file is found. If no matching file is found, +nil+ is returned. The result is cached,
     # meaning that the filesystem lookup for a specific path will only happen once.
@@ -84,18 +104,7 @@ module Racket
     # @param [Racket::Controller] controller
     # @return [String|nil]
     def get_layout(path, controller)
-      unless @layout_cache.key?(path)
-        layout = lookup_template(@layout_base_dir, path)
-        layout =
-          lookup_default_template(
-            @layout_base_dir, File.dirname(path), controller.controller_option(:default_layout)
-          ) unless layout
-        Application.inform_dev(
-          "Using layout #{layout.inspect} for #{controller.class}.#{controller.racket.action}."
-        )
-        @layout_cache[path] = layout
-      end
-      layout = @layout_cache[path]
+      layout = ensure_in_cache(path, controller, :layout)
       if layout.is_a?(Proc)
         layout =
           lookup_template(
@@ -114,18 +123,7 @@ module Racket
     # @param [Racket::Controller] controller
     # @return [String|nil]
     def get_view(path, controller)
-      unless @view_cache.key?(path)
-        view = lookup_template(@view_base_dir, path)
-        view =
-          lookup_default_template(
-            @view_base_dir, File.dirname(path), controller.controller_option(:default_view)
-          ) unless view
-        Application.inform_dev(
-          "Using view #{view.inspect} for #{controller.class}.#{controller.racket.action}."
-        )
-        @view_cache[path] = view
-      end
-      view = @view_cache[path]
+      view = ensure_in_cache(path, controller, :view)
       if view.is_a?(Proc)
         view =
           lookup_template(

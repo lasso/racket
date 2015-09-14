@@ -31,8 +31,7 @@ module Racket
       def self.run_block(errors)
         fail 'Need a block' unless block_given?
         begin
-          yield
-          true
+          true.tap { yield }
         rescue boolean_module(errors)
           false
         end
