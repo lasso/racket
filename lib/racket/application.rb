@@ -141,7 +141,6 @@ module Racket
         end
       end
       @options.delete(:last_added_controller)
-      p @router.routes
       inform_dev('Done loading controllers.') && nil
     end
 

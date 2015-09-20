@@ -118,4 +118,15 @@ describe 'A custom Racket test Application' do
     last_response.status.should.equal(200)
     last_response.body.should.equal("LAYOUT: default: BAZ\n\n")
   end
+
+  it 'should handle changes to global settings' do
+    app.options.default_content_type.should.equal('text/html')
+    app.options.get(:default_content_type).should.equal('text/html')
+    app.options.set(:default_content_type, 'text/plain')
+    app.options.default_content_type.should.equal('text/plain')
+    app.options.get(:default_content_type).should.equal('text/plain')
+    app.options.set(:default_content_type, 'text/html')
+    app.options.default_content_type.should.equal('text/html')
+    app.options.get(:default_content_type).should.equal('text/html')
+  end
 end

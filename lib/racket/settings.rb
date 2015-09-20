@@ -32,73 +32,144 @@ module Racket
       @custom = {}
       @root_dir = Utils.build_path(Dir.pwd)
       overrides.each_pair do |key, val|
-        next if key.to_sym == :root_dir
         send("#{key}=", val)
       end
     end
 
+    # Returns the controller directory associated with the application.
+    #
+    # @return [String|nil]
     def controller_dir
-      Utils.build_path(@controller_dir ||= Utils.build_path(@root_dir, 'controllers'))
+      @controller_dir = Utils.build_path(@root_dir, 'controllers') unless defined?(@controller_dir)
+      Utils.build_path(@controller_dir)
     end
 
+    # Returns a settings value associated with the application. Both standard and custom
+    # settings are searched. If the key cannot be found, a default value is returned.
+    #
+    # @param [Symbol] key
+    # @param [Object] default
+    # @return [Object]
     def get(key, default = nil)
+      meth = key.to_sym
+      return send(meth) if respond_to?(meth)
       @custom.fetch(key, default)
     end
 
+    # Sets/updates a setting in the application.
+    #
+    # @param [Symbol] key
+    # @param [Object] value
+    # @return [nil]
     def set(key, value)
-      @custom[key] = value
+      meth = "#{key}=".to_sym
+      if respond_to?(meth)
+        send(meth, value)
+      else
+        @custom[key] = value
+      end
+      nil
     end
 
+    # Deletes a setting associated with the application.
+    #
+    # @param [Symbol] key
+    # @return [nil]
     def delete(key)
-      @custom.delete(key)
+      fail InvalidArgumentException,
+           "Cannot delete standard setting #{key}" if respond_to?(key.to_sym)
+      @custom.delete(key) && nil
     end
 
+    # Returns the default action for controllers.
+    #
+    # @return [Symbol|nil]
     def default_action
-      @default_action ||= :index
+      @default_action = :index unless defined?(@default_action)
+      @default_action
     end
 
+    # Returns the default content for a controller.
+    #
+    # @return [String]
     def default_content_type
       @default_content_type ||= 'text/html'
     end
 
+    # Returns a list of default controller helpers.
+    #
+    # @return [Array]
     def default_controller_helpers
       @default_controller_helpers ||= [:routing, :view]
     end
 
+    # Returns the default layout used for controllers.
+    #
+    # @return [String|Symbol|nil]
     def default_layout
-      @default_layout ||= nil
+      @default_layout = nil unless defined?(@default_layout)
+      @default_layout
     end
 
+    # Returns the default view used for controllers.
+    #
+    # @return [String|Symbol|nil]
     def default_view
-      @default_view ||= nil
+      @default_view = nil unless defined?(@default_view)
+      @default_view
     end
 
+    # Returns the helper directory used by the application.
+    #
+    # @return [String|nil]
     def helper_dir
-      Utils.build_path(@helper_dir ||= Utils.build_path(@root_dir, 'helpers'))
+      @helper_dir = Utils.build_path(@root_dir, 'helpers') unless defined?(@helper_dir)
+      Utils.build_path(@helper_dir)
     end
 
+    # Returns the layout directory used by the application.
+    #
+    # @return [String|nil]
     def layout_dir
-      Utils.build_path(@layout_dir ||= Utils.build_path(@root_dir, 'layouts'))
+      @layout_dir = Utils.build_path(@root_dir, 'layouts') unless defined?(@layout_dir)
+      Utils.build_path(@layout_dir)
     end
 
+    # Returns the logger used by the application.
+    #
+    # @return [Object]
     def logger
-      @logger ||= Logger.new($stdout)
+      @logger = Logger.new($stdout) unless defined?(@logger)
+      @logger
     end
 
+    # Returns the middleware used by the application.
+    #
+    # @return [Array]
     def middleware
       @middleware ||= []
     end
 
+    # Returns the the mode the application is running in.
+    #
+    # @return [Symbol]
     def mode
       @mode ||= :live
     end
 
+    # Returns the public directory used by the application.
+    #
+    # @return [String|nil]
     def public_dir
-      Utils.build_path(@public_dir ||= Utils.build_path(@root_dir, 'public'))
+      @public_dir = Utils.build_path(@root_dir, 'public') unless defined?(@public_dir)
+      Utils.build_path(@public_dir)
     end
 
+    # Returns the session handlers used by the application.
+    #
+    # @return [Array|nil]
     def session_handler
-      @session_handler ||=
+      @session_handler =
         [
           Rack::Session::Cookie,
           {
@@ -106,11 +177,16 @@ module Racket
             old_secret: SecureRandom.hex(16),
             secret: SecureRandom.hex(16)
           }
-        ]
+        ] unless defined?(@session_handler)
+      @session_handler
     end
 
+    # Returns the view directory used by the application.
+    #
+    # @return [String|nil]
     def view_dir
-      Utils.build_path(@view_dir ||= Utils.build_path(@root_dir, 'views'))
+      @view_dir = Utils.build_path(@root_dir, 'views') unless defined?(@view_dir)
+      Utils.build_path(@view_dir)
     end
   end
 end
