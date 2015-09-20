@@ -101,27 +101,27 @@ describe 'A default Racket test Application' do
   end
 
   it 'should be able to log messages to everybody' do
-    original_logger = app.options[:logger]
+    original_logger = app.options.logger
     sio = StringIO.new
-    app.options[:logger] = Logger.new(sio)
+    app.options.logger = Logger.new(sio)
     app.inform_all('Informational message')
     sio.string.should.match(/Informational message/)
-    app.options[:logger] = original_logger
+    app.options.logger = original_logger
   end
 
   it 'should be able to log messages to developer' do
-    original_logger = app.options[:logger]
-    original_mode = app.options[:mode]
+    original_logger = app.options.logger
+    original_mode = app.options.mode
     sio = StringIO.new
-    app.options[:logger] = Logger.new(sio)
-    app.options[:mode] = :live
+    app.options.logger = Logger.new(sio)
+    app.options.mode = :live
     app.inform_dev('Development message')
     sio.string.should.be.empty
-    app.options[:mode] = :dev
+    app.options.mode = :dev
     app.inform_dev('Hey, listen up!')
     sio.string.should.match(/Hey, listen up!/)
-    app.options[:mode] = original_mode
-    app.options[:logger] = original_logger
+    app.options.mode = original_mode
+    app.options.logger = original_logger
   end
 
   it 'should be able to set and clear session variables' do

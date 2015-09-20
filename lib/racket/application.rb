@@ -16,8 +16,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Racket.  If not, see <http://www.gnu.org/licenses/>.
 
-require 'logger'
-
 module Racket
   # Racket main application class.
   class Application
@@ -29,13 +27,13 @@ module Racket
     # @return [Rack::Builder]
     def self.application
       return @application if @application
-      @options[:middleware].unshift(@options[:session_handler]) if @options[:session_handler]
-      @options[:middleware].unshift([Rack::ContentType, @options[:default_content_type]]) if
-        @options[:default_content_type]
-      @options[:middleware].unshift([Rack::ShowExceptions]) if dev_mode?
+      @options.middleware.unshift(@options.session_handler) if @options.session_handler
+      @options.middleware.unshift([Rack::ContentType, @options.default_content_type]) if
+        @options.default_content_type
+      @options.middleware.unshift([Rack::ShowExceptions]) if dev_mode?
       instance = self
       @application = Rack::Builder.new do
-        instance.options[:middleware].each do |middleware|
+        instance.options.middleware.each do |middleware|
           klass, opts = middleware
           instance.inform_dev("Loading middleware #{klass} with options #{opts.inspect}.")
           use(*middleware)
@@ -56,42 +54,11 @@ module Racket
       application.call(env.dup)
     end
 
-    # Returns a list of default options for Racket::Application.
-    #
-    # @return [Hash]
-    def self.default_options
-      root_dir = Utils.build_path(Dir.pwd)
-      {
-        controller_dir: Utils.build_path(root_dir, 'controllers'),
-        default_action: :index,
-        default_content_type: 'text/html',
-        default_controller_helpers: [:routing, :view],
-        default_layout: nil,
-        default_view: nil,
-        helper_dir: Utils.build_path(root_dir, 'helpers'),
-        layout_dir: Utils.build_path(root_dir, 'layouts'),
-        logger: Logger.new($stdout),
-        middleware: [],
-        mode: :live,
-        public_dir: Utils.build_path(root_dir, 'public'),
-        root_dir: root_dir,
-        session_handler: [
-          Rack::Session::Cookie,
-          {
-            key: 'racket.session',
-            old_secret: SecureRandom.hex(16),
-            secret: SecureRandom.hex(16)
-          }
-        ],
-        view_dir: Utils.build_path(root_dir, 'views')
-      }
-    end
-
     # Returns whether the application runs in dev mode.
     #
     # @return [true|false]
     def self.dev_mode?
-      @options[:mode] == :dev
+      @options.mode == :dev
     end
 
     # Returns a route to the specified controller/action/parameter combination.
@@ -112,22 +79,13 @@ module Racket
       init({}, reboot)
     end
 
-    # Expands all paths defined in the application, but only if it is set to something usable.
-    #
-    # @return [nil]
-    def self.expand_paths
-      [:controller_dir, :helper_dir, :layout_dir, :public_dir, :view_dir].each do |dir|
-        @options[dir] = Utils.build_path(@options[dir]) if @options[dir]
-      end && nil
-    end
-
     # Writes a message to the logger if there is one present.
     #
     # @param [String] message
     # @param [Symbol] level
     # @return nil
     def self.inform(message, level)
-      (@options[:logger].send(level, message) if @options[:logger]) && nil
+      (@options.logger.send(level, message) if @options.logger) && nil
     end
 
     # Sends a message to the logger.
@@ -156,8 +114,7 @@ module Racket
     def self.init(options, reboot)
       instance_variables.each { |ivar| instance_variable_set(ivar, nil) } if reboot
       fail 'Application has already been initialized!' if @options
-      @options = default_options.merge(options)
-      expand_paths
+      @options = Settings.new(options)
       setup_static_server
       reload
       self
@@ -168,24 +125,23 @@ module Racket
     # @return [nil]
     def self.load_controllers
       inform_dev('Loading controllers.')
-      @options[:last_added_controller] = []
+      @options.set(:last_added_controller, [])
       @controller = nil
-      Dir.chdir(@options[:controller_dir]) do
+      Dir.chdir(@options.controller_dir) do
         files = Pathname.glob(File.join('**', '*.rb')).map!(&:to_s)
         # Sort by longest path so that the longer paths gets matched first
         # HttpRouter claims to be doing this already, but this "hack" is needed in order
         # for the router to work.
-        files.sort! do |a, b|
-          b.split('/').length <=> a.split('/').length
-        end
+        files.sort! { |a, b| b.split('/').length <=> a.split('/').length }
         files.each do |file|
           ::Kernel.require File.expand_path(file)
           path = "/#{File.dirname(file)}"
           path = '' if path == '/.'
-          @router.map(path, @options[:last_added_controller].pop)
+          @router.map(path, @options.get(:last_added_controller).pop)
         end
       end
       @options.delete(:last_added_controller)
+      p @router.routes
       inform_dev('Done loading controllers.') && nil
     end
 
@@ -242,7 +198,7 @@ module Racket
     # @return [nil]
     def self.setup_static_server
       @static_server = nil
-      return nil unless (public_dir = @options[:public_dir]) && Utils.dir_readable?(public_dir)
+      return nil unless (public_dir = @options.public_dir) && Utils.dir_readable?(public_dir)
       inform_dev("Setting up static server to serve files from #{public_dir}.")
       (@static_server = Rack::File.new(public_dir)) && nil
     end
@@ -260,10 +216,10 @@ module Racket
     #
     # @return [Racket::ViewManager]
     def self.view_manager
-      @view_manager ||= ViewManager.new(@options[:layout_dir], @options[:view_dir])
+      @view_manager ||= ViewManager.new(@options.layout_dir, @options.view_dir)
     end
 
-    private_class_method :application, :default_options, :expand_paths, :inform, :init,
-                         :load_controllers, :setup_routes, :setup_static_server
+    private_class_method :application, :inform, :init, :load_controllers, :setup_routes,
+                         :setup_static_server
   end
 end

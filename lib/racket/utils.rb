@@ -63,7 +63,7 @@ module Racket
       else
         args.map!(&:to_s)
         path = Pathname.new(args.shift)
-        path = Pathname.new(Application.options[:root_dir]).join(path) if path.relative?
+        path = Pathname.new(Application.options.root_dir).join(path) if path.relative?
         args.each do |arg|
           path_part = Pathname.new(arg)
           next unless path_part.relative?

@@ -8,8 +8,8 @@ describe 'A custom Racket test Application' do
   end
 
   it 'should set requested options' do
-    app.options[:default_layout].should.equal('zebra.*')
-    app.options[:view_dir].should.equal(Racket::Utils.build_path('templates'))
+    app.options.default_layout.should.equal('zebra.*')
+    app.options.view_dir.should.equal(Racket::Utils.build_path('templates'))
   end
 
   it 'should be able to get/set options on controller' do

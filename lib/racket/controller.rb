@@ -20,7 +20,7 @@ module Racket
   # Base controller class. Your controllers should inherit this class.
   class Controller
     def self.__load_helpers(helpers)
-      helper_dir = Application.options.fetch(:helper_dir, nil)
+      helper_dir = Application.options.get(:helper_dir, nil)
       helper_modules = {}
       helpers.each do |helper|
         helper_module = helper.to_s.split('_').collect(&:capitalize).join.to_sym
@@ -91,7 +91,7 @@ module Racket
       existing_helpers = get_option(:helpers)
       if existing_helpers.nil?
         # No helpers has been loaded yet. Load the default helpers.
-        existing_helpers = Application.options.fetch(:default_controller_helpers, [])
+        existing_helpers = Application.options.get(:default_controller_helpers, [])
         helper_modules.merge!(__load_helpers(existing_helpers))
       end
       # Load new helpers
@@ -103,7 +103,7 @@ module Racket
 
     # :nodoc:
     def self.inherited(klass)
-      Application.options[:last_added_controller].push(klass)
+      Application.options.get(:last_added_controller).push(klass)
     end
 
     # Returns an option for the current controller class or any of the controller classes
@@ -115,7 +115,7 @@ module Racket
       @options ||= {}
       return @options[key] if @options.key?(key)
       # We are running out of controller options, do one final lookup in Application.options
-      return Application.options.fetch(key, nil) if superclass == Controller
+      return Application.options.get(key, nil) if superclass == Controller
       superclass.get_option(key)
     end
 
