@@ -114,7 +114,7 @@ module Racket
     def self.init(options, reboot)
       instance_variables.each { |ivar| instance_variable_set(ivar, nil) } if reboot
       fail 'Application has already been initialized!' if @options
-      @options = Settings.new(options)
+      @options = Settings::Application.new(options)
       setup_static_server
       reload
       self
@@ -137,7 +137,7 @@ module Racket
           ::Kernel.require File.expand_path(file)
           path = "/#{File.dirname(file)}"
           path = '' if path == '/.'
-          @router.map(path, @options.get(:last_added_controller).pop)
+          @router.map(path, @options.fetch(:last_added_controller).pop)
         end
       end
       @options.delete(:last_added_controller)

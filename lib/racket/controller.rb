@@ -103,7 +103,7 @@ module Racket
 
     # :nodoc:
     def self.inherited(klass)
-      Application.options.get(:last_added_controller).push(klass)
+      Application.options.fetch(:last_added_controller).push(klass)
     end
 
     # Returns an option for the current controller class or any of the controller classes
@@ -115,7 +115,7 @@ module Racket
       @options ||= {}
       return @options[key] if @options.key?(key)
       # We are running out of controller options, do one final lookup in Application.options
-      return Application.options.get(key) if superclass == Controller
+      return Application.options.extended_fetch(key) if superclass == Controller
       superclass.get_option(key)
     end
 

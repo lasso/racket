@@ -26,7 +26,7 @@ require_relative 'racket/request.rb'
 require_relative 'racket/response.rb'
 require_relative 'racket/router.rb'
 require_relative 'racket/session.rb'
-require_relative 'racket/settings.rb'
+require_relative 'racket/settings/application.rb'
 require_relative 'racket/view_manager.rb'
 require_relative 'racket/utils.rb'
 
