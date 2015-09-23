@@ -38,10 +38,10 @@ module Racket
     # @return [Hash]
     def render(controller)
       template_path = get_template_path(controller)
-      view = get_view(template_path, controller)
+      view = get_template(template_path, controller, :view)
       if view
         output = Tilt.new(view).render(controller)
-        layout = get_layout(template_path, controller)
+        layout = get_template(template_path, controller, :layout)
         output = Tilt.new(layout).render(controller) { output } if layout
       else
         output = controller.racket.action_result
@@ -51,12 +51,6 @@ module Racket
     end
 
     private
-
-    def get_template_path(controller)
-      template_path = [Application.get_route(controller.class), controller.racket.action].join('/')
-      template_path = template_path[1..-1] if template_path.start_with?('//')
-      template_path
-    end
 
     # Calls a template proc. Depending on how many parameters the template proc takes, different
     # types of information will be passed to the proc.
@@ -96,42 +90,33 @@ module Racket
       store[path] = template
     end
 
-    # Tries to locate a layout matching +path+ in the file system and returns the path if a
+    # Tries to locate a template matching +path+ in the file system and returns the path if a
     # matching file is found. If no matching file is found, +nil+ is returned. The result is cached,
     # meaning that the filesystem lookup for a specific path will only happen once.
     #
     # @param [String] path
     # @param [Racket::Controller] controller
+    # @param [Symbol] type
     # @return [String|nil]
-    def get_layout(path, controller)
-      layout = ensure_in_cache(path, controller, :layout)
-      if layout.is_a?(Proc)
-        layout =
-          lookup_template(
-            @layout_base_dir,
-            [File.dirname(path), call_template_proc(layout, controller)].join('/')
-          )
-      end
-      layout
+    def get_template(path, controller, type)
+      template = ensure_in_cache(path, controller, type)
+      # If template is a Proc, call it
+      template =
+        lookup_template(
+          instance_variable_get("@#{type}_base_dir".to_sym),
+          [File.dirname(path), call_template_proc(template, controller)].join('/')
+        ) if template.is_a?(Proc)
+      template
     end
 
-    # Tries to locate a view matching +path+ in the file system and returns the path if a
-    # matching file is found. If no matching file is found, +nil+ is returned. The result is cached,
-    # meaning that the filesystem lookup for a specific path will only happen once.
+    # Returns the "url path" that should be used when searching for templates.
     #
-    # @param [String] path
     # @param [Racket::Controller] controller
-    # @return [String|nil]
-    def get_view(path, controller)
-      view = ensure_in_cache(path, controller, :view)
-      if view.is_a?(Proc)
-        view =
-          lookup_template(
-            @view_base_dir,
-            [File.dirname(path), call_template_proc(view, controller)].join('/')
-          )
-      end
-      view
+    # @return [String]
+    def get_template_path(controller)
+      template_path = [Application.get_route(controller.class), controller.racket.action].join('/')
+      template_path = template_path[1..-1] if template_path.start_with?('//')
+      template_path
     end
 
     def lookup_default_template(base_path, path, default)
