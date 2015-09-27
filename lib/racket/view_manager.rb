@@ -80,7 +80,7 @@ module Racket
       store = instance_variable_get("@#{type}_cache".to_sym)
       return store[path] if store.key?(path)
       base_dir = instance_variable_get("@#{type}_base_dir".to_sym)
-      default_template = controller.controller_option("default_#{type}".to_sym)
+      default_template = controller.controller_setting("default_#{type}".to_sym)
       template = lookup_template(base_dir, path)
       template =
         lookup_default_template(base_dir, File.dirname(path), default_template) unless template

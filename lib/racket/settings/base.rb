@@ -62,24 +62,34 @@ module Racket
         @custom.fetch(key, default)
       end
 
+      def key?(key)
+        @custom.key?(key)
+      end
+
       # Sets/updates a custom setting in the application.
       #
       # @param [Symbol] key
       # @param [Object] value
       # @return [nil]
-      def set(key, value)
+      def store(key, value)
         fail ArgumentError,
              "Cannot overwrite standard setting #{key}" if respond_to?("#{key}=".to_sym)
         (@custom[key] = value) && nil
       end
 
-      def self.setting_with_default(symbol, default, writable = true)
+      # Creates a setting with a default value.
+      #
+      # @param [Symbol] symbol
+      # @param [Object] default
+      # @param [true|false] writable
+      # @return [nil]
+      def self.setting(symbol, default = nil, writable = true)
         ivar = "@#{symbol}".to_sym
         define_method symbol do
           instance_variable_set(ivar, default) unless instance_variables.include?(ivar)
           instance_variable_get(ivar)
         end
-        attr_writer(symbol) if writable
+        (attr_writer(symbol) if writable) && nil
       end
     end
   end

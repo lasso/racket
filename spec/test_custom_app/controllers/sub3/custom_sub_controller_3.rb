@@ -1,13 +1,13 @@
 # Custom sub controller 3
 class CustomSubController3 < Racket::Controller
-  set_option(:top_secret, 42)
+  store_setting(:top_secret, 42)
 
   def index
     "#{self.class}::#{__method__}"
   end
 
   def a_secret_place
-    redirect(rs(__method__, controller_option(:top_secret)))
+    redirect(rs(__method__, controller_setting(:top_secret)))
   end
 
   def not_so_secret

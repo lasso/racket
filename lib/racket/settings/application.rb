@@ -24,17 +24,15 @@ module Racket
   module Settings
     # Class for storing application settings.
     class Application < Base
-      attr_reader :root_dir
-
-      setting_with_default(:default_action, :index)
-      setting_with_default(:default_content_type, 'text/html')
-      setting_with_default(:default_controller_helpers, [:routing, :view])
-      setting_with_default(:default_layout, nil)
-      setting_with_default(:default_view, nil)
-      setting_with_default(:logger, Logger.new($stdout))
-      setting_with_default(:middleware, [])
-      setting_with_default(:mode, :live)
-      setting_with_default(
+      setting(:default_action, :index)
+      setting(:default_content_type, 'text/html')
+      setting(:default_controller_helpers, [:routing, :view])
+      setting(:default_layout, nil)
+      setting(:default_view, nil)
+      setting(:logger, Logger.new($stdout))
+      setting(:middleware, [])
+      setting(:mode, :live)
+      setting(
         :session_handler,
         [
           Rack::Session::Cookie,
@@ -45,22 +43,25 @@ module Racket
           }
         ]
       )
+      setting(:root_dir, nil) # Will be set automatically by constructor.
 
       def initialize(defaults = {})
-        @root_dir = Utils.build_path(Dir.pwd)
-        defaults.reject! { |key| key == :root_dir }
+        defaults[:root_dir] = Dir.pwd unless defaults.key?(:root_dir)
         super(defaults)
       end
 
-      # Created a directory setting with a default value
+      # Creates a directory setting with a default value.
+      #
+      # @param [Symbol] symbol
+      # @param [String] directory
+      # @return [nil]
       def self.directory_setting(symbol, directory)
         ivar = "@#{symbol}".to_sym
         define_method symbol do
-          instance_variable_set(ivar, Utils.build_path(directory)) unless
-            instance_variables.include?(ivar)
+          instance_variable_set(ivar, directory) unless instance_variables.include?(ivar)
           Utils.build_path(instance_variable_get(ivar))
         end
-        attr_writer(symbol)
+        attr_writer(symbol) && nil
       end
 
       directory_setting(:controller_dir, 'controllers')

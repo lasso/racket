@@ -19,7 +19,7 @@
 module Racket
   # Racket main application class.
   class Application
-    @options = nil
+    @settings = nil
 
     # Returns the internal application object. When called for the first time this method will use
     # Rack::Builder to build
@@ -27,15 +27,15 @@ module Racket
     # @return [Rack::Builder]
     def self.application
       return @application if @application
-      @options.middleware.unshift(@options.session_handler) if @options.session_handler
-      @options.middleware.unshift([Rack::ContentType, @options.default_content_type]) if
-        @options.default_content_type
-      @options.middleware.unshift([Rack::ShowExceptions]) if dev_mode?
+      @settings.middleware.unshift(@settings.session_handler) if @settings.session_handler
+      @settings.middleware.unshift([Rack::ContentType, @settings.default_content_type]) if
+        @settings.default_content_type
+      @settings.middleware.unshift([Rack::ShowExceptions]) if dev_mode?
       instance = self
       @application = Rack::Builder.new do
-        instance.options.middleware.each do |middleware|
+        instance.settings.middleware.each do |middleware|
           klass, opts = middleware
-          instance.inform_dev("Loading middleware #{klass} with options #{opts.inspect}.")
+          instance.inform_dev("Loading middleware #{klass} with settings #{opts.inspect}.")
           use(*middleware)
         end
         run lambda { |env|
@@ -58,7 +58,7 @@ module Racket
     #
     # @return [true|false]
     def self.dev_mode?
-      @options.mode == :dev
+      @settings.mode == :dev
     end
 
     # Returns a route to the specified controller/action/parameter combination.
@@ -71,7 +71,7 @@ module Racket
       @router.get_route(controller, action, params)
     end
 
-    # Initializes a new Racket::Application object with default options.
+    # Initializes a new Racket::Application object with default settings.
     #
     # @param [true|false] reboot
     # @return [Class]
@@ -85,7 +85,7 @@ module Racket
     # @param [Symbol] level
     # @return nil
     def self.inform(message, level)
-      (@options.logger.send(level, message) if @options.logger) && nil
+      (@settings.logger.send(level, message) if @settings.logger) && nil
     end
 
     # Sends a message to the logger.
@@ -108,13 +108,13 @@ module Racket
 
     # Initializes the Racket application.
     #
-    # @param [Hash] options
+    # @param [Hash] settings
     # @param [true|false] reboot
     # @return [Class]
-    def self.init(options, reboot)
+    def self.init(settings, reboot)
       instance_variables.each { |ivar| instance_variable_set(ivar, nil) } if reboot
-      fail 'Application has already been initialized!' if @options
-      @options = Settings::Application.new(options)
+      fail 'Application has already been initialized!' if @settings
+      @settings = Settings::Application.new(settings)
       setup_static_server
       reload
       self
@@ -125,9 +125,9 @@ module Racket
     # @return [nil]
     def self.load_controllers
       inform_dev('Loading controllers.')
-      @options.set(:last_added_controller, [])
+      @settings.store(:last_added_controller, [])
       @controller = nil
-      Dir.chdir(@options.controller_dir) do
+      Dir.chdir(@settings.controller_dir) do
         files = Pathname.glob(File.join('**', '*.rb')).map!(&:to_s)
         # Sort by longest path so that the longer paths gets matched first
         # HttpRouter claims to be doing this already, but this "hack" is needed in order
@@ -137,18 +137,18 @@ module Racket
           ::Kernel.require File.expand_path(file)
           path = "/#{File.dirname(file)}"
           path = '' if path == '/.'
-          @router.map(path, @options.fetch(:last_added_controller).pop)
+          @router.map(path, @settings.fetch(:last_added_controller).pop)
         end
       end
-      @options.delete(:last_added_controller)
+      @settings.delete(:last_added_controller)
       inform_dev('Done loading controllers.') && nil
     end
 
-    # Returns options for the currently running Racket::Application.
+    # Returns settings for the currently running Racket::Application.
     #
     # @return [Hash]
-    def self.options
-      @options
+    def self.settings
+      @settings
     end
 
     # Reloads the application, making any changes to the controller configuration visible
@@ -197,25 +197,25 @@ module Racket
     # @return [nil]
     def self.setup_static_server
       @static_server = nil
-      return nil unless (public_dir = @options.public_dir) && Utils.dir_readable?(public_dir)
+      return nil unless (public_dir = @settings.public_dir) && Utils.dir_readable?(public_dir)
       inform_dev("Setting up static server to serve files from #{public_dir}.")
       (@static_server = Rack::File.new(public_dir)) && nil
     end
 
-    # Initializes a new Racket::Application object with options specified by +options+.
+    # Initializes a new Racket::Application object with settings specified by +settings+.
     #
-    # @param [Hash] options
+    # @param [Hash] settings
     # @param [true|false] reboot
     # @return [Class]
-    def self.using(options, reboot = false)
-      init(options, reboot)
+    def self.using(settings, reboot = false)
+      init(settings, reboot)
     end
 
     # Returns the view cache of the currently running application.
     #
     # @return [Racket::ViewManager]
     def self.view_manager
-      @view_manager ||= ViewManager.new(@options.layout_dir, @options.view_dir)
+      @view_manager ||= ViewManager.new(@settings.layout_dir, @settings.view_dir)
     end
 
     private_class_method :application, :inform, :init, :load_controllers, :setup_routes,

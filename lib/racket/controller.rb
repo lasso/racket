@@ -20,7 +20,7 @@ module Racket
   # Base controller class. Your controllers should inherit this class.
   class Controller
     def self.__load_helpers(helpers)
-      helper_dir = Application.options.helper_dir
+      helper_dir = Application.settings.helper_dir
       helper_modules = {}
       helpers.each do |helper|
         helper_module = helper.to_s.split('_').collect(&:capitalize).join.to_sym
@@ -51,9 +51,9 @@ module Racket
       key = "#{type}_hooks".to_sym
       meths = public_instance_methods(false)
       meths &= methods.map(&:to_sym) unless methods.empty?
-      hooks = get_option(key) || {}
+      hooks = fetch_setting(key) || {}
       meths.each { |meth| hooks[meth] = blk }
-      set_option(key, hooks)
+      store_setting(key, hooks)
       nil
     end
 
@@ -78,62 +78,63 @@ module Racket
     end
 
     # Adds one or more helpers to the controller. All controllers get some default helpers
-    # (see Application.default_options), but if you have your own helpers you want to load this
+    # (:routing and :view by default), but if you have your own helpers you want to load this
     # is the preferred method.
     #
     # By default Racket will look for your helpers in the helpers directory, but you can specify
-    # another location by setting the helper_dir option.
+    # another location by changing the helper_dir setting.
     #
     # @param [Array] helpers An array of symbols representing classes living in the Racket::Helpers
     #  namespace.
     def self.helper(*helpers)
       helper_modules = {}
-      existing_helpers = get_option(:helpers)
+      existing_helpers = fetch_setting(:helpers)
       if existing_helpers.nil?
         # No helpers has been loaded yet. Load the default helpers.
-        existing_helpers = Application.options.default_controller_helpers
+        existing_helpers = Application.settings.default_controller_helpers
         helper_modules.merge!(__load_helpers(existing_helpers))
       end
       # Load new helpers
       helpers.map!(&:to_sym)
       helpers.reject! { |helper| helper_modules.key?(helper) }
       helper_modules.merge!(__load_helpers(helpers))
-      set_option(:helpers, helper_modules)
+      store_setting(:helpers, helper_modules)
     end
 
     # :nodoc:
     def self.inherited(klass)
-      Application.options.fetch(:last_added_controller).push(klass)
+      Application.settings.fetch(:last_added_controller).push(klass)
     end
 
-    # Returns an option for the current controller class or any of the controller classes
-    # it is inheriting from.
+    # Returns a setting for the current controller class or any of the controller classes
+    # the controller is inheriting from.
     #
-    # @param [Symbol] key The option to retrieve
+    # @param [Symbol] key The setting to retrieve
     # @return [Object]
-    def self.get_option(key)
-      @options ||= {}
-      return @options[key] if @options.key?(key)
-      # We are running out of controller options, do one final lookup in Application.options
-      return Application.options.extended_fetch(key) if superclass == Controller
-      superclass.get_option(key)
+    def self.fetch_setting(key)
+      @settings ||= Settings::Base.new
+      return @settings.fetch(key) if @settings.key?(key)
+      # We are running out of controller settings, do one final lookup in Application.settings
+      return Application.settings.extended_fetch(key) if superclass == Controller
+      superclass.fetch_setting(key)
     end
 
-    # Sets an option for the current controller class.
+    # Creates/updates a setting for the current controller class.
     #
     # @param [Symbol] key
     # @param [Object] value
-    def self.set_option(key, value)
-      @options ||= {}
-      (@options[key] = value) && nil
+    # @return [nil]
+    def self.store_setting(key, value)
+      @settings ||= Settings::Base.new
+      @settings.store(key, value)
     end
 
-    # Returns an option from the current controller class.
+    # Returns a setting for the current controller class.
     #
     # @param [Symbol] key
     # @return
-    def controller_option(key)
-      self.class.get_option(key)
+    def controller_setting(key)
+      self.class.fetch_setting(key)
     end
 
     # Redirects the client. After hooks are run.
@@ -196,7 +197,7 @@ module Racket
     end
 
     def __run_hook(type)
-      hooks = controller_option("#{type}_hooks".to_sym) || {}
+      hooks = controller_setting("#{type}_hooks".to_sym) || {}
       blk = hooks.fetch(racket.action, nil)
       (instance_eval(&blk) if blk) && nil
     end

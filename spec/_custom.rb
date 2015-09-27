@@ -14,9 +14,8 @@ describe 'A custom Racket test Application' do
   end
 
   it 'should set requested options' do
-    app.options.default_layout.should.equal('zebra.*')
-    p app.options.view_dir
-    app.options.view_dir.should.equal(Racket::Utils.build_path('templates'))
+    app.settings.default_layout.should.equal('zebra.*')
+    app.settings.view_dir.should.equal(Racket::Utils.build_path('templates'))
   end
 
   it 'should be able to get/set options on controller' do
@@ -127,18 +126,18 @@ describe 'A custom Racket test Application' do
   end
 
   it 'should handle changes to global settings' do
-    app.options.fetch(:my_custom_secret).should.equal(42)
-    app.options.set(:my_custom_secret, '9Lazy9')
-    app.options.fetch(:my_custom_secret).should.equal('9Lazy9')
-    app.options.delete(:my_custom_secret)
-    app.options.fetch(:my_custom_secret).should.equal(nil)
-    app.options.default_content_type.should.equal('text/html')
-    app.options.extended_fetch(:default_content_type).should.equal('text/html')
-    app.options.default_content_type = 'text/plain'
-    app.options.default_content_type.should.equal('text/plain')
-    app.options.extended_fetch(:default_content_type).should.equal('text/plain')
-    app.options.default_content_type = 'text/html'
-    app.options.default_content_type.should.equal('text/html')
-    app.options.extended_fetch(:default_content_type).should.equal('text/html')
+    app.settings.fetch(:my_custom_secret).should.equal(42)
+    app.settings.store(:my_custom_secret, '9Lazy9')
+    app.settings.fetch(:my_custom_secret).should.equal('9Lazy9')
+    app.settings.delete(:my_custom_secret)
+    app.settings.fetch(:my_custom_secret).should.equal(nil)
+    app.settings.default_content_type.should.equal('text/html')
+    app.settings.extended_fetch(:default_content_type).should.equal('text/html')
+    app.settings.default_content_type = 'text/plain'
+    app.settings.default_content_type.should.equal('text/plain')
+    app.settings.extended_fetch(:default_content_type).should.equal('text/plain')
+    app.settings.default_content_type = 'text/html'
+    app.settings.default_content_type.should.equal('text/html')
+    app.settings.extended_fetch(:default_content_type).should.equal('text/html')
   end
 end
