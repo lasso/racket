@@ -21,16 +21,24 @@ module Racket
   class Application
     @settings = nil
 
+    class << self
+      attr_reader :router, :settings
+    end
+
     # Returns the internal application object. When called for the first time this method will use
-    # Rack::Builder to build
+    # Rack::Builder to construct the application.
     #
     # @return [Rack::Builder]
     def self.application
       return @application if @application
-      @settings.middleware.unshift(@settings.session_handler) if @settings.session_handler
-      @settings.middleware.unshift([Rack::ContentType, @settings.default_content_type]) if
-        @settings.default_content_type
-      @settings.middleware.unshift([Rack::ShowExceptions]) if dev_mode?
+      load_middleware
+      build_application
+    end
+
+    # Builds an application from a Rack::Builder object.
+    #
+    # @return [Rack::Builder]
+    def self.build_application
       instance = self
       @application = Rack::Builder.new do
         instance.settings.middleware.each do |middleware|
@@ -144,11 +152,14 @@ module Racket
       inform_dev('Done loading controllers.') && nil
     end
 
-    # Returns settings for the currently running Racket::Application.
+    # Loads some middleware (based on settings).
     #
-    # @return [Hash]
-    def self.settings
-      @settings
+    # @return nil
+    def self.load_middleware
+      @settings.middleware.unshift(@settings.session_handler) if @settings.session_handler
+      @settings.middleware.unshift([Rack::ContentType, @settings.default_content_type]) if
+        @settings.default_content_type
+      (@settings.middleware.unshift([Rack::ShowExceptions]) if dev_mode?) && nil
     end
 
     # Reloads the application, making any changes to the controller configuration visible
@@ -166,13 +177,6 @@ module Racket
     # @return [nil]
     def self.require(*args)
       (::Kernel.require Utils.build_path(*args)) && nil
-    end
-
-    # Returns the router associated with the currenntly running Racket::Application.
-    #
-    # @return [Racket::Router]
-    def self.router
-      @router
     end
 
     # Serves a static file (if Racket is configured to serve static files).
@@ -218,7 +222,7 @@ module Racket
       @view_manager ||= ViewManager.new(@settings.layout_dir, @settings.view_dir)
     end
 
-    private_class_method :application, :inform, :init, :load_controllers, :setup_routes,
-                         :setup_static_server
+    private_class_method :application, :build_application, :inform, :init, :load_controllers,
+                         :load_middleware, :setup_routes, :setup_static_server
   end
 end
