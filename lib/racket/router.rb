@@ -105,7 +105,7 @@ module Racket
         # Some controller is claiming to be responsible for the route
         target_klass = matching_routes.first.first.route.dest
         params = matching_routes.first.first.param_values.first.reject(&:empty?)
-        action = params.empty? ? target_klass.fetch_setting(:default_action) : params.shift.to_sym
+        action = params.empty? ? target_klass.settings.fetch(:default_action) : params.shift.to_sym
 
         # Check if action is available on target
         return render_error(404) unless @action_cache[target_klass].include?(action)

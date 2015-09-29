@@ -51,9 +51,9 @@ module Racket
       key = "#{type}_hooks".to_sym
       meths = public_instance_methods(false)
       meths &= methods.map(&:to_sym) unless methods.empty?
-      hooks = fetch_setting(key) || {}
+      hooks = settings.fetch(key, {})
       meths.each { |meth| hooks[meth] = blk }
-      store_setting(key, hooks)
+      setting(key, hooks)
       nil
     end
 
@@ -88,7 +88,7 @@ module Racket
     #  namespace.
     def self.helper(*helpers)
       helper_modules = {}
-      existing_helpers = fetch_setting(:helpers)
+      existing_helpers = settings.fetch(:helpers)
       if existing_helpers.nil?
         # No helpers has been loaded yet. Load the default helpers.
         existing_helpers = Application.settings.default_controller_helpers
@@ -98,7 +98,7 @@ module Racket
       helpers.map!(&:to_sym)
       helpers.reject! { |helper| helper_modules.key?(helper) }
       helper_modules.merge!(__load_helpers(helpers))
-      store_setting(:helpers, helper_modules)
+      setting(:helpers, helper_modules)
     end
 
     # :nodoc:
@@ -106,17 +106,11 @@ module Racket
       Application.settings.fetch(:last_added_controller).push(klass)
     end
 
-    # Returns a setting for the current controller class or any of the controller classes
-    # the controller is inheriting from.
+    # Returns the settings associated with the current controller class.
     #
-    # @param [Symbol] key The setting to retrieve
-    # @return [Object]
-    def self.fetch_setting(key)
-      @settings ||= Settings::Base.new
-      return @settings.fetch(key) if @settings.key?(key)
-      # We are running out of controller settings, do one final lookup in Application.settings
-      return Application.settings.fetch(key) if superclass == Controller
-      superclass.fetch_setting(key)
+    # @return [Racket::Settings::Controller]
+    def self.settings
+      @settings ||= Settings::Controller.new(self)
     end
 
     # Creates/updates a setting for the current controller class.
@@ -124,17 +118,15 @@ module Racket
     # @param [Symbol] key
     # @param [Object] value
     # @return [nil]
-    def self.store_setting(key, value)
-      @settings ||= Settings::Base.new
-      @settings.store(key, value)
+    def self.setting(key, value)
+      settings.store(key, value)
     end
 
-    # Returns a setting for the current controller class.
+    # Returns the settings for a controller instance.
     #
-    # @param [Symbol] key
-    # @return
-    def controller_setting(key)
-      self.class.fetch_setting(key)
+    # @return [Racket::Settings::Controller]
+    def settings
+      self.class.settings
     end
 
     # Redirects the client. After hooks are run.
@@ -197,7 +189,7 @@ module Racket
     end
 
     def __run_hook(type)
-      hooks = controller_setting("#{type}_hooks".to_sym) || {}
+      hooks = settings.fetch("#{type}_hooks".to_sym, {})
       blk = hooks.fetch(racket.action, nil)
       (instance_eval(&blk) if blk) && nil
     end

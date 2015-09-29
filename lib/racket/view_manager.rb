@@ -147,7 +147,7 @@ module Racket
     # @return [String|Proc|nil]
     def store_in_cache(store, path, controller, type)
       base_dir = instance_variable_get("@#{type}_base_dir".to_sym)
-      default_template = controller.controller_setting("default_#{type}".to_sym)
+      default_template = controller.settings.fetch("default_#{type}".to_sym)
       template = lookup_template(base_dir, path)
       template =
         lookup_default_template(base_dir, File.dirname(path), default_template) unless template

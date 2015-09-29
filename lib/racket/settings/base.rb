@@ -17,6 +17,7 @@
 # along with Racket.  If not, see <http://www.gnu.org/licenses/>.
 
 module Racket
+  # Module for handling Racket settings.
   module Settings
     # Base class for settings.
     class Base
@@ -50,10 +51,6 @@ module Racket
         meth = key.to_sym
         return send(meth) if respond_to?(meth)
         @custom.fetch(key, default)
-      end
-
-      def key?(key)
-        @custom.key?(key)
       end
 
       # Sets/updates a custom setting in the application.
