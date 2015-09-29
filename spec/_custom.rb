@@ -132,12 +132,12 @@ describe 'A custom Racket test Application' do
     app.settings.delete(:my_custom_secret)
     app.settings.fetch(:my_custom_secret).should.equal(nil)
     app.settings.default_content_type.should.equal('text/html')
-    app.settings.extended_fetch(:default_content_type).should.equal('text/html')
+    app.settings.fetch(:default_content_type).should.equal('text/html')
     app.settings.default_content_type = 'text/plain'
     app.settings.default_content_type.should.equal('text/plain')
-    app.settings.extended_fetch(:default_content_type).should.equal('text/plain')
+    app.settings.fetch(:default_content_type).should.equal('text/plain')
     app.settings.default_content_type = 'text/html'
     app.settings.default_content_type.should.equal('text/html')
-    app.settings.extended_fetch(:default_content_type).should.equal('text/html')
+    app.settings.fetch(:default_content_type).should.equal('text/html')
   end
 end

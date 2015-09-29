@@ -46,19 +46,9 @@ module Racket
       # @param [Symbol] key
       # @param [Object] default
       # @return [Object]
-      def extended_fetch(key, default = nil)
+      def fetch(key, default = nil)
         meth = key.to_sym
         return send(meth) if respond_to?(meth)
-        @custom.fetch(key, default)
-      end
-
-      # Returns a custom settings value associated with the application.
-      # If the key cannot be found, a default value is returned.
-      #
-      # @param [Symbol] key
-      # @param [Object] default
-      # @return [Object]
-      def fetch(key, default = nil)
         @custom.fetch(key, default)
       end
 

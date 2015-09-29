@@ -115,7 +115,7 @@ module Racket
       @settings ||= Settings::Base.new
       return @settings.fetch(key) if @settings.key?(key)
       # We are running out of controller settings, do one final lookup in Application.settings
-      return Application.settings.extended_fetch(key) if superclass == Controller
+      return Application.settings.fetch(key) if superclass == Controller
       superclass.fetch_setting(key)
     end
 
