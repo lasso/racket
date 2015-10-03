@@ -2,14 +2,20 @@ describe 'A custom Racket test Application' do
   extend Rack::Test::Methods
   def app
     @app ||= Racket::Application.using(
-      { default_layout: 'zebra.*', logger: nil, mode: :dev, view_dir: 'templates' },
+      {
+        default_layout: 'zebra.*',
+        logger: nil,
+        my_custom_secret: 42,
+        mode: :dev,
+        view_dir: 'templates'
+      },
       true
     )
   end
 
   it 'should set requested options' do
-    app.options[:default_layout].should.equal('zebra.*')
-    app.options[:view_dir].should.equal(Racket::Utils.build_path('templates'))
+    app.settings.default_layout.should.equal('zebra.*')
+    app.settings.view_dir.should.equal(Racket::Utils.build_path('templates'))
   end
 
   it 'should be able to get/set options on controller' do
@@ -117,5 +123,21 @@ describe 'A custom Racket test Application' do
     get '/sub4/baz'
     last_response.status.should.equal(200)
     last_response.body.should.equal("LAYOUT: default: BAZ\n\n")
+  end
+
+  it 'should handle changes to global settings' do
+    app.settings.fetch(:my_custom_secret).should.equal(42)
+    app.settings.store(:my_custom_secret, '9Lazy9')
+    app.settings.fetch(:my_custom_secret).should.equal('9Lazy9')
+    app.settings.delete(:my_custom_secret)
+    app.settings.fetch(:my_custom_secret).should.equal(nil)
+    app.settings.default_content_type.should.equal('text/html')
+    app.settings.fetch(:default_content_type).should.equal('text/html')
+    app.settings.default_content_type = 'text/plain'
+    app.settings.default_content_type.should.equal('text/plain')
+    app.settings.fetch(:default_content_type).should.equal('text/plain')
+    app.settings.default_content_type = 'text/html'
+    app.settings.default_content_type.should.equal('text/html')
+    app.settings.fetch(:default_content_type).should.equal('text/html')
   end
 end

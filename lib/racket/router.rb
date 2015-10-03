@@ -94,34 +94,61 @@ module Racket
     # @return [Array] A Rack response triplet
     def route(env)
       catch :response do # Catches early exits from Controller.respond.
-        # Find controller in map
-        # If controller exists, call it
-        # Otherwise, send a 404
-        matching_routes = @router.recognize(env)
-
-        # Exit early if no controller is responsible for the route
-        return render_error(404) if matching_routes.first.nil?
-
-        # Some controller is claiming to be responsible for the route
-        target_klass = matching_routes.first.first.route.dest
-        params = matching_routes.first.first.param_values.first.reject(&:empty?)
-        action = params.empty? ? target_klass.get_option(:default_action) : params.shift.to_sym
-
-        # Check if action is available on target
-        return render_error(404) unless @action_cache[target_klass].include?(action)
+        # Ensure that that a controller will respond to the request. If not, send a 404.
+        return render_error(404) if (target_info = target_info(env)).nil?
+        target_klass, params, action = target_info
 
         # Rewrite PATH_INFO to reflect that we split out the parameters
-        env['PATH_INFO'] = env['PATH_INFO']
-                           .split('/')[0...-params.count]
-                           .join('/') unless params.empty?
+        update_path_info(env, params.length)
 
         # Initialize and render target
         target = target_klass.new
         target.extend(Current.init(env, target_klass, action, params))
         target.__run
       end
-      rescue => err
-        render_error(500, err)
+    rescue => err
+      render_error(500, err)
+    end
+
+    private
+
+    # Returns information about the target of the request. If no valid target can be found, +nil+
+    # is returned.
+    #
+    # @param [Hash] env
+    # @return [Array|nil]
+    def target_info(env)
+      matching_routes = @router.recognize(env)
+      # Exit early if no controller is responsible for the route
+      return nil if matching_routes.first.nil?
+      # Some controller is claiming to be responsible for the route
+      result = extract_target(matching_routes)
+      # Exit early if action is not available on target
+      return nil unless @action_cache[result.first].include?(result.last)
+      result
+    end
+
+    # Extracts the target class, target params and target action from a list of valid routes.
+    #
+    # @param [Array] routes
+    # @return [Array]
+    def extract_target(routes)
+      target_klass = routes.first.first.route.dest
+      params = routes.first.first.param_values.first.reject(&:empty?)
+      action = params.empty? ? target_klass.settings.fetch(:default_action) : params.shift.to_sym
+      [target_klass, params, action]
+    end
+
+    # Updates the PATH_INFO environment variable.
+    #
+    # @param [Hash] env
+    # @param [Fixnum] num_params
+    # @return [nil]
+    def update_path_info(env, num_params)
+      env['PATH_INFO'] = env['PATH_INFO']
+                         .split('/')[0...-num_params]
+                         .join('/') unless num_params.zero?
+      nil
     end
   end
 end

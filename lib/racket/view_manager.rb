@@ -39,13 +39,8 @@ module Racket
     def render(controller)
       template_path = get_template_path(controller)
       view = get_template(template_path, controller, :view)
-      if view
-        output = Tilt.new(view).render(controller)
-        layout = get_template(template_path, controller, :layout)
-        output = Tilt.new(layout).render(controller) { output } if layout
-      else
-        output = controller.racket.action_result
-      end
+      layout = view ? get_template(template_path, controller, :layout) : nil
+      output = view ? render_template(controller, view, layout) : controller.racket.action_result
       controller.response.write(output)
       controller.response.finish
     end
@@ -76,18 +71,11 @@ module Racket
     # @param [String] path
     # @param [Racket::Controller] controller
     # @param [Symbol] type
+    # @return [String|Proc|nil]
     def ensure_in_cache(path, controller, type)
       store = instance_variable_get("@#{type}_cache".to_sym)
       return store[path] if store.key?(path)
-      base_dir = instance_variable_get("@#{type}_base_dir".to_sym)
-      default_template = controller.controller_option("default_#{type}".to_sym)
-      template = lookup_template(base_dir, path)
-      template =
-        lookup_default_template(base_dir, File.dirname(path), default_template) unless template
-      Application.inform_dev(
-        "Using #{type} #{template.inspect} for #{controller.class}.#{controller.racket.action}."
-      )
-      store[path] = template
+      store_in_cache(store, path, controller, type)
     end
 
     # Tries to locate a template matching +path+ in the file system and returns the path if a
@@ -143,6 +131,37 @@ module Racket
         final_path = File.join(file_path, files.first.to_s)
         Utils.file_readable?(final_path) ? final_path : nil
       end
+    end
+
+    # Renders a template/layout combo using Tilt and returns it as a string.
+    #
+    # @param [Racket::Controller] controller
+    # @param [String] view
+    # @param [String|nil] layout
+    # @return [String]
+    def render_template(controller, view, layout)
+      output = Tilt.new(view).render(controller)
+      output = Tilt.new(layout).render(controller) { output } if layout
+      output
+    end
+
+    # Stores the location of a template (not its contents) in the cache.
+    #
+    # @param [Object] store Where to store the location
+    # @param [String] path
+    # @param [Racket::Controller] controller
+    # @param [Symbol] type
+    # @return [String|Proc|nil]
+    def store_in_cache(store, path, controller, type)
+      base_dir = instance_variable_get("@#{type}_base_dir".to_sym)
+      default_template = controller.settings.fetch("default_#{type}".to_sym)
+      template = lookup_template(base_dir, path)
+      template =
+        lookup_default_template(base_dir, File.dirname(path), default_template) unless template
+      Application.inform_dev(
+        "Using #{type} #{template.inspect} for #{controller.class}.#{controller.racket.action}."
+      )
+      store[path] = template
     end
   end
 end
