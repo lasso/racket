@@ -59,7 +59,8 @@ module Racket
         ivar = "@#{symbol}".to_sym
         define_method symbol do
           instance_variable_set(ivar, directory) unless instance_variables.include?(ivar)
-          Utils.build_path(instance_variable_get(ivar))
+          return nil unless (value = instance_variable_get(ivar))
+          Utils.build_path(value)
         end
         attr_writer(symbol) && nil
       end
