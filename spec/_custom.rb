@@ -13,12 +13,12 @@ describe 'A custom Racket test Application' do
     )
   end
 
-  it 'should set requested options' do
+  it 'should set requested settings' do
     app.settings.default_layout.should.equal('zebra.*')
     app.settings.view_dir.should.equal(Racket::Utils.build_path('templates'))
   end
 
-  it 'should be able to get/set options on controller' do
+  it 'should be able to get/set settings on controller' do
     get '/sub3/a_secret_place'
     last_response.status.should.equal(302)
     last_response.headers['Location'].should.equal('/sub3/a_secret_place/42')
