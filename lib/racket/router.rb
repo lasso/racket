@@ -99,7 +99,7 @@ module Racket
         target_klass, params, action = target_info
 
         # Rewrite PATH_INFO to reflect that we split out the parameters
-        update_path_info(env, params.length)
+        Utils::Router.update_path_info(env, params.length)
 
         # Initialize and render target
         target = target_klass.new
@@ -122,33 +122,10 @@ module Racket
       # Exit early if no controller is responsible for the route
       return nil if matching_routes.first.nil?
       # Some controller is claiming to be responsible for the route
-      result = extract_target(matching_routes)
+      result = Utils::Router.extract_target(matching_routes.first.first)
       # Exit early if action is not available on target
       return nil unless @action_cache[result.first].include?(result.last)
       result
-    end
-
-    # Extracts the target class, target params and target action from a list of valid routes.
-    #
-    # @param [Array] routes
-    # @return [Array]
-    def extract_target(routes)
-      target_klass = routes.first.first.route.dest
-      params = routes.first.first.param_values.first.reject(&:empty?)
-      action = params.empty? ? target_klass.settings.fetch(:default_action) : params.shift.to_sym
-      [target_klass, params, action]
-    end
-
-    # Updates the PATH_INFO environment variable.
-    #
-    # @param [Hash] env
-    # @param [Fixnum] num_params
-    # @return [nil]
-    def update_path_info(env, num_params)
-      env['PATH_INFO'] = env['PATH_INFO']
-                         .split('/')[0...-num_params]
-                         .join('/') unless num_params.zero?
-      nil
     end
   end
 end

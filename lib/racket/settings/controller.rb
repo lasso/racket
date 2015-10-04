@@ -35,9 +35,9 @@ module Racket
       # fallback.
       def fetch(key, default = nil)
         return @custom[key] if @custom.key?(key)
-        return ::Racket::Application.settings.fetch(key, default) if
-          @owner.superclass == ::Racket::Controller
-        @owner.superclass.settings.fetch(key, default)
+        parent = @owner.superclass
+        return ::Racket::Application.settings.fetch(key, default) if parent == ::Racket::Controller
+        parent.settings.fetch(key, default)
       end
     end
   end

@@ -16,9 +16,12 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Racket.  If not, see <http://www.gnu.org/licenses/>.
 
+require_relative 'utils/router.rb'
+require_relative 'utils/views.rb'
+
 module Racket
   # Collects utilities needed by different objects in Racket.
-  class Utils
+  module Utils
     # Handles exceptions dynamically
     class ExceptionHandler
       # Runs a block.
@@ -42,7 +45,7 @@ module Racket
         Module.new do
           (class << self; self; end).instance_eval do
             define_method(:===) do |error|
-              errors.any? { |e| error.class <= e }
+              errors.any? { |err| error.class <= err }
             end
           end
         end
