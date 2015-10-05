@@ -81,7 +81,7 @@ module Racket
       # @param [String] base_dir
       # @param [String] path
       # @param [String|Symbol|Proc|nil] default_template
-      # @return [String|Proc|nil] 
+      # @return [String|Proc|nil]
       def lookup_template_with_default(base_dir, path, default_template)
         template = Utils::Views.lookup_template(base_dir, path)
         if !template && (default_template.is_a?(String) || default_template.is_a?(Symbol))

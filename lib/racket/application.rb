@@ -146,11 +146,15 @@ module Racket
       inform_dev('Done loading controllers.') && nil
     end
 
+    # Loads a controller file.
+    #
+    # @param [String] file
+    # @return nil
     def self.load_controller_file(file)
       ::Kernel.require File.expand_path(file)
       path = "/#{File.dirname(file)}"
       path = '' if path == '/.'
-      @router.map(path, @settings.fetch(:last_added_controller).pop)
+      @router.map(path, @settings.fetch(:last_added_controller).pop) && nil
     end
 
     # Loads some middleware (based on settings).

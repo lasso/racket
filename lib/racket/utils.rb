@@ -64,14 +64,8 @@ module Racket
       if args.empty?
         path = Pathname.pwd
       else
-        args.map!(&:to_s)
-        path = Pathname.new(args.shift)
-        path = Pathname.new(Application.settings.root_dir).join(path) if path.relative?
-        args.each do |arg|
-          path_part = Pathname.new(arg)
-          next unless path_part.relative?
-          path = path.join(path_part)
-        end
+        path, args = __base_path(args)
+        path = __build_path(path, args)
       end
       path.cleanpath.expand_path.to_s
     end
@@ -96,5 +90,25 @@ module Racket
     def self.run_block(*errors, &block)
       ExceptionHandler.run_block(errors, &block)
     end
+
+    # :nodoc
+    def self.__base_path(args)
+      my_args = args.dup.map!(&:to_s)
+      path = Pathname.new(my_args.shift)
+      path = Pathname.new(Application.settings.root_dir).join(path) if path.relative?
+      [path, my_args]
+    end
+
+    #:nodoc
+    def self.__build_path(path, args)
+      args.each do |arg|
+        path_part = Pathname.new(arg)
+        next unless path_part.relative?
+        path = path.join(path_part)
+      end
+      path
+    end
+
+    private_class_method '__base_path'.to_sym, '__build_path'.to_sym
   end
 end
