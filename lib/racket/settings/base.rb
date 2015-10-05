@@ -68,15 +68,14 @@ module Racket
       #
       # @param [Symbol] symbol
       # @param [Object] default
-      # @param [true|false] writable
       # @return [nil]
-      def self.setting(symbol, default = nil, writable = true)
+      def self.setting(symbol, default = nil)
         ivar = "@#{symbol}".to_sym
         define_method symbol do
           instance_variable_set(ivar, default) unless instance_variables.include?(ivar)
           instance_variable_get(ivar)
         end
-        (attr_writer(symbol) if writable) && nil
+        attr_writer(symbol) && nil
       end
     end
   end

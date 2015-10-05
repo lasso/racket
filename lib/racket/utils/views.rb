@@ -53,12 +53,6 @@ module Racket
         template_path
       end
 
-      def lookup_default_template(base_path, path, default)
-        return Utils::Views.lookup_template(base_path, File.join(path, default.to_s)) if
-          default.is_a?(String) || default.is_a?(Symbol)
-        default
-      end
-
       # Locates a file in the filesystem matching an URL path. If there exists a matching file, the
       # path to it is returned. If there is no matching file, +nil+ is returned.
       #
@@ -79,6 +73,24 @@ module Racket
         end
       end
 
+      # Locates a file in the filesystem matching an URL path. If there exists a matching file, the
+      # path to it is returned. If there is no matching file and +default_template+ is a String or
+      # a Symbol, another lookup will be performed using +default_template+. If +default_template+
+      # is a Proc or nil, +default_template+ will be used as is instead.
+      #
+      # @param [String] base_dir
+      # @param [String] path
+      # @param [String|Symbol|Proc|nil] default_template
+      # @return [String|Proc|nil] 
+      def lookup_template_with_default(base_dir, path, default_template)
+        template = Utils::Views.lookup_template(base_dir, path)
+        if !template && (default_template.is_a?(String) || default_template.is_a?(Symbol))
+          path = File.join(File.dirname(path), default_template)
+          template = Utils::Views.lookup_template(base_dir, path)
+        end
+        template || default_template
+      end
+
       # Renders a template/layout combo using Tilt and returns it as a string.
       #
       # @param [Racket::Controller] controller
@@ -91,8 +103,18 @@ module Racket
         output
       end
 
-      module_function :call_template_proc, :get_template_path, :lookup_default_template,
-                      :lookup_template, :render_template
+      # Sends response to client.
+      #
+      # @param [Racket::Response] response
+      # @param [String] output
+      # @return nil
+      def send_response(response, output)
+        response.write(output)
+        response.finish
+      end
+
+      module_function :call_template_proc, :get_template_path, :lookup_template,
+                      :lookup_template_with_default, :render_template, :send_response
     end
   end
 end

@@ -134,32 +134,35 @@ module Racket
     def self.load_controllers
       inform_dev('Loading controllers.')
       @settings.store(:last_added_controller, [])
-      @controller = nil
       Dir.chdir(@settings.controller_dir) do
         files = Pathname.glob(File.join('**', '*.rb')).map!(&:to_s)
         # Sort by longest path so that the longer paths gets matched first
         # HttpRouter claims to be doing this already, but this "hack" is needed in order
         # for the router to work.
         files.sort! { |a, b| b.split('/').length <=> a.split('/').length }
-        files.each do |file|
-          ::Kernel.require File.expand_path(file)
-          path = "/#{File.dirname(file)}"
-          path = '' if path == '/.'
-          @router.map(path, @settings.fetch(:last_added_controller).pop)
-        end
+        files.each { |file| load_controller_file(file) }
       end
       @settings.delete(:last_added_controller)
       inform_dev('Done loading controllers.') && nil
+    end
+
+    def self.load_controller_file(file)
+      ::Kernel.require File.expand_path(file)
+      path = "/#{File.dirname(file)}"
+      path = '' if path == '/.'
+      @router.map(path, @settings.fetch(:last_added_controller).pop)
     end
 
     # Loads some middleware (based on settings).
     #
     # @return nil
     def self.load_middleware
-      @settings.middleware.unshift(@settings.session_handler) if @settings.session_handler
-      @settings.middleware.unshift([Rack::ContentType, @settings.default_content_type]) if
-        @settings.default_content_type
-      (@settings.middleware.unshift([Rack::ShowExceptions]) if dev_mode?) && nil
+      middleware = @settings.middleware
+      session_handler = @settings.session_handler
+      default_content_type = @settings.default_content_type
+      middleware.unshift(session_handler) if session_handler
+      middleware.unshift([Rack::ContentType, default_content_type]) if default_content_type
+      (middleware.unshift([Rack::ShowExceptions]) if dev_mode?) && nil
     end
 
     # Reloads the application, making any changes to the controller configuration visible
@@ -222,7 +225,7 @@ module Racket
       @view_manager ||= ViewManager.new(@settings.layout_dir, @settings.view_dir)
     end
 
-    private_class_method :application, :build_application, :inform, :init, :load_controllers,
-                         :load_middleware, :setup_routes, :setup_static_server
+    private_class_method :application, :build_application, :inform, :init, :load_controller_file,
+                         :load_controllers, :load_middleware, :setup_routes, :setup_static_server
   end
 end
