@@ -19,25 +19,27 @@
 module Racket
   # Collects utilities needed by different objects in Racket.
   module Utils
-    attr_reader :path
     # Utility functions for filesystem.
     module FS
       # Build path in the filesystem.
       class PathBuilder
-        def initialize(*args)
+        def self.to_pathname(*args)
+          new(args).path
+        end
+
+        def self.to_s(*args)
+          new(args).path.to_s
+        end
+
+        attr_reader :path
+
+        private
+
+        def initialize(args)
           extract_base_path(args.dup)
           build_path
           clean_path
         end
-
-        # Returns the PathBuilder as as string
-        #
-        # @return [String]
-        def to_s
-          @path.to_s
-        end
-
-        private
 
         def clean_path
           @path = @path.cleanpath.expand_path

@@ -62,16 +62,16 @@ module Racket
     # @param [Array] args
     # @return [String]
     def self.build_path(*args)
-      FS::PathBuilder.new(*args).to_s
+      FS::PathBuilder.to_s(*args)
     end
 
     def self.dir_readable?(path)
-      pathname = Pathname.new(path)
+      pathname = FS::PathBuilder.to_pathname(path)
       pathname.exist? && pathname.directory? && pathname.readable?
     end
 
     def self.file_readable?(path)
-      pathname = Pathname.new(path)
+      pathname = FS::PathBuilder.to_pathname(path)
       pathname.exist? && pathname.file? && pathname.readable?
     end
 
