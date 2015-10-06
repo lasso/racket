@@ -16,6 +16,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Racket.  If not, see <http://www.gnu.org/licenses/>.
 
+require_relative 'utils/fs.rb'
 require_relative 'utils/router.rb'
 require_relative 'utils/views.rb'
 
@@ -61,13 +62,7 @@ module Racket
     # @param [Array] args
     # @return [String]
     def self.build_path(*args)
-      if args.empty?
-        path = Pathname.pwd
-      else
-        path, args = __base_path(args)
-        path = __build_path(path, args)
-      end
-      path.cleanpath.expand_path.to_s
+      FS::PathBuilder.new(*args).to_s
     end
 
     def self.dir_readable?(path)
@@ -90,25 +85,5 @@ module Racket
     def self.run_block(*errors, &block)
       ExceptionHandler.run_block(errors, &block)
     end
-
-    # :nodoc
-    def self.__base_path(args)
-      my_args = args.dup.map!(&:to_s)
-      path = Pathname.new(my_args.shift)
-      path = Pathname.new(Application.settings.root_dir).join(path) if path.relative?
-      [path, my_args]
-    end
-
-    #:nodoc
-    def self.__build_path(path, args)
-      args.each do |arg|
-        path_part = Pathname.new(arg)
-        next unless path_part.relative?
-        path = path.join(path_part)
-      end
-      path
-    end
-
-    private_class_method '__base_path'.to_sym, '__build_path'.to_sym
   end
 end
