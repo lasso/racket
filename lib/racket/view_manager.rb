@@ -38,13 +38,13 @@ module Racket
     # @param [Controller] controller
     # @return [Hash]
     def render(controller)
-      template_path = Utils::Views.get_template_path(controller)
+      template_path = Utils.get_template_path(controller)
       view = get_template(ViewParams.new(controller, template_path, :view))
       layout = view ? get_template(ViewParams.new(controller, template_path, :layout)) : nil
-      if view then output = Utils::Views.render_template(controller, view, layout)
+      if view then output = Utils.render_template(controller, view, layout)
       else output = controller.racket.action_result
       end
-      Utils::Views.send_response(controller.response, output)
+      Utils.send_response(controller.response, output)
     end
 
     private
@@ -73,9 +73,9 @@ module Racket
       if template.is_a?(Proc)
         controller, path, type = view_params.to_a
         template =
-          Utils::Views.lookup_template(
+          Utils.lookup_template(
             instance_variable_get("@#{type}_base_dir".to_sym),
-            [File.dirname(path), Utils::Views.call_template_proc(template, controller)].join('/')
+            [File.dirname(path), Utils.call_template_proc(template, controller)].join('/')
           )
       end
       template
@@ -90,7 +90,7 @@ module Racket
       controller, path, type = view_params.to_a
       base_dir = instance_variable_get("@#{type}_base_dir".to_sym)
       default_template = controller.settings.fetch("default_#{type}".to_sym)
-      template = Utils::Views.lookup_template_with_default(base_dir, path, default_template)
+      template = Utils.lookup_template_with_default(base_dir, path, default_template)
       Application.inform_dev(
         "Using #{type} #{template.inspect} for #{controller.class}.#{controller.racket.action}."
       )

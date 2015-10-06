@@ -99,7 +99,7 @@ module Racket
         target_klass, params, action = target_info
 
         # Rewrite PATH_INFO to reflect that we split out the parameters
-        Utils::Router.update_path_info(env, params.length)
+        Utils.update_path_info(env, params.length)
 
         # Initialize and render target
         target = target_klass.new
@@ -122,7 +122,7 @@ module Racket
       # Exit early if no controller is responsible for the route
       return nil if matching_routes.first.nil?
       # Some controller is claiming to be responsible for the route
-      result = Utils::Router.extract_target(matching_routes.first.first)
+      result = Utils.extract_target(matching_routes.first.first)
       # Exit early if action is not available on target
       return nil unless @action_cache[result.first].include?(result.last)
       result

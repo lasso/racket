@@ -83,10 +83,10 @@ module Racket
       # @param [String|Symbol|Proc|nil] default_template
       # @return [String|Proc|nil]
       def lookup_template_with_default(base_dir, path, default_template)
-        template = Utils::Views.lookup_template(base_dir, path)
+        template = lookup_template(base_dir, path)
         if !template && (default_template.is_a?(String) || default_template.is_a?(Symbol))
           path = File.join(File.dirname(path), default_template)
-          template = Utils::Views.lookup_template(base_dir, path)
+          template = lookup_template(base_dir, path)
         end
         template || default_template
       end
@@ -112,9 +112,6 @@ module Racket
         response.write(output)
         response.finish
       end
-
-      module_function :call_template_proc, :get_template_path, :lookup_template,
-                      :lookup_template_with_default, :render_template, :send_response
     end
   end
 end

@@ -20,7 +20,7 @@ module Racket
   # Collects utilities needed by different objects in Racket.
   module Utils
     # Utility functions for filesystem.
-    module FS
+    module FileSystem
       # Build path in the filesystem.
       class PathBuilder
         def self.to_pathname(*args)
@@ -64,6 +64,26 @@ module Racket
           end
           remove_instance_variable :@args
         end
+      end
+
+      # Builds and returns a path in the file system from the provided arguments. The first element
+      # in the argument list can be either absolute or relative, all other arguments must be
+      # relative, otherwise they will be removed from the final path.
+      #
+      # @param [Array] args
+      # @return [String]
+      def build_path(*args)
+        PathBuilder.to_s(*args)
+      end
+
+      def dir_readable?(path)
+        pathname = PathBuilder.to_pathname(path)
+        pathname.exist? && pathname.directory? && pathname.readable?
+      end
+
+      def file_readable?(path)
+        pathname = PathBuilder.to_pathname(path)
+        pathname.exist? && pathname.file? && pathname.readable?
       end
     end
   end

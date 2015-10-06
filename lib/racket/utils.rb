@@ -16,74 +16,17 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Racket.  If not, see <http://www.gnu.org/licenses/>.
 
-require_relative 'utils/fs.rb'
-require_relative 'utils/router.rb'
+require_relative 'utils/exceptions.rb'
+require_relative 'utils/file_system.rb'
+require_relative 'utils/routing.rb'
 require_relative 'utils/views.rb'
 
 module Racket
   # Collects utilities needed by different objects in Racket.
   module Utils
-    # Handles exceptions dynamically
-    class ExceptionHandler
-      # Runs a block.
-      # If no exceptions are raised, this method returns true.
-      # If any of the provided error types are raised, this method returns false.
-      # If any other exception is raised, this method will just forward the exception.
-      #
-      # @param [Array] errors
-      # @return [true|flase]
-      def self.run_block(errors)
-        fail 'Need a block' unless block_given?
-        begin
-          true.tap { yield }
-        rescue boolean_module(errors)
-          false
-        end
-      end
-
-      # Returns an anonymous module that can be used to rescue exceptions dynamically.
-      def self.boolean_module(errors)
-        Module.new do
-          (class << self; self; end).instance_eval do
-            define_method(:===) do |error|
-              errors.any? { |err| error.class <= err }
-            end
-          end
-        end
-      end
-
-      private_class_method :boolean_module
-    end
-
-    # Builds and returns a path in the file system from the provided arguments. The first element
-    # in the argument list can be either absolute or relative, all other arguments must be relative,
-    # otherwise they will be removed from the final path.
-    #
-    # @param [Array] args
-    # @return [String]
-    def self.build_path(*args)
-      FS::PathBuilder.to_s(*args)
-    end
-
-    def self.dir_readable?(path)
-      pathname = FS::PathBuilder.to_pathname(path)
-      pathname.exist? && pathname.directory? && pathname.readable?
-    end
-
-    def self.file_readable?(path)
-      pathname = FS::PathBuilder.to_pathname(path)
-      pathname.exist? && pathname.file? && pathname.readable?
-    end
-
-    # Runs a block.
-    # If no exceptions are raised, this method returns true.
-    # If any of the provided error types are raised, this method returns false.
-    # If any other exception is raised, this method will just forward the exception.
-    #
-    # @param [Array] errors
-    # @return [true|flase]
-    def self.run_block(*errors, &block)
-      ExceptionHandler.run_block(errors, &block)
-    end
+    extend Exceptions
+    extend FileSystem
+    extend Routing
+    extend Views
   end
 end

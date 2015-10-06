@@ -19,7 +19,7 @@
 module Racket
   module Utils
     # Utility functions for routing.
-    module Router
+    module Routing
       # Extracts the target class, target params and target action from a list of valid routes.
       #
       # @param [HttpRouter::Response] response
@@ -42,8 +42,6 @@ module Racket
                            .join('/') unless num_params.zero?
         nil
       end
-
-      module_function :extract_target, :update_path_info
     end
   end
 end
