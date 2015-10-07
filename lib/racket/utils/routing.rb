@@ -24,7 +24,7 @@ module Racket
       #
       # @param [HttpRouter::Response] response
       # @return [Array]
-      def extract_target(response)
+      def self.extract_target(response)
         target_klass = response.route.dest
         params = response.param_values.first.reject(&:empty?)
         action = params.empty? ? target_klass.settings.fetch(:default_action) : params.shift.to_sym
@@ -36,7 +36,7 @@ module Racket
       # @param [Hash] env
       # @param [Fixnum] num_params
       # @return [nil]
-      def update_path_info(env, num_params)
+      def self.update_path_info(env, num_params)
         env['PATH_INFO'] = env['PATH_INFO']
                            .split('/')[0...-num_params]
                            .join('/') unless num_params.zero?

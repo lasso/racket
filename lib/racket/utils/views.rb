@@ -34,7 +34,7 @@ module Racket
       # @param [Proc] proc
       # @param [Racket::Controller] controller
       # @return [String]
-      def call_template_proc(proc, controller)
+      def self.call_template_proc(proc, controller)
         possible_proc_args =
           [controller.racket.action, controller.racket.params, controller.request]
         proc_args = []
@@ -46,7 +46,7 @@ module Racket
       #
       # @param [Racket::Controller] controller
       # @return [String]
-      def get_template_path(controller)
+      def self.get_template_path(controller)
         template_path =
           [Application.get_route(controller.class), controller.racket.action].join('/')
         template_path = template_path[1..-1] if template_path.start_with?('//')
@@ -59,7 +59,7 @@ module Racket
       # @param [String] base_path
       # @param [String] path
       # @return [String|nil]
-      def lookup_template(base_path, path)
+      def self.lookup_template(base_path, path)
         file_path = File.join(base_path, path)
         action = File.basename(file_path)
         file_path = File.dirname(file_path)
@@ -82,7 +82,7 @@ module Racket
       # @param [String] path
       # @param [String|Symbol|Proc|nil] default_template
       # @return [String|Proc|nil]
-      def lookup_template_with_default(base_dir, path, default_template)
+      def self.lookup_template_with_default(base_dir, path, default_template)
         template = lookup_template(base_dir, path)
         if !template && (default_template.is_a?(String) || default_template.is_a?(Symbol))
           path = File.join(File.dirname(path), default_template)
@@ -97,7 +97,7 @@ module Racket
       # @param [String] view
       # @param [String|nil] layout
       # @return [String]
-      def render_template(controller, view, layout)
+      def self.render_template(controller, view, layout)
         output = Tilt.new(view).render(controller)
         output = Tilt.new(layout).render(controller) { output } if layout
         output
@@ -108,7 +108,7 @@ module Racket
       # @param [Racket::Response] response
       # @param [String] output
       # @return nil
-      def send_response(response, output)
+      def self.send_response(response, output)
         response.write(output)
         response.finish
       end

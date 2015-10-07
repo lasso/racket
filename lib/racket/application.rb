@@ -139,7 +139,7 @@ module Racket
         # Sort by longest path so that the longer paths gets matched first
         # HttpRouter claims to be doing this already, but this "hack" is needed in order
         # for the router to work.
-        files.sort! { |a, b| b.split('/').length <=> a.split('/').length }
+        files.sort! { |first, second| second.split('/').length <=> first.split('/').length }
         files.each { |file| load_controller_file(file) }
       end
       @settings.delete(:last_added_controller)

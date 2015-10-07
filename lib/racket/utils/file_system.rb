@@ -72,16 +72,16 @@ module Racket
       #
       # @param [Array] args
       # @return [String]
-      def build_path(*args)
+      def self.build_path(*args)
         PathBuilder.to_s(*args)
       end
 
-      def dir_readable?(path)
+      def self.dir_readable?(path)
         pathname = PathBuilder.to_pathname(path)
         pathname.exist? && pathname.directory? && pathname.readable?
       end
 
-      def file_readable?(path)
+      def self.file_readable?(path)
         pathname = PathBuilder.to_pathname(path)
         pathname.exist? && pathname.file? && pathname.readable?
       end
