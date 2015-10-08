@@ -21,42 +21,65 @@ module Racket
   module Helpers
     # Helper module that handles files
     module File
+      # Class for sending files.
+      class Response
+        def initialize(file, options)
+          @file = Utils.build_path(file)
+          @options = options
+          @response = Racket::Response.new
+          build
+        end
+
+        def to_a
+          @response.to_a
+        end
+
+        private
+
+        def build
+          if Utils.file_readable?(@file) then build_success
+          else build_failure
+          end
+        end
+
+        def build_failure
+          @response.status = 404
+          @response.headers['Content-Type'] = 'text/plain'
+          @response.write(Rack::Utils::HTTP_STATUS_CODES[@response.status])
+        end
+
+        def build_success
+          @response.status = 200
+          set_mime_type
+          set_content_disposition
+          @response.write(::File.read(@file))
+        end
+
+        def set_content_disposition
+          # Set Content-Disposition (and a file name) if the file should be downloaded
+          # instead of displayed inline.
+          return unless @options.fetch(:download, false)
+          content_disposition = 'attachment'
+          filename = @options.fetch(:filename, nil).to_s
+          content_disposition << format('; filename="%s"', filename) unless filename.empty?
+          @response.headers['Content-Disposition'] = content_disposition
+        end
+
+        def set_mime_type
+          mime_type = @options.fetch(:mime_type, nil)
+          # Calculate MIME type if it was not already specified.
+          mime_type = Rack::Mime.mime_type(::File.extname(@file)) unless mime_type
+          @response.headers['Content-Type'] = mime_type
+        end
+      end
+
       # Sends the contents of a file to the client.
       #
       # @param [String] file
       # @param [Hash] options
       # @return [Array]
       def send_file(file, options = {})
-        file = Utils.build_path(file)
-        _send_file_check_file_readable(file)
-        headers = {}
-        mime_type = options.fetch(:mime_type, nil)
-        # Calculate MIME type if it was not already specified.
-        mime_type = Rack::Mime.mime_type(::File.extname(file)) unless mime_type
-        headers['Content-Type'] = mime_type
-        # Set Content-Disposition (and a file name) if the file should be downloaded
-        # instead of displayed inline.
-        _send_file_set_content_disposition(options, headers)
-        # Send response
-        respond!(200, headers, ::File.read(file))
-      end
-
-      private
-
-      def _send_file_check_file_readable(file)
-        # Respond with a 404 Not Found if the file cannot be read.
-        respond!(
-          404,
-          { 'Content-Type' => 'text/plain' },
-          Rack::Utils::HTTP_STATUS_CODES[404]
-        ) unless Utils.file_readable?(file)
-      end
-
-      def _send_file_set_content_disposition(options, headers)
-        return unless options.fetch(:download, false)
-        filename = options.fetch(:filename, nil).to_s
-        headers['Content-Disposition'] = 'attachment'
-        headers['Content-Disposition'] << format('; filename="%s"', filename) unless filename.empty?
+        respond!(*(Response.new(file, options).to_a))
       end
     end
   end
