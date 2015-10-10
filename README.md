@@ -40,7 +40,7 @@ If you are not interested in running the tests yourself you could have a look at
 ## Alright, I want to try using this stuff. Where are the docs?
 At the moment there is not much documentation available, but I have started working on the [wiki](https://github.com/lasso/racket/wiki).
 
-The code itself is documented using [Yard](http://yardoc.org/). The docs are not generated automatically, you need to run `rake doc` in the root directory to generate them. After running the rake task the documentation will be available in the `doc` directory.
+The code itself is documented using [Yard](http://yardoc.org/). The docs are not generated automatically, you need to run `rake doc` in the root directory to generate them. After running the rake task the documentation will be available in the `doc` directory. Online documentation is also available from [rubydoc.info](http://rubydoc.info/), both for [the latest gem](http://www.rubydoc.info/gems/racket-mvc) and [master](http://www.rubydoc.info/github/lasso/racket).
 
 ## Why is the code licenced under the GNU Affero General Public License? I want a more liberal licence!
 Because I think it is a Good Thing&trade; to share code. The
