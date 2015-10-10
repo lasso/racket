@@ -134,13 +134,8 @@ module Racket
     def self.load_controllers
       inform_dev('Loading controllers.')
       @settings.store(:last_added_controller, [])
-      Dir.chdir(@settings.controller_dir) do
-        files = Pathname.glob(File.join('**', '*.rb')).map!(&:to_s)
-        # Sort by longest path so that the longer paths gets matched first
-        # HttpRouter claims to be doing this already, but this "hack" is needed in order
-        # for the router to work.
-        files.sort! { |first, second| second.split('/').length <=> first.split('/').length }
-        files.each { |file| load_controller_file(file) }
+      Utils.files_by_longest_path(@settings.controller_dir, File.join('**', '*.rb')).each do |file|
+        load_controller_file(file)
       end
       @settings.delete(:last_added_controller)
       inform_dev('Done loading controllers.') && nil
@@ -148,10 +143,10 @@ module Racket
 
     # Loads a controller file.
     #
-    # @param [String] file
+    # @param [String] file Relative path from controller dir
     # @return nil
     def self.load_controller_file(file)
-      ::Kernel.require File.expand_path(file)
+      ::Kernel.require Utils.build_path(@settings.controller_dir, file)
       path = "/#{File.dirname(file)}"
       path = '' if path == '/.'
       @router.map(path, @settings.fetch(:last_added_controller).pop) && nil

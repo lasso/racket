@@ -86,14 +86,41 @@ module Racket
         PathBuilder.to_s(*args)
       end
 
+      # Returns whether a directory is readable or not. In order to be readable, the directory must
+      # a) exist
+      # b) be a directory
+      # c) be readable by the current user
+      #
+      # @param [String] path
+      # @return [true|false]
       def self.dir_readable?(path)
         pathname = PathBuilder.to_pathname(path)
         pathname.exist? && pathname.directory? && pathname.readable?
       end
 
+      # Returns whether a file is readable or not. In order to be readable, the file must
+      # a) exist
+      # b) be a file
+      # c) be readable by the current user
+      #
       def self.file_readable?(path)
         pathname = PathBuilder.to_pathname(path)
         pathname.exist? && pathname.file? && pathname.readable?
+      end
+
+      # Returns a list of relative file paths, sorted by path (longest first).
+      #
+      # @param [String] base_dir
+      # @param [String] glob
+      # return [Array]
+      def self.files_by_longest_path(base_dir, glob)
+        Dir.chdir(base_dir) do
+          # Get a list of matching files
+          files = Pathname.glob(glob).map!(&:to_s)
+          # Sort by longest path.
+          files.sort! { |first, second| second.split('/').length <=> first.split('/').length }
+          files
+        end
       end
     end
   end
