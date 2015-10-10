@@ -88,11 +88,9 @@ module Racket
     #  namespace.
     def self.helper(*helpers)
       helper_modules = {}
-      existing_helpers = settings.fetch(:helpers)
-      if existing_helpers.nil?
-        # No helpers has been loaded yet. Load the default helpers.
-        existing_helpers = Application.settings.default_controller_helpers
-        helper_modules.merge!(__load_helpers(existing_helpers))
+      unless settings.fetch(:helpers)
+        # No helpers has been loaded yet. Load the default helpers first.
+        helper_modules.merge!(__load_helpers(Application.settings.default_controller_helpers))
       end
       # Load new helpers
       helpers.map!(&:to_sym)

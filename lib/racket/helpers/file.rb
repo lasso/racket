@@ -30,6 +30,9 @@ module Racket
           build
         end
 
+        # Returns the current object as a Rack response array.
+        #
+        # @return [Array]
         def to_a
           @response.to_a
         end

@@ -48,7 +48,7 @@ module Racket
         end
         run lambda { |env|
           static_result = instance.serve_static_file(env)
-          return static_result unless static_result.nil? || static_result.first >= 400
+          return static_result if static_result && static_result.first < 400
           instance.router.route(env)
         }
       end
@@ -191,8 +191,7 @@ module Racket
     # @param [Hash] env Rack environment
     # @return [Array|nil] A Rack response array if Rack::File handled the file, nil otherwise.
     def self.serve_static_file(env)
-      return nil if @static_server.nil?
-      @static_server.call(env)
+      @static_server ? @static_server.call(env) : nil
     end
 
     # Initializes routing.

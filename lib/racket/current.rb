@@ -34,7 +34,7 @@ module Racket
     # @param [Array] params Parameters sent to the action
     # @return [Module] A module encapsulating all state relating to the current request
     def self.init(env, klass, action, params)
-      klass.helper if klass.settings.fetch(:helpers).nil? # Makes sure default helpers are loaded.
+      klass.helper unless klass.settings.fetch(:helpers) # Makes sure default helpers are loaded.
       properties = init_properties(action, params, env)
       Module.new do
         klass.settings.fetch(:helpers).each_value { |helper| include helper }

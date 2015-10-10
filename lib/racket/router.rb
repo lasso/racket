@@ -58,7 +58,7 @@ module Racket
       params.flatten!
       route = ''
       route << @routes[controller_class]
-      route << "/#{action}" unless action.nil?
+      route << "/#{action}" if action
       route << "/#{params.join('/')}" unless params.empty?
       route = route[1..-1] if route.start_with?('//') # Special case for root path
       route
@@ -95,7 +95,7 @@ module Racket
     def route(env)
       catch :response do # Catches early exits from Controller.respond.
         # Ensure that that a controller will respond to the request. If not, send a 404.
-        return render_error(404) if (target_info = target_info(env)).nil?
+        return render_error(404) unless (target_info = target_info(env))
         target_klass, params, action = target_info
 
         # Rewrite PATH_INFO to reflect that we split out the parameters
@@ -118,11 +118,11 @@ module Racket
     # @param [Hash] env
     # @return [Array|nil]
     def target_info(env)
-      matching_routes = @router.recognize(env)
+      matching_route = @router.recognize(env).first
       # Exit early if no controller is responsible for the route
-      return nil if matching_routes.first.nil?
+      return nil unless matching_route
       # Some controller is claiming to be responsible for the route
-      result = Utils.extract_target(matching_routes.first.first)
+      result = Utils.extract_target(matching_route.first)
       # Exit early if action is not available on target
       return nil unless @action_cache[result.first].include?(result.last)
       result

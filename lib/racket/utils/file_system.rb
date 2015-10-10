@@ -23,10 +23,20 @@ module Racket
     module FileSystem
       # Build path in the filesystem.
       class PathBuilder
+        # Creates a new instance of PathBuilder using +args+ and then returning the final path as
+        # a Pathname.
+        #
+        # @param [Array] args
+        # @return [Pathname]
         def self.to_pathname(*args)
           new(args).path
         end
 
+        # Creates a new instance of PathBuilder using +args+ and then returning the final path as
+        # a string.
+        #
+        # @param [Array] args
+        # @return [String]
         def self.to_s(*args)
           new(args).path.to_s
         end
