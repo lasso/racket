@@ -69,7 +69,7 @@ module Racket
         def build_path
           @args.each do |arg|
             path_part = Pathname.new(arg)
-            next unless path_part.relative?
+            fail ArgumentError, arg unless path_part.relative?
             @path = @path.join(path_part)
           end
           remove_instance_variable :@args
@@ -91,11 +91,24 @@ module Racket
       # b) be a directory
       # c) be readable by the current user
       #
-      # @param [String] path
+      # @param [Pathname] path
       # @return [true|false]
       def self.dir_readable?(path)
-        pathname = PathBuilder.to_pathname(path)
-        pathname.exist? && pathname.directory? && pathname.readable?
+        path.exist? && path.directory? && path.readable?
+      end
+
+      # Extracts the correct directory and glob for a given base path/path combination.
+      #
+      # @param [String] base_path
+      # @param [String] path
+      # @return [Array]
+      def self.extract_dir_and_glob(base_path, path)
+        path = Pathname.new(File.join(base_path, path))
+        basename = path.basename
+        [
+          path.dirname,
+          path.extname.empty? ? Pathname.new("#{basename}.*") : basename
+        ]
       end
 
       # Returns whether a file is readable or not. In order to be readable, the file must
@@ -103,9 +116,13 @@ module Racket
       # b) be a file
       # c) be readable by the current user
       #
+      # @param [Pathname|String] path
+      # @return [true|false]
+      # @todo Remove temporary workaround for handling string, we want to use Pathname everywhere
+      #   possible.
       def self.file_readable?(path)
-        pathname = PathBuilder.to_pathname(path)
-        pathname.exist? && pathname.file? && pathname.readable?
+        path = Pathname.new(path) unless path.is_a?(Pathname)
+        path.exist? && path.file? && path.readable?
       end
 
       # Returns a list of relative file paths, sorted by path (longest first).

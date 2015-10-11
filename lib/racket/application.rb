@@ -202,7 +202,8 @@ module Racket
     # @return [nil]
     def self.setup_static_server
       @static_server = nil
-      return nil unless (public_dir = @settings.public_dir) && Utils.dir_readable?(public_dir)
+      return nil unless (public_dir = @settings.public_dir) &&
+                        Utils.dir_readable?(Pathname.new(public_dir))
       inform_dev("Setting up static server to serve files from #{public_dir}.")
       (@static_server = Rack::File.new(public_dir)) && nil
     end

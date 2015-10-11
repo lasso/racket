@@ -60,15 +60,12 @@ module Racket
       # @param [String] path
       # @return [String|nil]
       def self.lookup_template(base_path, path)
-        file_path = File.join(base_path, path)
-        action = File.basename(file_path)
-        file_path = File.dirname(file_path)
-        return nil unless Utils.dir_readable?(file_path)
-        matcher = File.extname(action).empty? ? "#{action}.*" : action
-        Dir.chdir(file_path) do
-          files = Pathname.glob(matcher)
+        directory, glob = Utils.extract_dir_and_glob(base_path, path)
+        return nil unless Utils.dir_readable?(directory)
+        Dir.chdir(directory) do
+          files = Pathname.glob(glob)
           return nil if files.empty?
-          final_path = File.join(file_path, files.first.to_s)
+          final_path = directory.join(files.first)
           Utils.file_readable?(final_path) ? final_path : nil
         end
       end
