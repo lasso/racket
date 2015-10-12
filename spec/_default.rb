@@ -160,9 +160,9 @@ describe 'A default Racket test Application' do
   end
 
   it 'should be able to build paths correctly' do
-    Racket::Utils.build_path.should.equal(Pathname.pwd.to_s)
+    Racket::Utils.build_path.should.equal(Pathname.pwd)
     Racket::Utils.build_path('foo', 'bar', 'baz').should.equal(
-      File.join(Pathname.pwd.to_s, 'foo', 'bar', 'baz')
+      Pathname.pwd.join('foo').join('bar').join('baz')
     )
   end
 

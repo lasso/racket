@@ -38,13 +38,11 @@ module Racket
     # @param [Controller] controller
     # @return [Hash]
     def render(controller)
-      template_path = Utils.get_template_path(controller)
-      view = get_template(ViewParams.new(controller, template_path, :view))
-      layout = view ? get_template(ViewParams.new(controller, template_path, :layout)) : nil
-      if view then output = Utils.render_template(controller, view, layout)
-      else output = controller.racket.action_result
-      end
-      Utils.send_response(controller.response, output)
+      view, layout = *get_view_and_layout(controller)
+      Utils.send_response(
+        controller.response,
+        view ? Utils.render_template(controller, view, layout) : controller.racket.action_result
+      )
     end
 
     private
@@ -74,11 +72,24 @@ module Racket
         controller, path, type = view_params.to_a
         template =
           Utils.lookup_template(
-            instance_variable_get("@#{type}_base_dir".to_sym),
-            [File.dirname(path), Utils.call_template_proc(template, controller)].join('/')
+            Utils.fs_path(
+              Utils.fs_path(instance_variable_get("@#{type}_base_dir".to_sym), path).dirname,
+              Utils.call_template_proc(template, controller)
+            )
           )
       end
       template
+    end
+
+    # Returns the view and layout that should be used for rendering.
+    #
+    # @param [Racket::Controller] controller
+    # @return [Array]
+    def get_view_and_layout(controller)
+      template_path = Utils.get_template_path(controller)
+      view = get_template(ViewParams.new(controller, template_path, :view))
+      layout = view ? get_template(ViewParams.new(controller, template_path, :layout)) : nil
+      [view, layout]
     end
 
     # Stores the location of a template (not its contents) in the cache.
@@ -90,7 +101,7 @@ module Racket
       controller, path, type = view_params.to_a
       base_dir = instance_variable_get("@#{type}_base_dir".to_sym)
       default_template = controller.settings.fetch("default_#{type}".to_sym)
-      template = Utils.lookup_template_with_default(base_dir, path, default_template)
+      template = Utils.lookup_template_with_default(Utils.fs_path(base_dir, path), default_template)
       Application.inform_dev(
         "Using #{type} #{template.inspect} for #{controller.class}.#{controller.racket.action}."
       )

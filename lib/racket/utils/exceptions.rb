@@ -42,7 +42,7 @@ module Racket
         # Returns an anonymous module that can be used to rescue exceptions dynamically.
         def self.boolean_module(errors)
           Module.new do
-            (class << self; self; end).instance_eval do
+            singleton_class.instance_eval do
               define_method(:===) do |error|
                 errors.any? { |err| error.class <= err }
               end

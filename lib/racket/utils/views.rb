@@ -55,12 +55,10 @@ module Racket
 
       # Locates a file in the filesystem matching an URL path. If there exists a matching file, the
       # path to it is returned. If there is no matching file, +nil+ is returned.
-      #
-      # @param [String] base_path
-      # @param [String] path
-      # @return [String|nil]
-      def self.lookup_template(base_path, path)
-        directory, glob = Utils.extract_dir_and_glob(base_path, path)
+      # @param [Pathname] path
+      # @return [Pathname|nil]
+      def self.lookup_template(path)
+        directory, glob = Utils.extract_dir_and_glob(path)
         return nil unless Utils.dir_readable?(directory)
         Dir.chdir(directory) do
           files = Pathname.glob(glob)
@@ -75,15 +73,13 @@ module Racket
       # a Symbol, another lookup will be performed using +default_template+. If +default_template+
       # is a Proc or nil, +default_template+ will be used as is instead.
       #
-      # @param [String] base_dir
-      # @param [String] path
+      # @param [Pathname] path
       # @param [String|Symbol|Proc|nil] default_template
       # @return [String|Proc|nil]
-      def self.lookup_template_with_default(base_dir, path, default_template)
-        template = lookup_template(base_dir, path)
+      def self.lookup_template_with_default(path, default_template)
+        template = lookup_template(path)
         if !template && (default_template.is_a?(String) || default_template.is_a?(Symbol))
-          path = File.join(File.dirname(path), default_template)
-          template = lookup_template(base_dir, path)
+          template = lookup_template(Utils.fs_path(path.dirname, default_template))
         end
         template || default_template
       end

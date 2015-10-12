@@ -32,15 +32,6 @@ module Racket
           new(args).path
         end
 
-        # Creates a new instance of PathBuilder using +args+ and then returning the final path as
-        # a string.
-        #
-        # @param [Array] args
-        # @return [String]
-        def self.to_s(*args)
-          new(args).path.to_s
-        end
-
         attr_reader :path
 
         private
@@ -81,9 +72,9 @@ module Racket
       # relative, otherwise they will be removed from the final path.
       #
       # @param [Array] args
-      # @return [String]
+      # @return [Pathname]
       def self.build_path(*args)
-        PathBuilder.to_s(*args)
+        PathBuilder.to_pathname(*args)
       end
 
       # Returns whether a directory is readable or not. In order to be readable, the directory must
@@ -99,16 +90,25 @@ module Racket
 
       # Extracts the correct directory and glob for a given base path/path combination.
       #
-      # @param [String] base_path
-      # @param [String] path
+      # @param [Pathname] path
       # @return [Array]
-      def self.extract_dir_and_glob(base_path, path)
-        path = Pathname.new(File.join(base_path, path))
+      def self.extract_dir_and_glob(path)
         basename = path.basename
         [
           path.dirname,
           path.extname.empty? ? Pathname.new("#{basename}.*") : basename
         ]
+      end
+
+      # Given a base pathname and a url path string, returns a pathname.
+      #
+      # @param [Pathname] base_pathname
+      # @param [String] url_path
+      # @return [Pathname]
+      def self.fs_path(base_pathname, url_path)
+        parts = url_path.split('/').reject(&:empty?)
+        parts.each { |part| base_pathname = base_pathname.join(part) }
+        base_pathname
       end
 
       # Returns whether a file is readable or not. In order to be readable, the file must
@@ -121,7 +121,7 @@ module Racket
       # @todo Remove temporary workaround for handling string, we want to use Pathname everywhere
       #   possible.
       def self.file_readable?(path)
-        path = Pathname.new(path) unless path.is_a?(Pathname)
+        # path = Pathname.new(path) unless path.is_a?(Pathname)
         path.exist? && path.file? && path.readable?
       end
 

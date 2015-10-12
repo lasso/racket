@@ -27,7 +27,7 @@ module Racket
         Utils.run_block(NameError) do
           Utils.run_block(LoadError) { require "racket/helpers/#{helper}" } ||
             (helper_dir &&
-              Utils.run_block(LoadError) { require Utils.build_path(helper_dir, helper) }
+              Utils.run_block(LoadError) { require Utils.fs_path(helper_dir, helper) }
             )
           helper_modules[helper] = Racket::Helpers.const_get(helper_module)
           Application.inform_dev("Added helper module #{helper.inspect} to class #{self}.")

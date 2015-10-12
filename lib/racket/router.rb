@@ -23,6 +23,17 @@ require 'http_router'
 module Racket
   # Handles routing in Racket applications.
   class Router
+    # A struct describing a route.
+    Route = Struct.new(:root, :action, :params) do
+      def to_s
+        route = root.dup
+        route << "/#{action}" if action
+        route << "/#{params.join('/')}" unless params.empty?
+        route = route[1..-1] if route.start_with?('//') # Special case for root path
+        route
+      end
+    end
+
     attr_reader :action_cache
     attr_reader :routes
 
@@ -56,12 +67,7 @@ module Racket
     def get_route(controller_class, action, params)
       fail "Cannot find controller #{controller_class}" unless @routes.key?(controller_class)
       params.flatten!
-      route = ''
-      route << @routes[controller_class]
-      route << "/#{action}" if action
-      route << "/#{params.join('/')}" unless params.empty?
-      route = route[1..-1] if route.start_with?('//') # Special case for root path
-      route
+      Route.new(@routes[controller_class], action, params).to_s
     end
 
     # Maps a controller to the specified path.
