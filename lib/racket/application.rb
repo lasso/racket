@@ -134,8 +134,8 @@ module Racket
     def self.load_controllers
       inform_dev('Loading controllers.')
       @settings.store(:last_added_controller, [])
-      Utils.files_by_longest_path(@settings.controller_dir, File.join('**', '*.rb')).each do |file|
-        load_controller_file(file)
+      Utils.paths_by_longest_path(@settings.controller_dir, File.join('**', '*.rb')).each do |path|
+        load_controller_file(path)
       end
       @settings.delete(:last_added_controller)
       inform_dev('Done loading controllers.') && nil
@@ -146,10 +146,10 @@ module Racket
     # @param [String] file Relative path from controller dir
     # @return nil
     def self.load_controller_file(file)
-      ::Kernel.require Utils.build_path(@settings.controller_dir, file)
-      path = "/#{File.dirname(file)}"
-      path = '' if path == '/.'
-      @router.map(path, @settings.fetch(:last_added_controller).pop) && nil
+      ::Kernel.require file
+      url_path = "/#{file.relative_path_from(@settings.controller_dir).dirname}"
+      url_path = '' if url_path == '/.'
+      @router.map(url_path, @settings.fetch(:last_added_controller).pop) && nil
     end
 
     # Loads some middleware (based on settings).

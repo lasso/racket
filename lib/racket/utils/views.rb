@@ -58,14 +58,7 @@ module Racket
       # @param [Pathname] path
       # @return [Pathname|nil]
       def self.lookup_template(path)
-        directory, glob = Utils.extract_dir_and_glob(path)
-        return nil unless Utils.dir_readable?(directory)
-        Dir.chdir(directory) do
-          files = Pathname.glob(glob)
-          return nil if files.empty?
-          final_path = directory.join(files.first)
-          Utils.file_readable?(final_path) ? final_path : nil
-        end
+        Utils.first_matching_path(*Utils.extract_dir_and_glob(path))
       end
 
       # Locates a file in the filesystem matching an URL path. If there exists a matching file, the
