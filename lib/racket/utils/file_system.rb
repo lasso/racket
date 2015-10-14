@@ -21,15 +21,21 @@ module Racket
   module Utils
     # Utility functions for filesystem.
     module FileSystem
-      # Struct used for comparing length of paths.
-      PathSize = Struct.new(:path) do
+      # Class used for comparing length of paths.
+      class SizedPath
+        attr_reader :path, :size
+
+        def initialize(path)
+          @path = path
+          @size = 0
+          @path.ascend { @size += 1 }
+        end
+
         def <=>(other)
-          size = other_size = 0
-          path.ascend { size += 1 }
-          other.path.ascend { other_size += 1 }
-          other_size <=> size
+          other.size <=> @size
         end
       end
+
       # Build path in the filesystem.
       class PathBuilder
         # Creates a new instance of PathBuilder using +args+ and then returning the final path as
@@ -161,7 +167,7 @@ module Racket
       # @param [String] glob
       # return [Array]
       def self.paths_by_longest_path(base_dir, glob)
-        paths = matching_paths(base_dir, glob).map { |path| PathSize.new(path) }.sort
+        paths = matching_paths(base_dir, glob).map { |path| SizedPath.new(path) }.sort
         paths.map(&:path)
       end
     end
