@@ -93,7 +93,8 @@ module Racket
     # @param [Symbol] level
     # @return nil
     def self.inform(message, level)
-      (@settings.logger.send(level, message) if @settings.logger) && nil
+      logger = @settings.logger
+      (logger.send(level, message) if logger) && nil
     end
 
     # Sends a message to the logger.

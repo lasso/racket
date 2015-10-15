@@ -20,6 +20,39 @@ module Racket
   module Utils
     # Utility functions for routing.
     module Routing
+      # Class for caching actions
+      class ActionCache
+        def initialize
+          @cache = {}
+        end
+
+        # Returns the value associated with +key+. If cache does not contain +key+, an empty array
+        # is returned instead.
+        #
+        # @param [Object] key
+        # @return [Array]
+        def fetch(key)
+          @cache.fetch(key, [])
+        end
+
+        # Caches all actions for a controller class. This is used to quickly decide whether an
+        # action is valid or not.
+        #
+        # @param [Racket::Controller]
+        # @return [nil]
+        def store(controller_class)
+          actions = SortedSet.new
+          current_class = controller_class
+          while current_class < Controller
+            actions.merge(current_class.public_instance_methods(false))
+            current_class = current_class.superclass
+          end
+          actions = actions.to_a
+          Application.inform_dev("Caching actions #{actions} for #{controller_class}.")
+          (@cache[controller_class] = actions) && nil
+        end
+      end
+
       # Extracts the target class, target params and target action from a list of valid routes.
       #
       # @param [HttpRouter::Response] response

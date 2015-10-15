@@ -23,8 +23,6 @@ module Racket
     module FileSystem
       # Class used for comparing length of paths.
       class SizedPath
-        include Comparable
-
         attr_reader :path, :size
 
         def initialize(path)

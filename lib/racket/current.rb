@@ -34,10 +34,16 @@ module Racket
     # @param [Array] params Parameters sent to the action
     # @return [Module] A module encapsulating all state relating to the current request
     def self.init(env, klass, action, params)
-      klass.helper unless klass.settings.fetch(:helpers) # Makes sure default helpers are loaded.
+      settings = klass.settings
+      klass.helper unless settings.fetch(:helpers) # Makes sure default helpers are loaded.
+      helpers = settings.fetch(:helpers)
       properties = init_properties(action, params, env)
+      init_module(helpers, properties)
+    end
+
+    def self.init_module(helpers, properties)
       Module.new do
-        klass.settings.fetch(:helpers).each_value { |helper| include helper }
+        helpers.each_value { |helper| include helper }
         properties.each_pair { |key, value| define_method(key) { value } }
       end
     end
@@ -54,6 +60,6 @@ module Racket
       properties
     end
 
-    private_class_method :init_properties
+    private_class_method :init_module, :init_properties
   end
 end
