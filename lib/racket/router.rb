@@ -40,7 +40,7 @@ module Racket
     def initialize
       @router = HttpRouter.new
       @routes = {}
-      @action_cache = Utils::Routing::ActionCache.new
+      @action_cache = Utils.create_action_cache
     end
 
     # Returns a route to the specified controller/action/parameter combination.
@@ -65,7 +65,7 @@ module Racket
       Application.inform_dev("Mapping #{controller_class} to #{controller_class_base_path}.")
       @router.add("#{path}(/*params)").to(controller_class)
       @routes[controller_class] = controller_class_base_path
-      @action_cache.store(controller_class) && nil
+      @action_cache.add(controller_class)
     end
 
     # @todo: Allow the user to set custom handlers for different errors
@@ -115,7 +115,7 @@ module Racket
       # Some controller is claiming to be responsible for the route
       result = Utils.extract_target(matching_route.first)
       # Exit early if action is not available on target
-      return nil unless @action_cache.fetch(result.first).include?(result.last)
+      return nil unless @action_cache.present?(result.first, result.last)
       result
     end
   end

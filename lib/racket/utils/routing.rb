@@ -22,25 +22,28 @@ module Racket
     module Routing
       # Class for caching actions
       class ActionCache
+        attr_reader :items
+
         def initialize
-          @cache = {}
+          @items = {}
         end
 
-        # Returns the value associated with +key+. If cache does not contain +key+, an empty array
-        # is returned instead.
+        # Returns whether +controller_class+ is in the cache and that it contains the action
+        # +action+.
         #
-        # @param [Object] key
-        # @return [Array]
-        def fetch(key)
-          @cache.fetch(key, [])
+        # @param [Class] controller_class
+        # @param [Symbol] action
+        # @return [true|false]
+        def present?(controller_class, action)
+          @items.fetch(controller_class, []).include?(action)
         end
 
-        # Caches all actions for a controller class. This is used to quickly decide whether an
-        # action is valid or not.
+        # Caches all actions for a controller class. This is used on every request to quickly decide
+        # whether an action is valid or not.
         #
         # @param [Racket::Controller]
         # @return [nil]
-        def store(controller_class)
+        def add(controller_class)
           actions = SortedSet.new
           current_class = controller_class
           while current_class < Controller
@@ -49,8 +52,15 @@ module Racket
           end
           actions = actions.to_a
           Application.inform_dev("Caching actions #{actions} for #{controller_class}.")
-          (@cache[controller_class] = actions) && nil
+          (@items[controller_class] = actions) && nil
         end
+      end
+
+      # Returns a new ActionCache object.
+      #
+      # @return [ActionCache]
+      def self.create_action_cache
+        ActionCache.new
       end
 
       # Extracts the target class, target params and target action from a list of valid routes.
