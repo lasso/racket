@@ -40,7 +40,7 @@ module Racket
     def initialize
       @router = HttpRouter.new
       @routes = {}
-      @action_cache = Utils.create_action_cache
+      @action_cache = Utils::Routing::ActionCache.new
     end
 
     # Returns a route to the specified controller/action/parameter combination.

@@ -41,26 +41,21 @@ module Racket
         # Caches all actions for a controller class. This is used on every request to quickly decide
         # whether an action is valid or not.
         #
-        # @param [Racket::Controller]
+        # @param [Class] controller_class
         # @return [nil]
         def add(controller_class)
-          actions = SortedSet.new
-          current_class = controller_class
-          while current_class < Controller
-            actions.merge(current_class.public_instance_methods(false))
-            current_class = current_class.superclass
-          end
-          actions = actions.to_a
-          Application.inform_dev("Caching actions #{actions} for #{controller_class}.")
+          actions = self.class.__add(controller_class).to_a
+          Application.inform_dev("Registering actions #{actions} for #{controller_class}.")
           (@items[controller_class] = actions) && nil
         end
-      end
 
-      # Returns a new ActionCache object.
-      #
-      # @return [ActionCache]
-      def self.create_action_cache
-        ActionCache.new
+        def self.__add(controller_class, actions = SortedSet.new)
+          return actions if controller_class == Controller
+          __add(
+            controller_class.superclass,
+            actions.merge(controller_class.public_instance_methods(false))
+          )
+        end
       end
 
       # Extracts the target class, target params and target action from a list of valid routes.

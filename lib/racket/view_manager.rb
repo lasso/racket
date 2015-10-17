@@ -19,17 +19,9 @@
 module Racket
   # Handles rendering in Racket applications.
   class ViewManager
-    # Struct for holding view parameters.
-    ViewParams = Struct.new(:controller, :path, :type)
-
-    attr_reader :layout_cache
-    attr_reader :view_cache
-
     def initialize(layout_base_dir, view_base_dir)
-      @layout_base_dir = layout_base_dir
-      @view_base_dir = view_base_dir
-      @layout_cache = {}
-      @view_cache = {}
+      @locator = Utils::Views::TemplateLocator.new(layout_base_dir, view_base_dir)
+      @renderer = Utils::Views::ViewRenderer
     end
 
     # Renders a controller based on the request path and the variables set in the
@@ -38,74 +30,19 @@ module Racket
     # @param [Controller] controller
     # @return [Hash]
     def render(controller)
-      view, layout = *get_view_and_layout(controller)
-      Utils.send_response(
-        controller.response,
-        view ? Utils.render_template(controller, view, layout) : controller.racket.action_result
-      )
+      @renderer.render(controller, *get_view_and_layout(controller))
     end
 
     private
-
-    # Returns a cached template. If the template has not been cached yet, this method will run a
-    # lookup against the provided parameters.
-    #
-    # @param [ViewParams] view_params
-    # @return [String|Proc|nil]
-    def ensure_in_cache(view_params)
-      _, path, type = view_params.to_a
-      store = instance_variable_get("@#{type}_cache".to_sym)
-      return store[path] if store.key?(path)
-      store_in_cache(store, view_params)
-    end
-
-    # Tries to locate a template matching +path+ in the file system and returns the path if a
-    # matching file is found. If no matching file is found, +nil+ is returned. The result is cached,
-    # meaning that the filesystem lookup for a specific path will only happen once.
-    #
-    # @param [ViewParams] view_params
-    # @return [String|nil]
-    def get_template(view_params)
-      template = ensure_in_cache(view_params)
-      # If template is a Proc, call it
-      if template.is_a?(Proc)
-        controller, path, type = view_params.to_a
-        template =
-          Utils.lookup_template(
-            Utils.fs_path(
-              Utils.fs_path(instance_variable_get("@#{type}_base_dir".to_sym), path).dirname,
-              Utils.call_template_proc(template, controller)
-            )
-          )
-      end
-      template
-    end
 
     # Returns the view and layout that should be used for rendering.
     #
     # @param [Racket::Controller] controller
     # @return [Array]
     def get_view_and_layout(controller)
-      template_path = Utils.get_template_path(controller)
-      view = get_template(ViewParams.new(controller, template_path, :view))
-      layout = view ? get_template(ViewParams.new(controller, template_path, :layout)) : nil
+      view = @locator.get_view(controller)
+      layout = view ? @locator.get_layout(controller) : nil
       [view, layout]
-    end
-
-    # Stores the location of a template (not its contents) in the cache.
-    #
-    # @param [Object] store Where to store the location
-    # @param [ViewParams] view_params
-    # @return [String|Proc|nil]
-    def store_in_cache(store, view_params)
-      controller, path, type = view_params.to_a
-      base_dir = instance_variable_get("@#{type}_base_dir".to_sym)
-      default_template = controller.settings.fetch("default_#{type}".to_sym)
-      template = Utils.lookup_template_with_default(Utils.fs_path(base_dir, path), default_template)
-      Application.inform_dev(
-        "Using #{type} #{template.inspect} for #{controller.class}.#{controller.racket.action}."
-      )
-      store[path] = template
     end
   end
 end
