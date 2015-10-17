@@ -23,9 +23,23 @@ require 'racket/helpers/file.rb'
 require 'rack/test'
 require 'bacon'
 
+# Method tests should always be run first.
 require File.join(TEST_DIR, '_request.rb')
 
-Dir.chdir(TEST_DEFAULT_APP_DIR) { require File.join(TEST_DIR, '_default.rb') }
-Dir.chdir(TEST_CUSTOM_APP_DIR) { require File.join(TEST_DIR, '_custom.rb') }
+# Application tests.
+suites = [
+  -> { Dir.chdir(TEST_DEFAULT_APP_DIR) { require File.join(TEST_DIR, '_default.rb') } },
+  -> { Dir.chdir(TEST_CUSTOM_APP_DIR) { require File.join(TEST_DIR, '_custom.rb') } }
+]
 
+# Leave off randomization for now. Sessions does not seem to be reset correctly between suites!
+# suites.shuffle!
+
+# Run application tests.
+suites.each do |suite|
+  Racket::Application.reset!
+  suite.call
+end
+
+# Invalid application test should always be run last.
 require File.join(TEST_DIR, '_invalid.rb')

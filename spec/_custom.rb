@@ -2,14 +2,11 @@ describe 'A custom Racket test Application' do
   extend Rack::Test::Methods
   def app
     @app ||= Racket::Application.using(
-      {
-        default_layout: 'zebra.*',
-        logger: nil,
-        my_custom_secret: 42,
-        mode: :dev,
-        view_dir: 'templates'
-      },
-      true
+      default_layout: 'zebra.*',
+      logger: nil,
+      my_custom_secret: 42,
+      mode: :dev,
+      view_dir: 'templates'
     )
   end
 

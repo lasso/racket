@@ -81,10 +81,9 @@ module Racket
 
     # Initializes a new Racket::Application object with default settings.
     #
-    # @param [true|false] reboot
     # @return [Class]
-    def self.default(reboot = false)
-      init({}, reboot)
+    def self.default
+      init
     end
 
     # Writes a message to the logger if there is one present.
@@ -118,10 +117,8 @@ module Racket
     # Initializes the Racket application.
     #
     # @param [Hash] settings
-    # @param [true|false] reboot
     # @return [Class]
-    def self.init(settings, reboot)
-      instance_variables.each { |ivar| instance_variable_set(ivar, nil) } if reboot
+    def self.init(settings = {})
       fail 'Application has already been initialized!' if @settings
       @settings = Settings::Application.new(settings)
       setup_static_server
@@ -182,6 +179,13 @@ module Racket
       (::Kernel.require Utils.build_path(*args)) && nil
     end
 
+    # Resets Racket::Application, making it possible to run run a new application with new settings.
+    # This is a workaround for Racket::Application being a singleton, making tests harder to write,
+    # @todo Remove this when Racket::Application stops beeing a singleton (if ever).
+    def self.reset!
+      instance_variables.each { |ivar| instance_variable_set(ivar, nil) }
+    end
+
     # Serves a static file (if Racket is configured to serve static files).
     #
     # @param [Hash] env Rack environment
@@ -212,10 +216,9 @@ module Racket
     # Initializes a new Racket::Application object with settings specified by +settings+.
     #
     # @param [Hash] settings
-    # @param [true|false] reboot
     # @return [Class]
-    def self.using(settings, reboot = false)
-      init(settings, reboot)
+    def self.using(settings)
+      init(settings)
     end
 
     # Returns the view cache of the currently running application.

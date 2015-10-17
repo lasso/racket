@@ -33,10 +33,20 @@ module Racket
           @view_cache = {}
         end
 
+        # Returns the layout associated with the current request. On the first request to any action
+        # the result is cached, meaning that the layout only needs to be looked up once.
+        #
+        # @param [Racket::Controller] controller
+        # @return [String|nil]
         def get_layout(controller)
           get_template(TemplateParams.new(:layout, controller, @layout_base_dir, @layout_cache))
         end
 
+        # Returns the view associated with the current request. On the first request to any action
+        # the result is cached, meaning that the view only needs to be looked up once.
+        #
+        # @param [Racket::Controller] controller
+        # @return [String|nil]
         def get_view(controller)
           get_template(TemplateParams.new(:view, controller, @view_base_dir, @view_cache))
         end
@@ -57,7 +67,7 @@ module Racket
         # Returns a cached template. If the template has not been cached yet, this method will run a
         # lookup against the provided parameters.
         #
-        # @param [ViewParams] view_params
+        # @param [TemplateParams] template_params
         # @return [String|Proc|nil]
         def ensure_in_cache(template_params, path)
           cache = template_params.cache
@@ -69,24 +79,24 @@ module Racket
         # matching file is found. If no matching file is found, +nil+ is returned. The result is
         # cached, meaning that the filesystem lookup for a specific path will only happen once.
         #
-        # @param [ViewParams] view_params
+        # @param [TemplateParams] template_params
         # @return [String|nil]
         def get_template(template_params)
-          _, controller, base_dir = template_params.to_a
           klass = self.class
-          path = klass.get_template_path(controller)
+          path = klass.get_template_path(template_params.controller)
           template = ensure_in_cache(template_params, path)
-          # If template is a Proc, call it
-          if template.is_a?(Proc)
-            template =
-              klass.lookup_template(
-                Utils.fs_path(
-                  Utils.fs_path(base_dir, path).dirname,
-                  klass.call_template_proc(template, controller)
-                )
-              )
-          end
-          template
+          klass.resolve_template(template_params, path, template)
+        end
+
+        def self.resolve_template(template_params, path, template)
+          return template unless template.is_a?(Proc)
+          _, controller, base_dir = template_params.to_a
+          lookup_template(
+            Utils.fs_path(
+              Utils.fs_path(base_dir, path).dirname,
+              call_template_proc(template, controller)
+            )
+          )
         end
 
         # Calls a template proc. Depending on how many parameters the template proc takes, different
@@ -147,6 +157,13 @@ module Racket
 
       # Class responsible for rendering a controller/view/layout combination.
       class ViewRenderer
+        # Renders a page using the provided controller/view and layout combination and returns an
+        # response array that can be sent to the client.
+        #
+        # @param [Racket::Controller] controller
+        # @param [String] view
+        # @param [String] layout
+        # @return [Array]
         def self.render(controller, view, layout)
           send_response(
             controller.response,
