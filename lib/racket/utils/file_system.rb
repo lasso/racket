@@ -174,6 +174,15 @@ module Racket
         paths = matching_paths(base_dir, glob).map { |path| SizedPath.new(path) }.sort
         paths.map(&:path)
       end
+
+      # Safely requires a file. This method will catch load errors and return true (if the file
+      # was loaded) or false (if the file was not loaded).
+      #
+      # @param [String] resource
+      # @return [true|false]
+      def self.safe_require(resource)
+        Utils.run_block(LoadError) { require resource }
+      end
     end
   end
 end

@@ -44,17 +44,23 @@ module Racket
         # @param [Class] controller_class
         # @return [nil]
         def add(controller_class)
-          actions = self.class.__add(controller_class).to_a
-          Application.inform_dev("Registering actions #{actions} for #{controller_class}.")
-          (@items[controller_class] = actions) && nil
+          __add(controller_class)
+          actions = @items[controller_class].to_a
+          @items[controller_class] = actions
+          Application.inform_dev("Registering actions #{actions} for #{controller_class}.") && nil
         end
 
-        def self.__add(controller_class, actions = SortedSet.new)
-          return actions if controller_class == Controller
-          __add(
-            controller_class.superclass,
-            actions.merge(controller_class.public_instance_methods(false))
-          )
+        private
+
+        # Internal handler for adding actions to the cache.
+        #
+        # @param [Class] controller_class
+        # @return [nil]
+        def __add(controller_class)
+          return if controller_class == Controller
+          actions = @items.fetch(controller_class, SortedSet.new)
+          @items[controller_class] = actions.merge(controller_class.public_instance_methods(false))
+          __add(controller_class.superclass) && nil
         end
       end
 

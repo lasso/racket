@@ -20,26 +20,33 @@ module Racket
   # Base controller class. Your controllers should inherit this class.
   class Controller
     def self.__load_helpers(helpers)
-      helper_dir = Application.settings.helper_dir
       helper_modules = {}
       helpers.each do |helper|
-        helper_module = helper.to_s.split('_').collect(&:capitalize).join.to_sym
-        Utils.run_block(NameError) do
-          Utils.run_block(LoadError) { require "racket/helpers/#{helper}" } ||
-            (helper_dir &&
-              Utils.run_block(LoadError) { require Utils.fs_path(helper_dir, helper) }
-            )
-          helper_modules[helper] = Racket::Helpers.const_get(helper_module)
-          Application.inform_dev("Added helper module #{helper.inspect} to class #{self}.")
-        end ||
-          Application.inform_dev(
-            "Failed to add helper module #{helper.inspect} to class #{self}.", :warn
-          )
+        helper_module = __load_helper_file(Application.settings.helper_dir, helper)
+        helper_modules[helper] = helper_module if helper_module
       end
       helper_modules
     end
 
-    private_class_method :__load_helpers
+    def self.__load_helper_file(helper_dir, helper)
+      helper_module = nil
+      Utils.run_block(NameError) { helper_module = __require_helper_file(helper_dir, helper) }
+      Application.inform_dev(
+        "Failed to add helper module #{helper.inspect} to class #{self}.", :warn
+      ) unless helper_module
+      helper_module
+    end
+
+    def self.__require_helper_file(helper_dir, helper)
+      loaded = Utils.safe_require("racket/helpers/#{helper}")
+      Utils.safe_require(Utils.fs_path(helper_dir, helper)) if !loaded && helper_dir
+      helper_module =
+        Racket::Helpers.const_get(helper.to_s.split('_').collect(&:capitalize).join.to_sym)
+      Application.inform_dev("Added helper module #{helper.inspect} to class #{self}.")
+      helper_module
+    end
+
+    private_class_method :__load_helpers, :__load_helper_file, :__require_helper_file
 
     # Adds a hook to one or more actions.
     #
