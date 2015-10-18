@@ -53,6 +53,15 @@ module Racket
         @custom.fetch(key, default)
       end
 
+      # Returns whether +key+ is present among the settings.
+      #
+      # @param [Symbol] key
+      # @return [true|false]
+      def present?(key)
+        meth = key.to_sym
+        respond_to?(meth) || @custom.key?(key)
+      end
+
       # Sets/updates a custom setting in the application.
       #
       # @param [Symbol] key

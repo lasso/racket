@@ -19,34 +19,16 @@
 module Racket
   # Base controller class. Your controllers should inherit this class.
   class Controller
-    def self.__load_helpers(helpers)
-      helper_modules = {}
-      helpers.each do |helper|
-        helper_module = __load_helper_file(Application.settings.helper_dir, helper)
-        helper_modules[helper] = helper_module if helper_module
-      end
-      helper_modules
+    def self.__helper_cache
+      settings = Controller.settings
+      helper_cache =
+        settings.fetch(
+          :helper_cache,
+          Utils::Helpers::HelperCache.new(Application.settings.helper_dir)
+        )
+      settings.store(:helper_cache, helper_cache) unless settings.present?(:helper_cache)
+      helper_cache
     end
-
-    def self.__load_helper_file(helper_dir, helper)
-      helper_module = nil
-      Utils.run_block(NameError) { helper_module = __require_helper_file(helper_dir, helper) }
-      Application.inform_dev(
-        "Failed to add helper module #{helper.inspect} to class #{self}.", :warn
-      ) unless helper_module
-      helper_module
-    end
-
-    def self.__require_helper_file(helper_dir, helper)
-      loaded = Utils.safe_require("racket/helpers/#{helper}")
-      Utils.safe_require(Utils.fs_path(helper_dir, helper)) if !loaded && helper_dir
-      helper_module =
-        Racket::Helpers.const_get(helper.to_s.split('_').collect(&:capitalize).join.to_sym)
-      Application.inform_dev("Added helper module #{helper.inspect} to class #{self}.")
-      helper_module
-    end
-
-    private_class_method :__load_helpers, :__load_helper_file, :__require_helper_file
 
     # Adds a hook to one or more actions.
     #
@@ -63,8 +45,6 @@ module Racket
       setting(key, hooks)
       nil
     end
-
-    private_class_method :__register_hook
 
     # Adds a before hook to one or more actions. Actions should be given as a list of symbols.
     # If no symbols are provided, *all* actions on the controller is affected.
@@ -97,12 +77,14 @@ module Racket
       helper_modules = {}
       unless settings.fetch(:helpers)
         # No helpers has been loaded yet. Load the default helpers first.
-        helper_modules.merge!(__load_helpers(Application.settings.default_controller_helpers))
+        helper_modules.merge!(
+          __helper_cache.load_helpers(Application.settings.default_controller_helpers)
+        )
       end
       # Load new helpers
       helpers.map!(&:to_sym)
       helpers.reject! { |helper| helper_modules.key?(helper) }
-      helper_modules.merge!(__load_helpers(helpers))
+      helper_modules.merge!(__helper_cache.load_helpers(helpers))
       setting(:helpers, helper_modules)
     end
 
@@ -126,6 +108,8 @@ module Racket
     def self.setting(key, value)
       settings.store(key, value)
     end
+
+    private_class_method :__helper_cache, :__register_hook
 
     # Returns the settings for a controller instance.
     #

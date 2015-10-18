@@ -18,6 +18,7 @@
 
 require_relative 'utils/exceptions.rb'
 require_relative 'utils/file_system.rb'
+require_relative 'utils/helpers.rb'
 require_relative 'utils/routing.rb'
 require_relative 'utils/views.rb'
 
@@ -36,6 +37,7 @@ module Racket
 
     __embrace(Exceptions)
     __embrace(FileSystem)
+    __embrace(Helpers)
     __embrace(Routing)
     __embrace(Views)
   end
