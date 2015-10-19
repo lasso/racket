@@ -45,26 +45,31 @@ module Racket
 
         def load_helper(helper)
           return @helpers[helper] if @helpers.key?(helper)
-          @helpers[helper] = load_helper_file(helper)
+          helper_module = load_helper_file(helper)
+          @helpers[helper] = helper_module if helper_module
         end
 
         def load_helper_file(helper)
-          helper_module = nil
-          Utils.run_block(NameError) { helper_module = require_helper_file(helper) }
-          ::Racket::Application.inform_dev(
-            "Failed to load helper module #{helper.inspect}.", :warn
-          ) unless helper_module
-          helper_module
+          require_helper_file(helper)
+          self.class.load_helper_module(helper)
         end
 
         def require_helper_file(helper)
           loaded = Utils.safe_require("racket/helpers/#{helper}")
-          Utils.safe_require(Utils.fs_path(@helper_dir, helper)) if !loaded && helper_dir
-          helper_module =
-            Racket::Helpers.const_get(helper.to_s.split('_').collect(&:capitalize).join.to_sym)
-          ::Racket::Application.inform_dev("Loaded helper module #{helper.inspect}.")
+          Utils.safe_require(Utils.build_path(@helper_dir, helper).to_s) if !loaded && @helper_dir
+        end
+
+        def self.load_helper_module(helper)
+          helper_module = nil
+          Utils.run_block(NameError) do
+            helper_module =
+              Racket::Helpers.const_get(helper.to_s.split('_').collect(&:capitalize).join.to_sym)
+            ::Racket::Application.inform_dev("Loaded helper module #{helper.inspect}.")
+          end
           helper_module
         end
+
+        private_class_method :load_helper_module
       end
     end
   end
