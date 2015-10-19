@@ -68,8 +68,6 @@ module Racket
           end
           helper_module
         end
-
-        private_class_method :load_helper_module
       end
     end
   end
