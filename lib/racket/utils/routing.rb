@@ -47,7 +47,9 @@ module Racket
           __add(controller_class)
           actions = @items[controller_class].to_a
           @items[controller_class] = actions
-          Application.inform_dev("Registering actions #{actions} for #{controller_class}.") && nil
+          ::Racket::Application.inform_dev(
+            "Registering actions #{actions} for #{controller_class}."
+          ) && nil
         end
 
         private

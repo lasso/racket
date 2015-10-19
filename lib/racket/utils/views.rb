@@ -58,7 +58,7 @@ module Racket
           default_template = controller.settings.fetch("default_#{type}".to_sym)
           template =
             self.class.lookup_template_with_default(Utils.fs_path(base_dir, path), default_template)
-          Application.inform_dev(
+          ::Racket::Application.inform_dev(
             "Using #{type} #{template.inspect} for #{controller.class}.#{controller.racket.action}."
           )
           template
@@ -125,7 +125,7 @@ module Racket
         # @return [String]
         def self.get_template_path(controller)
           template_path =
-            [Application.get_route(controller.class), controller.racket.action].join('/')
+            [::Racket::Application.get_route(controller.class), controller.racket.action].join('/')
           template_path = template_path[1..-1] if template_path.start_with?('//')
           template_path
         end

@@ -31,7 +31,7 @@ module Racket
         # cannot be loaded are excluded from the result.
         #
         # @param [Array] helpers An array of symbols
-        # @return [Hash] A hash of {Symbol: Module}
+        # @return [Hash]
         def load_helpers(helpers)
           helper_modules = {}
           helpers.each do |helper|
@@ -51,7 +51,7 @@ module Racket
         def load_helper_file(helper)
           helper_module = nil
           Utils.run_block(NameError) { helper_module = require_helper_file(helper) }
-          Application.inform_dev(
+          ::Racket::Application.inform_dev(
             "Failed to load helper module #{helper.inspect}.", :warn
           ) unless helper_module
           helper_module
@@ -62,7 +62,7 @@ module Racket
           Utils.safe_require(Utils.fs_path(@helper_dir, helper)) if !loaded && helper_dir
           helper_module =
             Racket::Helpers.const_get(helper.to_s.split('_').collect(&:capitalize).join.to_sym)
-          Application.inform_dev("Loaded helper module #{helper.inspect}.")
+          ::Racket::Application.inform_dev("Loaded helper module #{helper.inspect}.")
           helper_module
         end
       end

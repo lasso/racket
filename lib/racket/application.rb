@@ -31,27 +31,7 @@ module Racket
     # @return [Rack::Builder]
     def self.application
       return @application if @application
-      load_middleware
-      build_application
-    end
-
-    # Builds an application from a Rack::Builder object.
-    #
-    # @return [Rack::Builder]
-    def self.build_application
-      instance = self
-      @application = Rack::Builder.new do
-        instance.settings.middleware.each do |middleware|
-          klass, opts = middleware
-          instance.inform_dev("Loading middleware #{klass} with settings #{opts.inspect}.")
-          use(*middleware)
-        end
-        run lambda { |env|
-          static_result = instance.serve_static_file(env)
-          return static_result if static_result && static_result.first < 400
-          instance.router.route(env)
-        }
-      end
+      @application = Utils::Application::ApplicationBuilder.new(self).build
     end
 
     # Called whenever Rack sends a request to the application.
@@ -150,18 +130,6 @@ module Racket
       @router.map(url_path, @settings.fetch(:last_added_controller).pop) && nil
     end
 
-    # Loads some middleware (based on settings).
-    #
-    # @return nil
-    def self.load_middleware
-      middleware = @settings.middleware
-      session_handler = @settings.session_handler
-      default_content_type = @settings.default_content_type
-      middleware.unshift(session_handler) if session_handler
-      middleware.unshift([Rack::ContentType, default_content_type]) if default_content_type
-      (middleware.unshift([Rack::ShowExceptions]) if dev_mode?) && nil
-    end
-
     # Reloads the application, making any changes to the controller configuration visible
     # to the application.
     #
@@ -228,7 +196,7 @@ module Racket
       @view_manager ||= ViewManager.new(@settings.layout_dir, @settings.view_dir)
     end
 
-    private_class_method :application, :build_application, :inform, :init, :load_controller_file,
-                         :load_controllers, :load_middleware, :setup_routes, :setup_static_server
+    private_class_method :application, :inform, :init, :load_controller_file, :load_controllers,
+                         :setup_routes, :setup_static_server
   end
 end

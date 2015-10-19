@@ -16,6 +16,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Racket.  If not, see <http://www.gnu.org/licenses/>.
 
+require_relative 'utils/application.rb'
 require_relative 'utils/exceptions.rb'
 require_relative 'utils/file_system.rb'
 require_relative 'utils/helpers.rb'
@@ -35,6 +36,7 @@ module Racket
       def_single_delegators(mod, *mod.singleton_methods) && nil
     end
 
+    __embrace(Application)
     __embrace(Exceptions)
     __embrace(FileSystem)
     __embrace(Helpers)
