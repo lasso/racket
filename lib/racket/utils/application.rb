@@ -25,6 +25,7 @@ module Racket
       class ApplicationBuilder
         def initialize(application)
           @application = application
+          @builder = Rack::Builder.new
           @settings = @application.settings
           @middleware = @settings.middleware
         end
@@ -33,21 +34,26 @@ module Racket
         #
         # @return [Proc]
         def build
+          expand_middleware_list
           add_middleware
-          self.class.build_proc(@application, @middleware)
+          @builder.run(application_proc)
+          @builder
         end
 
         private
 
+        # Add middleware to the builder.
         def add_middleware
-          session_handler = @settings.session_handler
-          default_content_type = @settings.default_content_type
-          @middleware.unshift(session_handler) if session_handler
-          @middleware.unshift([Rack::ContentType, default_content_type]) if default_content_type
-          @middleware.unshift([Rack::ShowExceptions]) if @application.dev_mode?
+          @middleware.each do |ware|
+            klass, opts = ware
+            @application.inform_dev("Loading middleware #{klass} with settings #{opts.inspect}.")
+            @builder.use(*ware)
+          end
         end
 
-        def self.application_proc(application)
+        # Returns a lambda that represenents that application flow.
+        def application_proc
+          application = @application
           lambda do |env|
             static_result = application.serve_static_file(env)
             return static_result if static_result && static_result.first < 400
@@ -55,24 +61,14 @@ module Racket
           end
         end
 
-        def self.build_middleware(builder, application, middleware)
-          middleware.each do |ware|
-            klass, opts = ware
-            application.inform_dev("Loading middleware #{klass} with settings #{opts.inspect}.")
-            builder.use(*ware)
-          end
+        # Expands middleware list based on application settings.
+        def expand_middleware_list
+          session_handler = @settings.session_handler
+          default_content_type = @settings.default_content_type
+          @middleware.unshift(session_handler) if session_handler
+          @middleware.unshift([Rack::ContentType, default_content_type]) if default_content_type
+          @middleware.unshift([Rack::ShowExceptions]) if @application.dev_mode?
         end
-
-        def self.build_proc(application, middleware)
-          klass = self
-          application_proc = application_proc(application)
-          Rack::Builder.new do |builder|
-            klass.build_middleware(builder, application, middleware)
-            run application_proc
-          end
-        end
-
-        private_class_method :application_proc
       end
     end
   end
