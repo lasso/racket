@@ -61,10 +61,8 @@ module Racket
     # @param [Class] controller_class
     # @return [nil]
     def map(path, controller_class)
-      controller_class_base_path = path.empty? ? '/' : path
-      Application.inform_dev("Mapping #{controller_class} to #{controller_class_base_path}.")
+      map_controller(path.empty? ? '/' : path, controller_class)
       @router.add("#{path}(/*params)").to(controller_class)
-      @routes[controller_class] = controller_class_base_path
       @action_cache.add(controller_class)
     end
 
@@ -87,21 +85,18 @@ module Racket
       catch :response do # Catches early exits from Controller.respond.
         # Ensure that that a controller will respond to the request. If not, send a 404.
         return render_error(404) unless (target_info = target_info(env))
-        target_klass, params, action = target_info
-
-        # Rewrite PATH_INFO to reflect that we split out the parameters
-        Utils.update_path_info(env, params.length)
-
-        # Initialize and render target
-        target = target_klass.new
-        target.extend(Current.init(env, target_klass, action, params))
-        target.__run
+        Utils.render_controller(env, target_info)
       end
     rescue => err
       render_error(500, err)
     end
 
     private
+
+    def map_controller(base_path, controller_class)
+      Application.inform_dev("Mapping #{controller_class} to #{base_path}.")
+      @routes[controller_class] = base_path
+    end
 
     # Returns information about the target of the request. If no valid target can be found, +nil+
     # is returned.

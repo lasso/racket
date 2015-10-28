@@ -30,8 +30,7 @@ module Racket
     #
     # @return [Rack::Builder]
     def self.application
-      return @application if @application
-      @application = Utils::Application::ApplicationBuilder.new(self).build
+      @application ||= Utils.build_application(self)
     end
 
     # Called whenever Rack sends a request to the application.

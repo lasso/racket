@@ -77,6 +77,28 @@ module Racket
         [target_klass, params, action]
       end
 
+      def self.call_controller(target_klass, mod)
+        target = target_klass.new
+        target.extend(mod)
+        target.__run
+      end
+
+      # Renders a controller. This is the default action whenever a matching route for a request
+      # is found.
+      #
+      # @param [Hash] env
+      # @param [Array] target_info
+      # @return [Array] A racket response triplet
+      def self.render_controller(env, target_info)
+        controller_class, params, action = target_info
+
+        # Rewrite PATH_INFO to reflect that we split out the parameters
+        update_path_info(env, params.length)
+
+        # Initialize and render target
+        call_controller(controller_class, Current.init(env, controller_class, action, params))
+      end
+
       # Updates the PATH_INFO environment variable.
       #
       # @param [Hash] env
@@ -88,6 +110,8 @@ module Racket
                            .join('/') unless num_params.zero?
         nil
       end
+
+      private_class_method :call_controller, :update_path_info
     end
   end
 end

@@ -70,6 +70,14 @@ module Racket
           @middleware.unshift([Rack::ShowExceptions]) if @application.dev_mode?
         end
       end
+
+      # Builds and returns a Rack::Builder using the provided Racket::Application
+      #
+      # @param [Racket::Application] application
+      # @return [Rack::Builder]
+      def self.build_application(application)
+        ApplicationBuilder.new(application).build
+      end
     end
   end
 end
