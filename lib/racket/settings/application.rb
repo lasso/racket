@@ -56,13 +56,16 @@ module Racket
       # @param [String] directory
       # @return [nil]
       def self.directory_setting(symbol, directory)
-        ivar = "@#{symbol}".to_sym
+        define_directory_method(symbol, "@#{symbol}".to_sym, directory)
+        attr_writer(symbol) && nil
+      end
+
+      def self.define_directory_method(symbol, ivar, directory)
         define_method symbol do
           instance_variable_set(ivar, directory) unless instance_variables.include?(ivar)
           return nil unless (value = instance_variable_get(ivar))
           Utils.build_path(value)
         end
-        attr_writer(symbol) && nil
       end
 
       directory_setting(:controller_dir, 'controllers')
@@ -70,6 +73,8 @@ module Racket
       directory_setting(:layout_dir, 'layouts')
       directory_setting(:public_dir, 'public')
       directory_setting(:view_dir, 'views')
+
+      private_class_method :define_directory_method
     end
   end
 end

@@ -111,9 +111,7 @@ module Racket
     def self.load_controllers
       inform_dev('Loading controllers.')
       @settings.store(:last_added_controller, [])
-      Utils.paths_by_longest_path(@settings.controller_dir, File.join('**', '*.rb')).each do |path|
-        load_controller_file(path)
-      end
+      load_controller_files
       @settings.delete(:last_added_controller)
       inform_dev('Done loading controllers.') && nil
     end
@@ -127,6 +125,12 @@ module Racket
       url_path = "/#{file.relative_path_from(@settings.controller_dir).dirname}"
       url_path = '' if url_path == '/.'
       @router.map(url_path, @settings.fetch(:last_added_controller).pop) && nil
+    end
+
+    def self.load_controller_files
+      Utils.paths_by_longest_path(@settings.controller_dir, File.join('**', '*.rb')).each do |path|
+        load_controller_file(path)
+      end
     end
 
     # Reloads the application, making any changes to the controller configuration visible
@@ -195,7 +199,8 @@ module Racket
       @view_manager ||= ViewManager.new(@settings.layout_dir, @settings.view_dir)
     end
 
-    private_class_method :application, :inform, :init, :load_controller_file, :load_controllers,
-                         :setup_routes, :setup_static_server
+    private_class_method :application, :inform, :init, :load_controller_file,
+                         :load_controller_files, :load_controllers, :setup_routes,
+                         :setup_static_server
   end
 end
