@@ -22,15 +22,31 @@ module Racket
   module Utils
     # Utility functions for views.
     module Views
+      # Cache for storing templates
+      class TemplateCache
+        def initialize
+          @cache = {}
+        end
+
+        # Returns a cached template. If the template has not been cached yet, this method will run a
+        # lookup against the provided parameters.
+        #
+        # @param [String] path
+        # @param [TemplateParams] template_params
+        # @return [String|Proc|nil]
+        def ensure_in_cache(path, template_params)
+          return @cache[path] if @cache.key?(path)
+          @cache[path] = TemplateLocator.calculate_path(path, template_params)
+        end
+      end
+
       # Class used for locating templates.
       class TemplateLocator
-        # Struct for holding template data.
-        TemplateParams = Struct.new(:type, :controller, :base_dir, :cache)
         def initialize(layout_base_dir, view_base_dir)
           @layout_base_dir = layout_base_dir
           @view_base_dir = view_base_dir
-          @layout_cache = {}
-          @view_cache = {}
+          @layout_cache = TemplateCache.new
+          @view_cache = TemplateCache.new
         end
 
         # Returns the layout associated with the current request. On the first request to any action
@@ -53,28 +69,6 @@ module Racket
 
         private
 
-        def calculate_path(template_params, path)
-          type, controller, base_dir = template_params.to_a
-          default_template = controller.settings.fetch("default_#{type}".to_sym)
-          template =
-            self.class.lookup_template_with_default(Utils.fs_path(base_dir, path), default_template)
-          ::Racket::Application.inform_dev(
-            "Using #{type} #{template.inspect} for #{controller.class}.#{controller.racket.action}."
-          )
-          template
-        end
-
-        # Returns a cached template. If the template has not been cached yet, this method will run a
-        # lookup against the provided parameters.
-        #
-        # @param [TemplateParams] template_params
-        # @return [String|Proc|nil]
-        def ensure_in_cache(template_params, path)
-          cache = template_params.cache
-          return cache[path] if cache.key?(path)
-          cache[path] = calculate_path(template_params, path)
-        end
-
         # Tries to locate a template matching +path+ in the file system and returns the path if a
         # matching file is found. If no matching file is found, +nil+ is returned. The result is
         # cached, meaning that the filesystem lookup for a specific path will only happen once.
@@ -84,11 +78,24 @@ module Racket
         def get_template(template_params)
           klass = self.class
           path = klass.get_template_path(template_params.controller)
-          template = ensure_in_cache(template_params, path)
-          klass.resolve_template(template_params, path, template)
+          template = template_params.cache.ensure_in_cache(path, template_params)
+          klass.resolve_template(path, template, template_params)
         end
 
-        def self.resolve_template(template_params, path, template)
+        def self.calculate_path(path, template_params)
+          type, controller, base_dir = template_params.to_a
+          default_template = controller.settings.fetch("default_#{type}".to_sym)
+          template =
+            TemplateLocator.lookup_template_with_default(
+              Utils.fs_path(base_dir, path), default_template
+            )
+          ::Racket::Application.inform_dev(
+            "Using #{type} #{template.inspect} for #{controller.class}.#{controller.racket.action}."
+          )
+          template
+        end
+
+        def self.resolve_template(path, template, template_params)
           return template unless template.is_a?(Proc)
           _, controller, base_dir = template_params.to_a
           lookup_template(
@@ -112,10 +119,8 @@ module Racket
         # @param [Racket::Controller] controller
         # @return [String]
         def self.call_template_proc(proc, controller)
-          possible_proc_args =
-            [controller.racket.action, controller.racket.params, controller.request]
-          proc_args = []
-          1.upto(proc.arity) { proc_args.push(possible_proc_args.shift) }
+          racket = controller.racket
+          proc_args = [racket.action, racket.params, controller.request].slice(0...proc.arity)
           proc.call(*proc_args).to_s
         end
 
@@ -195,6 +200,9 @@ module Racket
 
         private_class_method :render_template, :send_response
       end
+
+      # Struct for holding template data.
+      TemplateParams = Struct.new(:type, :controller, :base_dir, :cache)
     end
   end
 end

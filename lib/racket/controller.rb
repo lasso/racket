@@ -37,13 +37,22 @@ module Racket
     # @param [Proc] blk
     # @return [nil]
     def self.__register_hook(type, methods, blk)
-      key = "#{type}_hooks".to_sym
       meths = public_instance_methods(false)
       meths &= methods.map(&:to_sym) unless methods.empty?
-      hooks = settings.fetch(key, {})
+      __update_hooks("#{type}_hooks".to_sym, meths, blk)
+      Application.inform_dev("Adding #{type} hook #{blk} for actions #{meths} for #{self}.")
+    end
+
+    # Updates hooks in settings object.
+    #
+    # @param [Symbol] hook_key
+    # @param [Array] meths
+    # @param [Proc] blk
+    # @return [nil]
+    def self.__update_hooks(hook_key, meths, blk)
+      hooks = settings.fetch(hook_key, {})
       meths.each { |meth| hooks[meth] = blk }
-      setting(key, hooks)
-      nil
+      setting(hook_key, hooks) && nil
     end
 
     # Adds a before hook to one or more actions. Actions should be given as a list of symbols.
@@ -73,6 +82,7 @@ module Racket
     #
     # @param [Array] helpers An array of symbols representing classes living in the Racket::Helpers
     #  namespace.
+    # @return [nil]
     def self.helper(*helpers)
       helper_modules = {}
       unless settings.fetch(:helpers)
@@ -82,10 +92,19 @@ module Racket
         )
       end
       # Load new helpers
-      helpers.map!(&:to_sym)
+      __load_helpers(helpers.map(&:to_sym), helper_modules)
+    end
+
+    # Loads new helpers and stores the list of helpers associated with the currenct controller
+    # in the settings.
+    #
+    # @param [Array] helpers Requested helpers
+    # @param [Array] helper_modules Helper modules already loaded
+    # @retunr nil
+    def self.__load_helpers(helpers, helper_modules)
       helpers.reject! { |helper| helper_modules.key?(helper) }
       helper_modules.merge!(__helper_cache.load_helpers(helpers))
-      setting(:helpers, helper_modules)
+      setting(:helpers, helper_modules) && nil
     end
 
     # :nodoc:
@@ -109,7 +128,7 @@ module Racket
       settings.store(key, value)
     end
 
-    private_class_method :__helper_cache, :__register_hook
+    private_class_method :__helper_cache, :__load_helpers, :__register_hook, :__update_hooks
 
     # Returns the settings for a controller instance.
     #
