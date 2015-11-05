@@ -72,9 +72,7 @@ module Racket
       fail(error) if error && Application.dev_mode?
 
       # Not running in dev mode, let us handle the error ourselves.
-      response = Response.new([], status, 'Content-Type' => 'text/plain')
-      response.write("#{status} #{Rack::Utils::HTTP_STATUS_CODES[status]}")
-      response.finish
+      Response.generate_error_response(status)
     end
 
     # Routes a request and renders it.

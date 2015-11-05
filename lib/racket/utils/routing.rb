@@ -20,6 +20,9 @@ module Racket
   module Utils
     # Utility functions for routing.
     module Routing
+      # Struct for keeping track router parameters.
+      RouterParams = Struct.new(:env, :controller_class, :action, :params)
+
       # Class for caching actions
       class ActionCache
         attr_reader :items
@@ -96,7 +99,10 @@ module Racket
         update_path_info(env, params.length)
 
         # Initialize and render target
-        call_controller(controller_class, Current.init(env, controller_class, action, params))
+        call_controller(
+          controller_class,
+          Current.init(RouterParams.new(env, controller_class, action, params))
+        )
       end
 
       # Updates the PATH_INFO environment variable.
