@@ -33,6 +33,18 @@ require_relative 'racket/utils.rb'
 
 # Racket main namespace
 module Racket
+  # Loads a racket plugin.
+  #
+  # @param [Symbol] plugin
+  # @param [Hash] settings
+  def plugin(plugin, settings = {})
+    Utils.safe_load("racket/plugins/#{plugin}.rb")
+    plugin_module =
+      Racket::Plugins.const_get(plugin.to_s.split('_').collect(&:capitalize).join.to_sym)
+    plugin_module.init(settings) if plugin_module.respond_to?(:init)
+    Application.add_plugin(plugin_module)
+  end
+
   # Requires a file using the current application directory as a base path.
   #
   # @param [Object] args
