@@ -25,17 +25,6 @@ module Racket
       attr_reader :router, :settings
     end
 
-    # Adds a plugin to Racket. The plugin will be automatically inserted into Racket when the
-    # application is instantiated.
-    #
-    # @param [Module] plugin
-    # @return [nil]
-    def self.add_plugin(plugin)
-      @plugins ||= []
-      @plugins << plugin
-      nil
-    end
-
     # Returns the internal application object. When called for the first time this method will use
     # Rack::Builder to construct the application.
     #

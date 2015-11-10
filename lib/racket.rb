@@ -22,6 +22,7 @@ require 'rack'
 require_relative 'racket/application.rb'
 require_relative 'racket/controller.rb'
 require_relative 'racket/current.rb'
+require_relative 'racket/plugin_manager.rb'
 require_relative 'racket/request.rb'
 require_relative 'racket/response.rb'
 require_relative 'racket/router.rb'
@@ -38,11 +39,7 @@ module Racket
   # @param [Symbol] plugin
   # @param [Hash] settings
   def plugin(plugin, settings = {})
-    Utils.safe_load("racket/plugins/#{plugin}.rb")
-    plugin_module =
-      Racket::Plugins.const_get(plugin.to_s.split('_').collect(&:capitalize).join.to_sym)
-    plugin_module.init(settings) if plugin_module.respond_to?(:init)
-    Application.add_plugin(plugin_module)
+    PluginManager.add(plugin, settings)
   end
 
   # Requires a file using the current application directory as a base path.
@@ -62,5 +59,5 @@ module Racket
     Version.current
   end
 
-  module_function :require, :version
+  module_function :plugin, :require, :version
 end

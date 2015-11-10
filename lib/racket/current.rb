@@ -43,6 +43,8 @@ module Racket
 
     def self.init_module(helpers, properties)
       Module.new do
+        # Plugins get loaded inte every controller regardless of settings.
+        PluginManager.plugins.each { |plugin| include plugin }
         helpers.each_value { |helper| include helper }
         properties.each_pair { |key, value| define_method(key) { value } }
       end

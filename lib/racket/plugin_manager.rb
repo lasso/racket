@@ -16,21 +16,18 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Racket.  If not, see <http://www.gnu.org/licenses/>.
 
-begin
-  require 'sass/plugin/rack'
-rescue LoadError
-  fail 'Failed to load sass rack plugin!'
-end
-
 module Racket
-  # Namespace for plugins.
-  module Plugins
-    # Sass plugin.
-    module Sass
-      # :nodoc
-      def self.included(klass)
-        ::Racket::Application.inform_dev("Included #{self} in #{klass}")
-      end
+  # Racket plugin registry.
+  class PluginManager
+    def self.add(plugin, settings = {})
+      Utils.safe_require("racket/plugins/#{plugin}.rb")
+      mod = Racket::Plugins.const_get(plugin.to_s.split('_').collect(&:capitalize).join.to_sym)
+      mod.init(settings) if mod.respond_to?(:init)
+      (plugins << mod) && nil
+    end
+
+    def self.plugins
+      @plugins ||= []
     end
   end
 end
