@@ -19,5 +19,14 @@
 module Racket
   # Represents a response from the application
   class Response < Rack::Response
+    # Generates a basic error response.
+    #
+    # @param [Fixnum] status
+    # @return [Array]
+    def self.generate_error_response(status)
+      response = new([], status, 'Content-Type' => 'text/plain')
+      response.write("#{status} #{Rack::Utils::HTTP_STATUS_CODES[status]}")
+      response.finish
+    end
   end
 end
