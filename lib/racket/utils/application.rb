@@ -34,6 +34,7 @@ module Racket
         #
         # @return [Proc]
         def build
+          init_plugins
           expand_middleware_list
           add_middleware
           @builder.run(application_proc)
@@ -68,6 +69,22 @@ module Racket
           @middleware.unshift(session_handler) if session_handler
           @middleware.unshift([Rack::ContentType, default_content_type]) if default_content_type
           @middleware.unshift([Rack::ShowExceptions]) if @application.dev_mode?
+        end
+
+        # Initializes plugins.
+        def init_plugins
+          @settings.plugins.each do |plugin_info|
+            plugin, settings = plugin_info
+            mod = self.class.load_plugin(plugin)
+            mod.init(settings)
+            @middleware.concat(mod.middleware)
+          end
+        end
+
+        def self.load_plugin(plugin)
+          Utils.safe_require("racket/plugins/#{plugin}.rb")
+          # TODO: Allow custom plugins dir as well
+          Racket::Plugins.const_get(plugin.to_s.split('_').collect(&:capitalize).join.to_sym)
         end
       end
 

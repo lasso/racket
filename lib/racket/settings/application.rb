@@ -32,6 +32,7 @@ module Racket
       setting(:logger, Logger.new($stdout))
       setting(:middleware, [])
       setting(:mode, :live)
+      setting(:plugins, [])
       setting(
         :session_handler,
         [

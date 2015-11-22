@@ -22,7 +22,6 @@ require 'rack'
 require_relative 'racket/application.rb'
 require_relative 'racket/controller.rb'
 require_relative 'racket/current.rb'
-require_relative 'racket/plugin_manager.rb'
 require_relative 'racket/request.rb'
 require_relative 'racket/response.rb'
 require_relative 'racket/router.rb'
@@ -34,14 +33,6 @@ require_relative 'racket/utils.rb'
 
 # Racket main namespace
 module Racket
-  # Loads a racket plugin.
-  #
-  # @param [Symbol] plugin
-  # @param [Hash] settings
-  def plugin(plugin, settings = {})
-    PluginManager.add(plugin, settings)
-  end
-
   # Requires a file using the current application directory as a base path.
   #
   # @param [Object] args
@@ -59,5 +50,5 @@ module Racket
     Version.current
   end
 
-  module_function :plugin, :require, :version
+  module_function :require, :version
 end
