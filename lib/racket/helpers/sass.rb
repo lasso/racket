@@ -17,30 +17,19 @@
 # along with Racket.  If not, see <http://www.gnu.org/licenses/>.
 
 module Racket
-  # Namespace for plugins.
-  module Plugins
-    # Sass plugin.
+  # Helpers module
+  module Helpers
+    # Helper module that allows CSS files to be loaded dynamically using SASS.
     module Sass
-      # Called on plugin initialization.
-      def self.init(settings)
-        begin
-          require 'sass/plugin/rack'
-        rescue LoadError
-          raise 'Failed to load sass rack plugin!'
-        end
-        settings.each_pair { |key, value| ::Sass::Plugin.options[key] = value }
+      # Get route to CSS, which will call SASS in the background.
+      def css(base_name)
       end
 
-      # Helpers that should be *automatically* added to the controller.
-      # If the plugin has halpers that should *not* be loaded automatically, this method
-      # should not return those helpers.
-      def self.helpers
-        []
-      end
-
-      # Middleware that should be automatically added.
-      def self.middleware
-        [[::Sass::Plugin::Rack, nil]]
+      # Whenever this helper is included in a controller it will setup a link between
+      def self.included(klass)
+        #Sass::Plugin.add_template_location(
+        #  Utils.build_path(Application.settings.root_dir, 'sass', mod
+        #)
       end
     end
   end
