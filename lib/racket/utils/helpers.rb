@@ -85,7 +85,7 @@ module Racket
           ::Racket::Application.inform_dev(
             "Adding helper module #{helper_key.inspect} to #{klass}"
           )
-          klass.include helper
+          klass.send(:include, helper)
         end
       end
 
