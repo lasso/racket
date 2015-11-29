@@ -21,7 +21,7 @@ module Racket
     # Utility functions for routing.
     module Routing
       # Struct for keeping track router parameters.
-      RouterParams = Struct.new(:env, :controller_class, :action, :params)
+      RouterParams = Struct.new(:action, :params, :env)
 
       # Class for caching actions
       class ActionCache
@@ -101,7 +101,7 @@ module Racket
         # Initialize and render target
         call_controller(
           controller_class,
-          Current.init(RouterParams.new(env, controller_class, action, params))
+          Current.init(RouterParams.new(action, params, env))
         )
       end
 
