@@ -30,20 +30,11 @@ module Racket
     # @param [RouterParams] router_params
     # @return [Module] A module encapsulating all state relating to the current request
     def self.init(router_params)
-      env, klass, action, params = router_params.to_a
-      properties = init_properties(action, params, env)
-      init_helpers(klass)
-      init_module(klass.settings.fetch(:helpers), properties)
+      init_module(init_properties(*router_params.to_a))
     end
 
-    def self.init_helpers(klass)
-      klass.helper unless klass.settings.fetch(:helpers) # Makes sure default helpers are loaded.
-      nil
-    end
-
-    def self.init_module(helpers, properties)
+    def self.init_module(properties)
       Module.new do
-        helpers.each_value { |helper| include helper }
         properties.each_pair { |key, value| define_method(key) { value } }
       end
     end
@@ -60,6 +51,6 @@ module Racket
       properties
     end
 
-    private_class_method :init_helpers, :init_module, :init_properties
+    private_class_method :init_module, :init_properties
   end
 end

@@ -33,6 +33,12 @@ module Racket
       @application ||= Utils.build_application(self)
     end
 
+    def self.calculate_url_path(file)
+      url_path = "/#{file.relative_path_from(@settings.controller_dir).dirname}"
+      url_path = '' if url_path == '/.'
+      url_path
+    end
+
     # Called whenever Rack sends a request to the application.
     #
     # @param [Hash] env Rack environment
@@ -122,9 +128,9 @@ module Racket
     # @return nil
     def self.load_controller_file(file)
       ::Kernel.require file
-      url_path = "/#{file.relative_path_from(@settings.controller_dir).dirname}"
-      url_path = '' if url_path == '/.'
-      @router.map(url_path, @settings.fetch(:last_added_controller).pop) && nil
+      klass = @settings.fetch(:last_added_controller).pop
+      Utils.apply_helpers(klass)
+      @router.map(calculate_url_path(file), klass) && nil
     end
 
     def self.load_controller_files
@@ -199,7 +205,7 @@ module Racket
       @view_manager ||= ViewManager.new(@settings.layout_dir, @settings.view_dir)
     end
 
-    private_class_method :application, :inform, :init, :load_controller_file,
+    private_class_method :application, :calculate_url_path, :inform, :init, :load_controller_file,
                          :load_controller_files, :load_controllers, :setup_routes,
                          :setup_static_server
   end

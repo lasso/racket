@@ -100,7 +100,7 @@ module Racket
     #
     # @param [Array] helpers Requested helpers
     # @param [Array] helper_modules Helper modules already loaded
-    # @retunr nil
+    # @return nil
     def self.__load_helpers(helpers, helper_modules)
       helpers.reject! { |helper| helper_modules.key?(helper) }
       helper_modules.merge!(__helper_cache.load_helpers(helpers))
