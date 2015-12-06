@@ -33,6 +33,12 @@ module Racket
       @application ||= Utils.build_application(self)
     end
 
+    # Applies settings.
+    def self.apply_settings(settings)
+      fail 'Application has already been initialized!' if @settings
+      @settings = Settings::Application.new(settings)
+    end
+
     def self.calculate_url_path(file)
       url_path = "/#{file.relative_path_from(@settings.controller_dir).dirname}"
       url_path = '' if url_path == '/.'
@@ -104,8 +110,8 @@ module Racket
     # @param [Hash] settings
     # @return [Class]
     def self.init(settings = {})
-      fail 'Application has already been initialized!' if @settings
-      @settings = Settings::Application.new(settings)
+      apply_settings(settings)
+      application # This will make sure all plugins and helpers are loaded before any controllers
       setup_static_server
       reload
       self
@@ -129,8 +135,9 @@ module Racket
     def self.load_controller_file(file)
       ::Kernel.require file
       klass = @settings.fetch(:last_added_controller).pop
-      Utils.apply_helpers(klass)
-      @router.map(calculate_url_path(file), klass) && nil
+      @router.map(calculate_url_path(file), klass) # Helpers may do stuff based on route, make sure
+                                                   # it is available before applying helpers.
+      Utils.apply_helpers(klass) && nil
     end
 
     def self.load_controller_files

@@ -74,17 +74,29 @@ module Racket
         # Initializes plugins.
         def init_plugins
           @settings.plugins.each do |plugin_info|
-            plugin, settings = plugin_info
-            mod = self.class.load_plugin(plugin)
-            mod.init(settings)
-            @middleware.concat(mod.middleware)
+            plugin_instance = self.class.get_plugin_instance(*plugin_info)
+            run_plugin_hooks(plugin_instance)
+            # TODO: Store plugin instance somewhere in application settings
           end
         end
 
-        def self.load_plugin(plugin)
+        # Runs plugin hooks.
+        def run_plugin_hooks(plugin_obj)
+          @middleware.concat(plugin_obj.middleware)
+          @settings.default_controller_helpers.concat(plugin_obj.default_controller_helpers)
+        end
+
+        # Returns an instance of a specific plugin.
+        #
+        # @param [Symbol] plugin
+        # @param [Hash|nil] settings
+        # @return [Object] An instance of the requested plugin class
+        def self.get_plugin_instance(plugin, settings)
           Utils.safe_require("racket/plugins/#{plugin}.rb")
           # TODO: Allow custom plugins dir as well
-          Racket::Plugins.const_get(plugin.to_s.split('_').collect(&:capitalize).join.to_sym)
+          klass =
+            Racket::Plugins.const_get(plugin.to_s.split('_').collect(&:capitalize).join.to_sym)
+          klass.new(settings)
         end
       end
 

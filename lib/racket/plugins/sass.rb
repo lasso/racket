@@ -16,31 +16,34 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Racket.  If not, see <http://www.gnu.org/licenses/>.
 
+require_relative 'base'
+
 module Racket
   # Namespace for plugins.
   module Plugins
     # Sass plugin.
-    module Sass
+    class Sass < Base
       # Called on plugin initialization.
-      def self.init(settings)
+      def initialize(settings = nil)
+        super
         begin
           require 'sass/plugin/rack'
         rescue LoadError
           raise 'Failed to load sass rack plugin!'
         end
-        settings.each_pair { |key, value| ::Sass::Plugin.options[key] = value }
-      end
-
-      # Helpers that should be *automatically* added to the controller.
-      # If the plugin has halpers that should *not* be loaded automatically, this method
-      # should not return those helpers.
-      def self.helpers
-        []
+        apply_sass_settings
       end
 
       # Middleware that should be automatically added.
-      def self.middleware
+      def middleware
         [[::Sass::Plugin::Rack, nil]]
+      end
+
+      private
+
+      # Apply each setting to the Sass plugin.
+      def apply_sass_settings
+        settings.each_pair { |key, value| ::Sass::Plugin.options[key] = value }
       end
     end
   end
