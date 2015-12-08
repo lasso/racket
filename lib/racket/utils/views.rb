@@ -153,10 +153,16 @@ module Racket
         # @return [String|Proc|nil]
         def self.lookup_template_with_default(path, default_template)
           template = lookup_template(path)
-          if !template && (default_template.is_a?(String) || default_template.is_a?(Symbol))
-            template = lookup_template(Utils.fs_path(path.dirname, default_template))
+          unless template
+            if default_template.is_a?(String) || default_template.is_a?(Symbol)
+              # Strings and symbols can be lookup up in the file system...
+              template = lookup_template(Utils.fs_path(path.dirname, default_template))
+            else
+              # ...but not nils/procs!
+              template = default_template
+            end
           end
-          template || default_template
+          template
         end
       end
 
