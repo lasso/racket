@@ -1,4 +1,4 @@
-describe 'A custom Racket test Application' do
+describe 'A custom Racket test application' do
   extend Rack::Test::Methods
   def app
     @app ||= Racket::Application.using(

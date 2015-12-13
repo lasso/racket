@@ -26,7 +26,9 @@ module Racket
       # @param [Symbol] sym
       # @return [String]
       def css(sym)
-        "/css/#{Application.get_route(self.class)}/#{sym}.css"
+        route = Application.get_route(self.class)
+        route = '' if route == '/' # Special case for root controller
+        "/css#{route}/#{sym}.css"
       end
 
       # Whenever this helper is included in a controller it will setup a link between
