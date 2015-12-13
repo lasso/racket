@@ -1,3 +1,4 @@
+# Main controller
 class MainController < Racket::Controller
   helper :sass
 

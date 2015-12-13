@@ -1,3 +1,4 @@
+# Sub controller
 class SubController < Racket::Controller
   helper :sass
 

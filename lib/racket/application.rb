@@ -135,8 +135,8 @@ module Racket
     def self.load_controller_file(file)
       ::Kernel.require file
       klass = @settings.fetch(:last_added_controller).pop
-      @router.map(calculate_url_path(file), klass) # Helpers may do stuff based on route, make sure
-                                                   # it is available before applying helpers.
+      # Helpers may do stuff based on route, make sure it is available before applying helpers.
+      @router.map(calculate_url_path(file), klass)
       Utils.apply_helpers(klass) && nil
     end
 

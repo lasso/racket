@@ -3,15 +3,7 @@ describe 'A Racket application with plugins' do
   def app
     @app ||= Racket::Application.using(
       logger: nil,
-      plugins: [
-        [
-          :sass,
-          {
-            style: :compressed,
-            sourcemap: :none
-          }
-        ]
-      ]
+      plugins: [[:sass, { style: :compressed, sourcemap: :none }]]
     )
   end
 

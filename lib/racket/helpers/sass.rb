@@ -38,9 +38,10 @@ module Racket
       # @return [nil]
       def self.included(klass)
         route = Application.get_route(klass)[1..-1] # Remove leading slash
+        root_dir = Application.settings.root_dir
         ::Sass::Plugin.add_template_location(
-          Utils.build_path(Application.settings.root_dir, 'sass', route).to_s,
-          Utils.build_path(Application.settings.root_dir, 'public', 'css', route).to_s
+          Utils.build_path(root_dir, 'sass', route).to_s,
+          Utils.build_path(root_dir, 'public', 'css', route).to_s
         )
         nil
       end
