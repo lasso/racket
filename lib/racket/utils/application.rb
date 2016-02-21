@@ -35,6 +35,7 @@ module Racket
         # @return [Proc]
         def build
           init_plugins
+          add_warmup_hook
           expand_middleware_list
           add_middleware
           @builder.run(application_proc)
@@ -49,6 +50,20 @@ module Racket
             klass, opts = ware
             @application.inform_dev("Loading middleware #{klass} with settings #{opts.inspect}.")
             @builder.use(*ware)
+          end
+        end
+
+        # Add a list of urls to visit on startup
+        def add_warmup_hook
+          @builder.warmup do |app|
+            warmup_urls = Racket::Application.settings.warmup_urls
+            unless warmup_urls.empty?
+              client = Rack::MockRequest.new(app)
+              warmup_urls.each do |url|
+                @application.inform_dev("Visiting warmup url #{url}.")
+                client.get(url)
+              end
+            end
           end
         end
 

@@ -47,6 +47,18 @@ describe 'A default Racket test application' do
     JSON.parse(last_response.body).should.equal(%w(foo bar baz))
   end
 
+  it 'should get the correct middleware' do
+    middleware = app.settings.middleware
+    middleware.length.should.equal(2)
+    middleware[0].class.should.equal(Array)
+    middleware[0].length.should.equal(2)
+    middleware[0].first.should.equal(Rack::ContentType)
+    middleware[1].class.should.equal(Array)
+    middleware[1].length.should.equal(2)
+    middleware[1].first.should.equal(Rack::Session::Cookie)
+    true.should.equal(true)
+  end
+
   it 'returns the correct respnse when calling index action' do
     # RootController
     get '/'

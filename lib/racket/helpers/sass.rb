@@ -39,10 +39,15 @@ module Racket
       def self.included(klass)
         route = Application.get_route(klass)[1..-1] # Remove leading slash
         root_dir = Application.settings.root_dir
-        ::Sass::Plugin.add_template_location(
-          Utils.build_path(root_dir, 'sass', route).to_s,
-          Utils.build_path(root_dir, 'public', 'css', route).to_s
-        )
+        sass_dir = Utils.build_path(root_dir, 'sass', route).to_s
+        css_dir = Utils.build_path(root_dir, 'public', 'css', route).to_s
+        ::Sass::Plugin.add_template_location(sass_dir, css_dir)
+        Dir.chdir(sass_dir) do
+          basedir = route.empty? ? '/css' : "/css/#{route}"
+          Dir.glob('*.s[ac]ss').each do |file|
+            Application.settings.warmup_urls << "#{basedir}/#{::File.basename(file, '.*')}.css"
+          end
+        end
         nil
       end
     end
