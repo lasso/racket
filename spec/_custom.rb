@@ -19,7 +19,7 @@ describe 'A custom Racket test application' do
     middleware = app.settings.middleware
     middleware.length.should.equal(3)
     middleware[0].class.should.equal(Array)
-    middleware[0].length.should.equal(2)
+    middleware[0].length.should.equal(1)
     middleware[0].first.should.equal(Rack::ShowExceptions)
     middleware[1].class.should.equal(Array)
     middleware[1].length.should.equal(2)
@@ -27,7 +27,6 @@ describe 'A custom Racket test application' do
     middleware[2].class.should.equal(Array)
     middleware[2].length.should.equal(2)
     middleware[2].first.should.equal(Rack::Session::Cookie)
-    true.should.equal(true)
   end
 
   it 'should be able to get/set settings on controller' do
