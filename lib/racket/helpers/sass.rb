@@ -31,6 +31,23 @@ module Racket
         "/css#{route}/#{sym}.css"
       end
 
+      def self.add_template_location(route)
+        root_dir = Application.settings.root_dir
+        sass_dir = Utils.build_path(root_dir, 'sass', route).to_s
+        css_dir = Utils.build_path(root_dir, 'public', 'css', route).to_s
+        ::Sass::Plugin.add_template_location(sass_dir, css_dir)
+        sass_dir
+      end
+
+      def self.add_warmup_urls(sass_dir, route)
+        Dir.chdir(sass_dir) do
+          basedir = route.empty? ? '/css' : "/css/#{route}"
+          Dir.glob('*.s[ac]ss').each do |file|
+            Application.settings.warmup_urls << "#{basedir}/#{::File.basename(file, '.*')}.css"
+          end
+        end
+      end
+
       # Whenever this helper is included in a controller it will setup a link between
       # a SASS directory and a CSS directory.
       #
@@ -38,18 +55,12 @@ module Racket
       # @return [nil]
       def self.included(klass)
         route = Application.get_route(klass)[1..-1] # Remove leading slash
-        root_dir = Application.settings.root_dir
-        sass_dir = Utils.build_path(root_dir, 'sass', route).to_s
-        css_dir = Utils.build_path(root_dir, 'public', 'css', route).to_s
-        ::Sass::Plugin.add_template_location(sass_dir, css_dir)
-        Dir.chdir(sass_dir) do
-          basedir = route.empty? ? '/css' : "/css/#{route}"
-          Dir.glob('*.s[ac]ss').each do |file|
-            Application.settings.warmup_urls << "#{basedir}/#{::File.basename(file, '.*')}.css"
-          end
-        end
+        sass_dir = add_template_location(route)
+        add_warmup_urls(sass_dir, route)
         nil
       end
+
+      private_class_method :add_template_location, :add_warmup_urls
     end
   end
 end

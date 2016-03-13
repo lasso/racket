@@ -36,7 +36,6 @@ module Racket
         def build
           init_plugins
           add_warmup_hook
-          expand_middleware_list
           add_middleware
           @builder.run(application_proc)
           @builder
@@ -46,6 +45,7 @@ module Racket
 
         # Add middleware to the builder.
         def add_middleware
+          expand_middleware_list
           @middleware.each do |ware|
             klass, opts = ware
             @application.inform_dev("Loading middleware #{klass} with settings #{opts.inspect}.")
@@ -55,15 +55,11 @@ module Racket
 
         # Add a list of urls to visit on startup
         def add_warmup_hook
+          warmup_urls = Racket::Application.settings.warmup_urls
+          return if warmup_urls.empty?
           @builder.warmup do |app|
-            warmup_urls = Racket::Application.settings.warmup_urls
-            unless warmup_urls.empty?
-              client = Rack::MockRequest.new(app)
-              warmup_urls.each do |url|
-                @application.inform_dev("Visiting warmup url #{url}.")
-                client.get(url)
-              end
-            end
+            client = Rack::MockRequest.new(app)
+            visit_warmup_urls(client, warmup_urls)
           end
         end
 
@@ -99,6 +95,14 @@ module Racket
         def run_plugin_hooks(plugin_obj)
           @middleware.concat(plugin_obj.middleware)
           @settings.default_controller_helpers.concat(plugin_obj.default_controller_helpers)
+        end
+
+        # Visits a list of warmup URLs.
+        def visit_warmup_urls(client, urls)
+          urls.each do |url|
+            @application.inform_dev("Visiting warmup url #{url}.")
+            client.get(url)
+          end
         end
 
         # Returns an instance of a specific plugin.

@@ -163,13 +163,6 @@ module Racket
       (::Kernel.require Utils.build_path(*args)) && nil
     end
 
-    # Resets Racket::Application, making it possible to run run a new application with new settings.
-    # This is a workaround for Racket::Application being a singleton, making tests harder to write,
-    # @todo Remove this when Racket::Application stops beeing a singleton (if ever).
-    def self.reset!
-      instance_variables.each { |ivar| instance_variable_set(ivar, nil) }
-    end
-
     # Serves a static file (if Racket is configured to serve static files).
     #
     # @param [Hash] env Rack environment

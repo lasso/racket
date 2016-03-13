@@ -39,7 +39,14 @@ suites = [
 
 # Run application tests.
 suites.each do |suite|
-  Racket::Application.reset!
+  # Make sure Racket::Application and Racket::Settings::Application is reset between the suites.
+  # Racket::Application@application and Racket::Settings::Application must be pristine on each run!
+  Racket.class_eval { remove_const(:Application) }
+  Racket::Settings.class_eval { remove_const(:Application) }
+  load('lib/racket/application.rb')
+  load('lib/racket/settings/application.rb')
+
+  # Run suite
   suite.call
 end
 
