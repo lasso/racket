@@ -26,6 +26,7 @@ describe 'A Racket application with plugins' do
     last_response.body.should.equal('/css/sub/bar.css')
   end
 
+=begin
   it 'should render a SASS based stylesheet for the default controller' do
     get '/css/test.css'
     last_response.status.should.equal(200)
@@ -39,4 +40,5 @@ describe 'A Racket application with plugins' do
     last_response.headers['Content-Type'].should.equal('text/css')
     last_response.body.should.equal("body{background-color:steelblue;color:gray}\n")
   end
+=end
 end
