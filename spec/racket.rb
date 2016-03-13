@@ -14,6 +14,7 @@ end
 TEST_DIR = File.absolute_path(File.dirname(__FILE__))
 TEST_DEFAULT_APP_DIR = File.join(TEST_DIR, 'test_default_app')
 TEST_CUSTOM_APP_DIR = File.join(TEST_DIR, 'test_custom_app')
+TEST_PLUGIN_APP_DIR = File.join(TEST_DIR, 'test_plugin_app')
 
 require 'racket'
 
@@ -29,7 +30,8 @@ require File.join(TEST_DIR, '_request.rb')
 # Application tests.
 suites = [
   -> { Dir.chdir(TEST_DEFAULT_APP_DIR) { require File.join(TEST_DIR, '_default.rb') } },
-  -> { Dir.chdir(TEST_CUSTOM_APP_DIR) { require File.join(TEST_DIR, '_custom.rb') } }
+  -> { Dir.chdir(TEST_CUSTOM_APP_DIR) { require File.join(TEST_DIR, '_custom.rb') } },
+  -> { Dir.chdir(TEST_PLUGIN_APP_DIR) { require File.join(TEST_DIR, '_plugin.rb') } }
 ]
 
 # Leave off randomization for now. Sessions does not seem to be reset correctly between suites!
@@ -37,7 +39,14 @@ suites = [
 
 # Run application tests.
 suites.each do |suite|
-  Racket::Application.reset!
+  # Make sure Racket::Application and Racket::Settings::Application is reset between the suites.
+  # Racket::Application@application and Racket::Settings::Application must be pristine on each run!
+  Racket.class_eval { remove_const(:Application) }
+  Racket::Settings.class_eval { remove_const(:Application) }
+  load('lib/racket/application.rb')
+  load('lib/racket/settings/application.rb')
+
+  # Run suite
   suite.call
 end
 

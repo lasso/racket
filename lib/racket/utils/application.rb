@@ -34,7 +34,8 @@ module Racket
         #
         # @return [Proc]
         def build
-          expand_middleware_list
+          init_plugins
+          add_warmup_hook
           add_middleware
           @builder.run(application_proc)
           @builder
@@ -44,10 +45,21 @@ module Racket
 
         # Add middleware to the builder.
         def add_middleware
+          expand_middleware_list
           @middleware.each do |ware|
             klass, opts = ware
             @application.inform_dev("Loading middleware #{klass} with settings #{opts.inspect}.")
             @builder.use(*ware)
+          end
+        end
+
+        # Add a list of urls to visit on startup
+        def add_warmup_hook
+          warmup_urls = Racket::Application.settings.warmup_urls
+          return if warmup_urls.empty?
+          @builder.warmup do |app|
+            client = Rack::MockRequest.new(app)
+            visit_warmup_urls(client, warmup_urls)
           end
         end
 
@@ -68,6 +80,42 @@ module Racket
           @middleware.unshift(session_handler) if session_handler
           @middleware.unshift([Rack::ContentType, default_content_type]) if default_content_type
           @middleware.unshift([Rack::ShowExceptions]) if @application.dev_mode?
+        end
+
+        # Initializes plugins.
+        def init_plugins
+          @settings.plugins.each do |plugin_info|
+            plugin_instance = self.class.get_plugin_instance(*plugin_info)
+            run_plugin_hooks(plugin_instance)
+            # TODO: Store plugin instance somewhere in application settings
+          end
+        end
+
+        # Runs plugin hooks.
+        def run_plugin_hooks(plugin_obj)
+          @middleware.concat(plugin_obj.middleware)
+          @settings.default_controller_helpers.concat(plugin_obj.default_controller_helpers)
+        end
+
+        # Visits a list of warmup URLs.
+        def visit_warmup_urls(client, urls)
+          urls.each do |url|
+            @application.inform_dev("Visiting warmup url #{url}.")
+            client.get(url)
+          end
+        end
+
+        # Returns an instance of a specific plugin.
+        #
+        # @param [Symbol] plugin
+        # @param [Hash|nil] settings
+        # @return [Object] An instance of the requested plugin class
+        def self.get_plugin_instance(plugin, settings)
+          Utils.safe_require("racket/plugins/#{plugin}.rb")
+          # TODO: Allow custom plugins dir as well
+          klass =
+            Racket::Plugins.const_get(plugin.to_s.split('_').collect(&:capitalize).join.to_sym)
+          klass.new(settings)
         end
       end
 

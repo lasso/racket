@@ -33,6 +33,12 @@ module Racket
       @application ||= Utils.build_application(self)
     end
 
+    # Applies settings.
+    def self.apply_settings(settings)
+      fail 'Application has already been initialized!' if @settings
+      @settings = Settings::Application.new(settings)
+    end
+
     def self.calculate_url_path(file)
       url_path = "/#{file.relative_path_from(@settings.controller_dir).dirname}"
       url_path = '' if url_path == '/.'
@@ -104,8 +110,8 @@ module Racket
     # @param [Hash] settings
     # @return [Class]
     def self.init(settings = {})
-      fail 'Application has already been initialized!' if @settings
-      @settings = Settings::Application.new(settings)
+      apply_settings(settings)
+      application # This will make sure all plugins and helpers are loaded before any controllers
       setup_static_server
       reload
       self
@@ -129,8 +135,9 @@ module Racket
     def self.load_controller_file(file)
       ::Kernel.require file
       klass = @settings.fetch(:last_added_controller).pop
-      Utils.apply_helpers(klass)
-      @router.map(calculate_url_path(file), klass) && nil
+      # Helpers may do stuff based on route, make sure it is available before applying helpers.
+      @router.map(calculate_url_path(file), klass)
+      Utils.apply_helpers(klass) && nil
     end
 
     def self.load_controller_files
@@ -154,13 +161,6 @@ module Racket
     # @return [nil]
     def self.require(*args)
       (::Kernel.require Utils.build_path(*args)) && nil
-    end
-
-    # Resets Racket::Application, making it possible to run run a new application with new settings.
-    # This is a workaround for Racket::Application being a singleton, making tests harder to write,
-    # @todo Remove this when Racket::Application stops beeing a singleton (if ever).
-    def self.reset!
-      instance_variables.each { |ivar| instance_variable_set(ivar, nil) }
     end
 
     # Serves a static file (if Racket is configured to serve static files).

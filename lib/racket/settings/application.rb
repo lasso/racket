@@ -32,6 +32,7 @@ module Racket
       setting(:logger, Logger.new($stdout))
       setting(:middleware, [])
       setting(:mode, :live)
+      setting(:plugins, [])
       setting(
         :session_handler,
         [
@@ -44,6 +45,7 @@ module Racket
         ]
       )
       setting(:root_dir, nil) # Will be set automatically by constructor.
+      setting(:warmup_urls, Set.new)
 
       def initialize(defaults = {})
         defaults[:root_dir] = Dir.pwd unless defaults.key?(:root_dir)

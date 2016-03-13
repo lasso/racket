@@ -1,4 +1,4 @@
-describe 'A custom Racket test Application' do
+describe 'A custom Racket test application' do
   extend Rack::Test::Methods
   def app
     @app ||= Racket::Application.using(
@@ -13,6 +13,20 @@ describe 'A custom Racket test Application' do
   it 'should set requested settings' do
     app.settings.default_layout.should.equal('zebra.*')
     app.settings.view_dir.should.equal(Racket::Utils.build_path('templates'))
+  end
+
+  it 'should get the correct middleware' do
+    middleware = app.settings.middleware
+    middleware.length.should.equal(3)
+    middleware[0].class.should.equal(Array)
+    middleware[0].length.should.equal(1)
+    middleware[0].first.should.equal(Rack::ShowExceptions)
+    middleware[1].class.should.equal(Array)
+    middleware[1].length.should.equal(2)
+    middleware[1].first.should.equal(Rack::ContentType)
+    middleware[2].class.should.equal(Array)
+    middleware[2].length.should.equal(2)
+    middleware[2].first.should.equal(Rack::Session::Cookie)
   end
 
   it 'should be able to get/set settings on controller' do
