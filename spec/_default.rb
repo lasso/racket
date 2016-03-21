@@ -116,6 +116,8 @@ describe 'A default Racket test application' do
     last_response.body.should.equal('/sub3/inherited/nonono/with/params')
   end
 
+=begin
+  # Replace with tests actually testing logging.
   it 'should be able to log messages to everybody' do
     original_logger = app.settings.logger
     sio = StringIO.new
@@ -139,6 +141,7 @@ describe 'A default Racket test application' do
     app.settings.mode = original_mode
     app.settings.logger = original_logger
   end
+=end
 
   it 'should be able to set and clear session variables' do
     get '/session_as_json'

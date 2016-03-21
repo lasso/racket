@@ -119,6 +119,49 @@ module Racket
         end
       end
 
+      class ApplicationLogger
+        def initialize(logger, mode)
+          if logger
+            puts
+            puts "Creating new application logger"
+            puts "Logger: #{logger.inspect}"
+            puts "Mode: #{mode.inspect}"
+            puts
+          end
+          @logger = logger
+          @in_dev_mode = (mode == :dev)
+        end
+
+        # Sends a message to the logger.
+        #
+        # @param [String] message
+        # @param [Symbol] level
+        # @return nil
+        def inform_all(message, level = :info)
+          inform(message, level)
+        end
+
+        # Sends a message to the logger, but only if we are running in dev mode.
+        #
+        # @param [String] message
+        # @param [Symbol] level
+        # @return nil
+        def inform_dev(message, level = :debug)
+          (inform(message, level) if @in_dev_mode) && nil
+        end
+
+        private
+
+        # Writes a message to the logger if there is one present.
+        #
+        # @param [String] message
+        # @param [Symbol] level
+        # @return nil
+        def inform(message, level)
+          (@logger.send(level, message) if @logger) && nil
+        end
+      end
+
       # Builds and returns a Rack::Builder using the provided Racket::Application
       #
       # @param [Racket::Application] application

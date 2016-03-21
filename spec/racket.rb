@@ -51,4 +51,4 @@ suites.each do |suite|
 end
 
 # Invalid application test should always be run last.
-require File.join(TEST_DIR, '_invalid.rb')
+# require File.join(TEST_DIR, '_invalid.rb')

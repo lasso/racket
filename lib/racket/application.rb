@@ -33,12 +33,6 @@ module Racket
       @application ||= Utils.build_application(self)
     end
 
-    # Applies settings.
-    def self.apply_settings(settings)
-      fail 'Application has already been initialized!' if @settings
-      @settings = Settings::Application.new(settings)
-    end
-
     def self.calculate_url_path(file)
       url_path = "/#{file.relative_path_from(@settings.controller_dir).dirname}"
       url_path = '' if url_path == '/.'
@@ -77,23 +71,13 @@ module Racket
       init
     end
 
-    # Writes a message to the logger if there is one present.
-    #
-    # @param [String] message
-    # @param [Symbol] level
-    # @return nil
-    def self.inform(message, level)
-      logger = @settings.logger
-      (logger.send(level, message) if logger) && nil
-    end
-
     # Sends a message to the logger.
     #
     # @param [String] message
     # @param [Symbol] level
     # @return nil
     def self.inform_all(message, level = :info)
-      inform(message, level)
+      @registry.application_logger.inform_all(message, level)
     end
 
     # Sends a message to the logger, but only if the application is running in dev mode.
@@ -102,7 +86,7 @@ module Racket
     # @param [Symbol] level
     # @return nil
     def self.inform_dev(message, level = :debug)
-      (inform(message, level) if dev_mode?) && nil
+      @registry.application_logger.inform_dev(message, level)
     end
 
     # Initializes the Racket application.
@@ -110,11 +94,43 @@ module Racket
     # @param [Hash] settings
     # @return [Class]
     def self.init(settings = {})
-      apply_settings(settings)
+      @registry = Needle::Registry.define do |builder|
+        builder.application do
+          Racket::Application.new
+        end
+
+        builder.application_logger do
+          Racket::Utils::Application::ApplicationLogger.new(
+            builder.application_settings.logger, builder.application_settings.mode
+          )
+        end
+
+        builder.application_settings do
+          Racket::Settings::Application.new(builder.utils, settings)
+        end
+
+        builder.router do
+          Router.new
+        end
+
+        builder.utils do
+          Racket::Utils
+        end
+
+        builder.view_manager(model: :prototype) do
+          ViewManager.new(
+            builder.application_settings.layout_dir, builder.application_settings.view_dir
+          )
+        end
+      end
+      @settings = @registry.application_settings
+      @settings.mode
+      @settings.logger
       application # This will make sure all plugins and helpers are loaded before any controllers
       setup_static_server
       reload
       self
+      # Return application from registry
     end
 
     # Loads controllers and associates each controller with a route.
@@ -175,7 +191,7 @@ module Racket
     #
     # @return [nil]
     def self.setup_routes
-      @router = Router.new
+      @router = @registry.router
       load_controllers
     end
 
@@ -202,10 +218,10 @@ module Racket
     #
     # @return [Racket::ViewManager]
     def self.view_manager
-      @view_manager ||= ViewManager.new(@settings.layout_dir, @settings.view_dir)
+      @view_manager ||= @registry.view_manager
     end
 
-    private_class_method :application, :calculate_url_path, :inform, :init, :load_controller_file,
+    private_class_method :application, :calculate_url_path, :init, :load_controller_file,
                          :load_controller_files, :load_controllers, :setup_routes,
                          :setup_static_server
   end
