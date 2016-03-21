@@ -30,7 +30,7 @@ module Racket
     #
     # @return [Rack::Builder]
     def self.application
-      @application ||= Utils.build_application(self)
+      @application ||= @utils.build_application(self)
     end
 
     def self.calculate_url_path(file)
@@ -77,7 +77,7 @@ module Racket
     # @param [Symbol] level
     # @return nil
     def self.inform_all(message, level = :info)
-      @registry.application_logger.inform_all(message, level)
+      @application_logger.inform_all(message, level)
     end
 
     # Sends a message to the logger, but only if the application is running in dev mode.
@@ -86,7 +86,7 @@ module Racket
     # @param [Symbol] level
     # @return nil
     def self.inform_dev(message, level = :debug)
-      @registry.application_logger.inform_dev(message, level)
+      @application_logger.inform_dev(message, level)
     end
 
     # Initializes the Racket application.
@@ -94,38 +94,10 @@ module Racket
     # @param [Hash] settings
     # @return [Class]
     def self.init(settings = {})
-      @registry = Needle::Registry.define do |builder|
-        builder.application do
-          Racket::Application.new
-        end
-
-        builder.application_logger do
-          Racket::Utils::Application::ApplicationLogger.new(
-            builder.application_settings.logger, builder.application_settings.mode
-          )
-        end
-
-        builder.application_settings do
-          Racket::Settings::Application.new(builder.utils, settings)
-        end
-
-        builder.router do
-          Router.new
-        end
-
-        builder.utils do
-          Racket::Utils
-        end
-
-        builder.view_manager(model: :prototype) do
-          ViewManager.new(
-            builder.application_settings.layout_dir, builder.application_settings.view_dir
-          )
-        end
-      end
+      @registry = Racket::Utils::Application.build_registry(settings)
+      @application_logger = @registry.application_logger
       @settings = @registry.application_settings
-      @settings.mode
-      @settings.logger
+      @utils = @registry.utils
       application # This will make sure all plugins and helpers are loaded before any controllers
       setup_static_server
       reload
@@ -153,11 +125,11 @@ module Racket
       klass = @settings.fetch(:last_added_controller).pop
       # Helpers may do stuff based on route, make sure it is available before applying helpers.
       @router.map(calculate_url_path(file), klass)
-      Utils.apply_helpers(klass) && nil
+      @utils.apply_helpers(klass) && nil
     end
 
     def self.load_controller_files
-      Utils.paths_by_longest_path(@settings.controller_dir, File.join('**', '*.rb')).each do |path|
+      @utils.paths_by_longest_path(@settings.controller_dir, File.join('**', '*.rb')).each do |path|
         load_controller_file(path)
       end
     end
@@ -176,7 +148,7 @@ module Racket
     # @param [Object] args
     # @return [nil]
     def self.require(*args)
-      (::Kernel.require Utils.build_path(*args)) && nil
+      (::Kernel.require @utils.build_path(*args)) && nil
     end
 
     # Serves a static file (if Racket is configured to serve static files).
@@ -201,7 +173,7 @@ module Racket
     def self.setup_static_server
       @static_server = nil
       return nil unless (public_dir = @settings.public_dir) &&
-                        Utils.dir_readable?(Pathname.new(public_dir))
+                        @utils.dir_readable?(Pathname.new(public_dir))
       inform_dev("Setting up static server to serve files from #{public_dir}.")
       (@static_server = Rack::File.new(public_dir)) && nil
     end

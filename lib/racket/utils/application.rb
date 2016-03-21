@@ -119,15 +119,9 @@ module Racket
         end
       end
 
+      # Class for logging messages in the application.
       class ApplicationLogger
         def initialize(logger, mode)
-          if logger
-            puts
-            puts "Creating new application logger"
-            puts "Logger: #{logger.inspect}"
-            puts "Mode: #{mode.inspect}"
-            puts
-          end
           @logger = logger
           @in_dev_mode = (mode == :dev)
         end
@@ -162,12 +156,60 @@ module Racket
         end
       end
 
+      # Class for easily building a Needle::Registry.
+      class RegistryBuilder
+        def initialize(settings = {})
+          @settings = settings
+        end
+
+        def build()
+          settings = @settings
+          Needle::Registry.define do |builder|
+            builder.application do
+              Racket::Application.new
+            end
+
+            builder.application_logger do
+              Racket::Utils::Application::ApplicationLogger.new(
+                builder.application_settings.logger, builder.application_settings.mode
+              )
+            end
+
+            builder.application_settings do
+              Racket::Settings::Application.new(builder.utils, settings)
+            end
+
+            builder.router do
+              Racket::Router.new
+            end
+
+            builder.utils do
+              Racket::Utils
+            end
+
+            builder.view_manager(model: :prototype) do
+              ViewManager.new(
+                builder.application_settings.layout_dir, builder.application_settings.view_dir
+              )
+            end
+          end
+        end
+      end
+
       # Builds and returns a Rack::Builder using the provided Racket::Application
       #
       # @param [Racket::Application] application
       # @return [Rack::Builder]
       def self.build_application(application)
         ApplicationBuilder.new(application).build
+      end
+
+      # Builds and returns a Needle::Registry that can be used across the application.
+      #
+      # @param [Racket::Application] application
+      # @return [Rack::Builder]
+      def self.build_registry(settings)
+        RegistryBuilder.new(settings).build
       end
     end
   end
