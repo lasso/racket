@@ -145,10 +145,12 @@ module Racket
 
     # Requires a file using the current application directory as a base path.
     #
+    # @TODO: Clean this mess up when Application stops being a sigleton. 
     # @param [Object] args
     # @return [nil]
     def self.require(*args)
-      (::Kernel.require @utils.build_path(*args)) && nil
+      registry = @registry || Racket::Utils::Application.build_registry({})
+      (::Kernel.require registry.resolve(:utils).build_path(*args)) && nil
     end
 
     # Serves a static file (if Racket is configured to serve static files).
