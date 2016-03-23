@@ -95,9 +95,9 @@ module Racket
     # @return [Class]
     def self.init(settings = {})
       @registry = Racket::Utils::Application.build_registry(settings)
-      @application_logger = @registry.application_logger
-      @settings = @registry.application_settings
-      @utils = @registry.utils
+      @application_logger = @registry.resolve(:application_logger)
+      @settings = @registry.resolve(:application_settings)
+      @utils = @registry.resolve(:utils)
       application # This will make sure all plugins and helpers are loaded before any controllers
       setup_static_server
       reload
@@ -163,7 +163,7 @@ module Racket
     #
     # @return [nil]
     def self.setup_routes
-      @router = @registry.router
+      @router = @registry.resolve(:router)
       load_controllers
     end
 
@@ -190,7 +190,7 @@ module Racket
     #
     # @return [Racket::ViewManager]
     def self.view_manager
-      @view_manager ||= @registry.view_manager
+      @view_manager ||= @registry.resolve(:view_manager)
     end
 
     private_class_method :application, :calculate_url_path, :init, :load_controller_file,

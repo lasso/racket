@@ -16,6 +16,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Racket.  If not, see <http://www.gnu.org/licenses/>.
 
+require 'ioc'
+
 module Racket
   # Collects utilities needed by different objects in Racket.
   module Utils
@@ -156,43 +158,39 @@ module Racket
         end
       end
 
-      # Class for easily building a Needle::Registry.
+      # Class for easily building an IOC::Container.
       class RegistryBuilder
         def initialize(settings = {})
           @settings = settings
         end
 
         def build()
+          container = IOC::Container.new
           settings = @settings
-          Needle::Registry.define do |builder|
-            builder.application do
-              Racket::Application.new
-            end
-
-            builder.application_logger do
-              Racket::Utils::Application::ApplicationLogger.new(
-                builder.application_settings.logger, builder.application_settings.mode
-              )
-            end
-
-            builder.application_settings do
-              Racket::Settings::Application.new(builder.utils, settings)
-            end
-
-            builder.router do
-              Racket::Router.new
-            end
-
-            builder.utils do
-              Racket::Utils
-            end
-
-            builder.view_manager(model: :prototype) do
-              ViewManager.new(
-                builder.application_settings.layout_dir, builder.application_settings.view_dir
-              )
-            end
+          container.register(:application) do |c|
+            Racket::Application.new
           end
+          container.register(:application_logger) do |c|
+            Racket::Utils::Application::ApplicationLogger.new(
+              c.resolve(:application_settings).logger, c.resolve(:application_settings).mode
+            )
+          end
+          container.register(:application_settings) do |c|
+            Racket::Settings::Application.new(c.resolve(:utils), settings)
+          end
+          container.register(:router) do |c|
+            Racket::Router.new
+          end
+          container.register(:utils) do |c|
+            Racket::Utils
+          end
+          container.register(:view_manager) do |c|
+            ViewManager.new(
+              c.resolve(:application_settings).layout_dir,
+              c.resolve(:application_settings).view_dir
+            )
+          end
+          container
         end
       end
 
@@ -204,7 +202,7 @@ module Racket
         ApplicationBuilder.new(application).build
       end
 
-      # Builds and returns a Needle::Registry that can be used across the application.
+      # Builds and returns an IOC::Container that can be used across the application.
       #
       # @param [Racket::Application] application
       # @return [Rack::Builder]
