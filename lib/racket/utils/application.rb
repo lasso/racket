@@ -160,37 +160,71 @@ module Racket
 
       # Class for easily building an IOC::Container.
       class RegistryBuilder
+
+        attr_reader :registry
+
         def initialize(settings = {})
-          @settings = settings
+          @registry = IOC::Container.new
+          build_registry(settings)
         end
 
-        def build()
-          container = IOC::Container.new
-          settings = @settings
-          container.register(:application) do |c|
+        private
+
+        def build_registry(settings)
+
+          @registry.register(:application) do |c|
             Racket::Application.new
           end
-          container.register(:application_logger) do |c|
+
+          @registry.register(:application_logger) do |c|
             Racket::Utils::Application::ApplicationLogger.new(
               c.resolve(:application_settings).logger, c.resolve(:application_settings).mode
             )
           end
-          container.register(:application_settings) do |c|
+
+          @registry.register(:application_settings) do |c|
             Racket::Settings::Application.new(c.resolve(:utils), settings)
           end
-          container.register(:router) do |c|
+
+          @registry.register(:layout_cache) do
+            Racket::Utils::Views::TemplateCache.new
+          end
+
+          @registry.register(:router) do |c|
             Racket::Router.new
           end
-          container.register(:utils) do |c|
-            Racket::Utils
-          end
-          container.register(:view_manager) do |c|
-            ViewManager.new(
-              c.resolve(:application_settings).layout_dir,
-              c.resolve(:application_settings).view_dir
+
+          @registry.register(:template_locator) do |c|
+            settings = c.resolve(:application_settings)
+            Racket::Utils::Views::TemplateLocator.new(
+              {
+                layout_base_dir: settings.layout_dir,
+                layout_cache: c.resolve(:layout_cache),
+                view_base_dir: settings.view_dir,
+                view_cache: c.resolve(:view_cache)
+              }
             )
           end
-          container
+
+          @registry.register(:template_renderer) do
+            Utils::Views::ViewRenderer
+          end
+
+          @registry.register(:view_cache) do
+            Racket::Utils::Views::TemplateCache.new
+          end
+
+          @registry.register(:view_manager) do |c|
+            Racket::ViewManager.new(
+              c.resolve(:template_locator), c.resolve(:template_renderer)
+            )
+          end
+
+          @registry.register(:utils) do |c|
+            Racket::Utils
+          end
+
+          nil
         end
       end
 
@@ -207,7 +241,7 @@ module Racket
       # @param [Racket::Application] application
       # @return [Rack::Builder]
       def self.build_registry(settings)
-        RegistryBuilder.new(settings).build
+        RegistryBuilder.new(settings).registry
       end
     end
   end

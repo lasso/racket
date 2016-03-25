@@ -145,7 +145,7 @@ module Racket
 
     # Requires a file using the current application directory as a base path.
     #
-    # @TODO: Clean this mess up when Application stops being a sigleton. 
+    # @TODO: Clean this mess up when Application stops being a sigleton.
     # @param [Object] args
     # @return [nil]
     def self.require(*args)
