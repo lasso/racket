@@ -74,14 +74,14 @@ module Racket
       #
       # @param [HttpRouter::Response] response
       # @return [Array]
-      def self.extract_target(response)
+      def extract_target(response)
         target_klass = response.route.dest
         params = response.param_values.first.reject(&:empty?)
         action = params.empty? ? target_klass.settings.fetch(:default_action) : params.shift.to_sym
         [target_klass, params, action]
       end
 
-      def self.call_controller(target_klass, mod)
+      def call_controller(target_klass, mod)
         target = target_klass.new
         target.extend(mod)
         target.__run
@@ -93,7 +93,7 @@ module Racket
       # @param [Hash] env
       # @param [Array] target_info
       # @return [Array] A racket response triplet
-      def self.render_controller(env, target_info)
+      def render_controller(env, target_info)
         controller_class, params, action = target_info
 
         # Rewrite PATH_INFO to reflect that we split out the parameters
@@ -111,14 +111,15 @@ module Racket
       # @param [Hash] env
       # @param [Fixnum] num_params
       # @return [nil]
-      def self.update_path_info(env, num_params)
+      def update_path_info(env, num_params)
         env['PATH_INFO'] = env['PATH_INFO']
                            .split('/')[0...-num_params]
                            .join('/') unless num_params.zero?
         nil
       end
 
-      private_class_method :call_controller, :update_path_info
+      # @TODO: Remove when Racket::Utils stops being a singleton
+      extend self
     end
   end
 end

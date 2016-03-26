@@ -60,9 +60,12 @@ module Racket
       #
       # @param [Array] errors
       # @return [true|flase]
-      def self.run_block(*errors, &block)
+      def run_block(*errors, &block)
         ExceptionHandler.run_block(errors, &block)
       end
+
+      # @TODO: Remove when Racket::Utils stops being a singleton
+      extend self
     end
   end
 end

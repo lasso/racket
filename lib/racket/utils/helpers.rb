@@ -73,13 +73,13 @@ module Racket
       # Applies helpers to a controller class by including the modules in the class.
       #
       # @param [Class] klass
-      def self.apply_helpers(klass)
+      def apply_helpers(klass)
         klass.helper unless klass.settings.fetch(:helpers) # Makes sure default helpers are loaded.
         __apply_helpers(klass)
         nil
       end
 
-      def self.__apply_helpers(klass)
+      def __apply_helpers(klass)
         klass.settings.fetch(:helpers).reverse_each do |pair|
           helper_key, helper = pair
           ::Racket::Application.inform_dev(
@@ -89,7 +89,8 @@ module Racket
         end
       end
 
-      private_class_method :__apply_helpers
+      # @TODO: Remove when Racket::Utils stops being a singleton
+      extend self
     end
   end
 end

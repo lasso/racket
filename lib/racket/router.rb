@@ -37,11 +37,12 @@ module Racket
     attr_reader :action_cache
     attr_reader :routes
 
-    def initialize(action_cache, logger)
+    def initialize(action_cache, logger, utils)
       @action_cache = action_cache
       @logger = logger
       @router = HttpRouter.new
       @routes = {}
+      @utils = utils
     end
 
     # Returns a route to the specified controller/action/parameter combination.
@@ -84,7 +85,7 @@ module Racket
       catch :response do # Catches early exits from Controller.respond.
         # Ensure that that a controller will respond to the request. If not, send a 404.
         return render_error(404) unless (target_info = target_info(env))
-        Utils.render_controller(env, target_info)
+        @utils.render_controller(env, target_info)
       end
     rescue => err
       render_error(500, err)
@@ -107,7 +108,7 @@ module Racket
       # Exit early if no controller is responsible for the route
       return nil unless matching_route
       # Some controller is claiming to be responsible for the route
-      result = Utils.extract_target(matching_route.first)
+      result = @utils.extract_target(matching_route.first)
       # Exit early if action is not available on target
       return nil unless @action_cache.present?(result.first, result.last)
       result

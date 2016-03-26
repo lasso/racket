@@ -197,7 +197,8 @@ module Racket
           @registry.register(:router) do |c|
             Racket::Router.new(
               c.resolve(:action_cache),
-              c.resolve(:application_logger)
+              c.resolve(:application_logger),
+              c.resolve(:utils)
             )
           end
 
@@ -228,7 +229,7 @@ module Racket
           end
 
           @registry.register(:utils) do |c|
-            Racket::Utils
+            Racket::Utils::ToolBelt.new
           end
 
           nil
@@ -239,7 +240,7 @@ module Racket
       #
       # @param [Racket::Application] application
       # @return [Rack::Builder]
-      def self.build_application(application)
+      def build_application(application)
         ApplicationBuilder.new(application).build
       end
 
@@ -247,9 +248,12 @@ module Racket
       #
       # @param [Racket::Application] application
       # @return [Rack::Builder]
-      def self.build_registry(settings)
+      def build_registry(settings)
         RegistryBuilder.new(settings).registry
       end
+
+      # @TODO: Remove when Racket::Utils stops being a singleton
+      extend self
     end
   end
 end

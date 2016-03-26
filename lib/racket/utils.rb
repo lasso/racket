@@ -28,6 +28,15 @@ module Racket
   module Utils
     extend SingleForwardable
 
+    class ToolBelt
+      include Application
+      include Exceptions
+      include FileSystem
+      include Helpers
+      include Routing
+      include Views
+    end
+
     # Embraces a module, making its class methods available as class methods on the current module.
     #
     # @param [Module] mod
