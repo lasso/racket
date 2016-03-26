@@ -172,6 +172,10 @@ module Racket
 
         def build_registry(settings)
 
+          @registry.register(:action_cache) do |c|
+            Racket::Utils::Routing::ActionCache.new(c.resolve(:application_logger))
+          end
+
           @registry.register(:application) do |c|
             Racket::Application.new
           end
@@ -191,7 +195,10 @@ module Racket
           end
 
           @registry.register(:router) do |c|
-            Racket::Router.new
+            Racket::Router.new(
+              c.resolve(:action_cache),
+              c.resolve(:application_logger)
+            )
           end
 
           @registry.register(:template_locator) do |c|

@@ -37,10 +37,11 @@ module Racket
     attr_reader :action_cache
     attr_reader :routes
 
-    def initialize
+    def initialize(action_cache, logger)
+      @action_cache = action_cache
+      @logger = logger
       @router = HttpRouter.new
       @routes = {}
-      @action_cache = Utils::Routing::ActionCache.new
     end
 
     # Returns a route to the specified controller/action/parameter combination.
@@ -92,7 +93,7 @@ module Racket
     private
 
     def map_controller(base_path, controller_class)
-      Application.inform_dev("Mapping #{controller_class} to #{base_path}.")
+      @logger.inform_dev("Mapping #{controller_class} to #{base_path}.")
       @routes[controller_class] = base_path
     end
 

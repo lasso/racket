@@ -27,8 +27,9 @@ module Racket
       class ActionCache
         attr_reader :items
 
-        def initialize
+        def initialize(logger)
           @items = {}
+          @logger = logger
         end
 
         # Returns whether +controller_class+ is in the cache and that it contains the action
@@ -50,7 +51,7 @@ module Racket
           __add(controller_class)
           actions = @items[controller_class].to_a
           @items[controller_class] = actions
-          ::Racket::Application.inform_dev(
+          @logger.inform_dev(
             "Registering actions #{actions} for #{controller_class}."
           ) && nil
         end
