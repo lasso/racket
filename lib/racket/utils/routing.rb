@@ -82,7 +82,7 @@ module Racket
       end
 
       def call_controller(target_klass, mod)
-        target = target_klass.new
+        target = target_klass.new(self)
         target.extend(mod)
         target.__run
       end
@@ -117,9 +117,6 @@ module Racket
                            .join('/') unless num_params.zero?
         nil
       end
-
-      # @TODO: Remove when Racket::Utils stops being a singleton
-      extend self
     end
   end
 end

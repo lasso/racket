@@ -88,9 +88,6 @@ module Racket
           klass.send(:include, helper)
         end
       end
-
-      # @TODO: Remove when Racket::Utils stops being a singleton
-      extend self
     end
   end
 end

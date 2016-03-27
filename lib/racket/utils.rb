@@ -45,11 +45,7 @@ module Racket
       def_single_delegators(mod, *mod.singleton_methods) && nil
     end
 
-    __embrace(Application)
     __embrace(Exceptions)
     __embrace(FileSystem)
-    __embrace(Helpers)
-    __embrace(Routing)
-    __embrace(Views)
   end
 end

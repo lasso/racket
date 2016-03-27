@@ -243,17 +243,6 @@ module Racket
       def build_application(application)
         ApplicationBuilder.new(application).build
       end
-
-      # Builds and returns an IOC::Container that can be used across the application.
-      #
-      # @param [Racket::Application] application
-      # @return [Rack::Builder]
-      def build_registry(settings)
-        RegistryBuilder.new(settings).registry
-      end
-
-      # @TODO: Remove when Racket::Utils stops being a singleton
-      extend self
     end
   end
 end

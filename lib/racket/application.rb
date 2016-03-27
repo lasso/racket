@@ -94,7 +94,7 @@ module Racket
     # @param [Hash] settings
     # @return [Class]
     def self.init(settings = {})
-      @registry = Racket::Utils::Application.build_registry(settings)
+      @registry = Utils::Application::RegistryBuilder.new(settings).registry
       @application_logger = @registry.resolve(:application_logger)
       @settings = @registry.resolve(:application_settings)
       @utils = @registry.resolve(:utils)

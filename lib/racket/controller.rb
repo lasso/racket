@@ -19,6 +19,13 @@
 module Racket
   # Base controller class. Your controllers should inherit this class.
   class Controller
+
+    attr_reader :utils
+
+    def initialize(utils)
+      @utils = utils
+    end
+
     def self.__helper_cache
       settings = Controller.settings
       helper_cache =
