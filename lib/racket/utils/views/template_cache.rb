@@ -16,18 +16,26 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Racket.  If not, see <http://www.gnu.org/licenses/>.
 
-require 'tilt'
-
-require_relative 'views/renderer.rb'
-require_relative 'views/template_cache.rb'
-require_relative 'views/template_locator.rb'
-
 module Racket
   module Utils
-    # Utility functions for views.
     module Views
-      # Struct for holding template data.
-      TemplateParams = Struct.new(:type, :controller, :base_dir, :cache)
+      # Cache for storing templates
+      class TemplateCache
+        def initialize
+          @cache = {}
+        end
+
+        # Returns a cached template. If the template has not been cached yet, this method will run a
+        # lookup against the provided parameters.
+        #
+        # @param [String] path
+        # @param [TemplateParams] template_params
+        # @return [String|Proc|nil]
+        def ensure_in_cache(path, template_params)
+          return @cache[path] if @cache.key?(path)
+          @cache[path] = TemplateLocator.calculate_path(path, template_params)
+        end
+      end
     end
   end
 end

@@ -74,7 +74,7 @@ module Racket
           end
 
           @registry.register(:template_renderer) do
-            Utils::Views::ViewRenderer
+            Utils::Views::Renderer
           end
 
           @registry.register(:view_cache) do
