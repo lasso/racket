@@ -43,9 +43,9 @@ module Racket
       # Class used for locating templates.
       class TemplateLocator
         def initialize(options)
-          raise ArgumentError, 'Layout base path is missing.' unless
+          fail ArgumentError, 'Layout base path is missing.' unless
             (@layout_base_dir = options.fetch(:layout_base_dir, nil))
-          raise ArgumentError, 'View base path is missing.' unless
+          fail ArgumentError, 'View base path is missing.' unless
             (@view_base_dir = options.fetch(:view_base_dir, nil))
           @layout_cache = options.fetch(:layout_cache, TemplateCache.new)
           @view_cache = options.fetch(:view_cache, TemplateCache.new)

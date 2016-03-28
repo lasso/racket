@@ -30,7 +30,7 @@ module Racket
     #
     # @return [Rack::Builder]
     def self.application
-      @application ||= @utils.build_application(self)
+      @application ||= @utils.build_application(self, @utils)
     end
 
     def self.calculate_url_path(file)

@@ -28,6 +28,7 @@ module Racket
   module Utils
     extend SingleForwardable
 
+    # Collects functionality from all utility modules into a handy class.
     class ToolBelt
       include Application
       include Exceptions

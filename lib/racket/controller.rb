@@ -19,7 +19,6 @@
 module Racket
   # Base controller class. Your controllers should inherit this class.
   class Controller
-
     attr_reader :utils
 
     def initialize(utils)
