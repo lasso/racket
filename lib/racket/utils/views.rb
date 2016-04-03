@@ -19,8 +19,8 @@
 require 'tilt'
 
 require_relative 'views/renderer.rb'
-require_relative 'views/template_cache.rb'
 require_relative 'views/template_locator.rb'
+require_relative 'views/template_resolver.rb'
 
 module Racket
   module Utils

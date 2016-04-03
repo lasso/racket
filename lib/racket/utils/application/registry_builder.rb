@@ -34,6 +34,7 @@ module Racket
           register_router
           register_template_locator
           register_template_renderer
+          register_template_resolver
           register_view_cache
           register_view_manager
           register_utils
@@ -62,7 +63,7 @@ module Racket
 
         def register_layout_cache
           @registry.register(:layout_cache) do
-            Racket::Utils::Views::TemplateCache.new
+            Moneta.new(:LRUHash)
           end
         end
 
@@ -82,6 +83,7 @@ module Racket
             Racket::Utils::Views::TemplateLocator.new(
               layout_base_dir: settings.layout_dir,
               layout_cache: reg.resolve(:layout_cache),
+              template_resolver: reg.resolve(:template_resolver),
               view_base_dir: settings.view_dir,
               view_cache: reg.resolve(:view_cache)
             )
@@ -94,9 +96,15 @@ module Racket
           end
         end
 
+        def register_template_resolver
+          @registry.register(:template_resolver) do |reg|
+            Utils::Views::TemplateResolver.new(reg.resolve(:utils))
+          end
+        end
+
         def register_view_cache
           @registry.register(:view_cache) do
-            Racket::Utils::Views::TemplateCache.new
+            Moneta.new(:LRUHash)
           end
         end
 
