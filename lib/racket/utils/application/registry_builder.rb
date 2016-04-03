@@ -63,7 +63,7 @@ module Racket
 
         def register_layout_cache
           @registry.register(:layout_cache) do
-            Moneta.new(:LRUHash)
+            Racket::Utils::Views::TemplateCache.new
           end
         end
 
@@ -92,19 +92,21 @@ module Racket
 
         def register_template_renderer
           @registry.register(:template_renderer) do
-            Utils::Views::Renderer
+            Racket::Utils::Views::Renderer
           end
         end
 
         def register_template_resolver
           @registry.register(:template_resolver) do |reg|
-            Utils::Views::TemplateResolver.new(reg.resolve(:utils))
+            Racket::Utils::Views::TemplateResolver.new(
+              reg.resolve(:utils), reg.resolve(:application_logger)
+            )
           end
         end
 
         def register_view_cache
           @registry.register(:view_cache) do
-            Moneta.new(:LRUHash)
+            Racket::Utils::Views::TemplateCache.new
           end
         end
 

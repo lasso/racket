@@ -18,7 +18,6 @@ Gem::Specification.new do |s|
 
   s.add_dependency('http_router', '~>0')
   s.add_dependency('ioc', '~>6.4')
-  s.add_dependency('moneta', '~>0.8')
   s.add_dependency('rack', '~>1.6')
   s.add_dependency('tilt', '~>2.0')
 

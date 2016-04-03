@@ -15,20 +15,21 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with Racket.  If not, see <http://www.gnu.org/licenses/>.
-
-require 'tilt'
-
-require_relative 'views/renderer.rb'
-require_relative 'views/template_cache.rb'
-require_relative 'views/template_locator.rb'
-require_relative 'views/template_resolver.rb'
-
 module Racket
   module Utils
-    # Utility functions for views.
     module Views
-      # Struct for holding template data.
-      TemplateParams = Struct.new(:type, :controller, :base_dir, :cache)
+      class TemplateCache
+        extend Forwardable
+
+        # Match interface provided by Moneta. 
+        def_delegator :@items, :key?
+        def_delegator :@items, :[], :load
+        def_delegator :@items, :[]=, :store
+
+        def initialize
+          @items = {}
+        end
+      end
     end
   end
 end

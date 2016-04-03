@@ -21,7 +21,7 @@ module Racket
     module Views
       # Class used for locating templates. This class uses the TemplateResolver class internally
       # for getting the template for the first time and caches the result so that subsequent Calls
-      # will not need to resolve the template again. 
+      # will not need to resolve the template again.
       class TemplateLocator
         def initialize(options)
           fail ArgumentError, 'Layout base path is missing.' unless
@@ -30,8 +30,8 @@ module Racket
             (@view_base_dir = options.fetch(:view_base_dir, nil))
           fail ArgumentError, 'Template resolver is missing.' unless
             (@template_resolver = options.fetch(:template_resolver, nil))
-          @layout_cache = options.fetch(:layout_cache, Moneta.new(:Null))
-          @view_cache = options.fetch(:view_cache, Moneta.new(:Null))
+          @layout_cache = options.fetch(:layout_cache, TemplateCache.new)
+          @view_cache = options.fetch(:view_cache, TemplateCache.new)
         end
 
         # Returns the layout associated with the current request. On the first request to any action
@@ -64,13 +64,10 @@ module Racket
           path = @template_resolver.get_template_path(template_params.controller)
           cache = template_params.cache
           unless cache.key?(path)
-            template = @template_resolver.calculate_path(path, template_params)
-            cache.store(
-              path,
-              @template_resolver.resolve_template(path, template, template_params)
-            )
+            template = @template_resolver.get_template_object(path, template_params)
+            cache.store(path, template)
           end
-          cache.load(path)
+          @template_resolver.resolve_template(path, cache.load(path), template_params)
         end
       end
     end

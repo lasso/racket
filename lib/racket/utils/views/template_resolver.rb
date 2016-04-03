@@ -21,18 +21,19 @@ module Racket
     module Views
       # Class used for resolving template paths.
       class TemplateResolver
-        def initialize(utils)
+        def initialize(utils, logger)
           @utils = utils
+          @logger = logger
         end
 
-        def calculate_path(path, template_params)
+        def get_template_object(path, template_params)
           type, controller, base_dir = template_params.to_a
           default_template = controller.settings.fetch("default_#{type}".to_sym)
           template =
             lookup_template_with_default(
               @utils.fs_path(base_dir, path), default_template
             )
-          ::Racket::Application.inform_dev(
+          @logger.inform_dev(
             "Using #{type} #{template.inspect} for #{controller.class}.#{controller.racket.action}."
           )
           template
@@ -49,6 +50,12 @@ module Racket
           template_path
         end
 
+        # Returns the "resolved" path for the given parameters. This is either a pathname or nil.
+        #
+        # @param [String] path
+        # @param [Proc|String|nil] template
+        # @param [TemplateParams] template_params
+        # @return [pathname|nil]
         def resolve_template(path, template, template_params)
           return template unless template.is_a?(Proc)
           _, controller, base_dir = template_params.to_a
