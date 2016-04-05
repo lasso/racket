@@ -149,7 +149,7 @@ module Racket
     # @param [Object] args
     # @return [nil]
     def self.require(*args)
-      registry = @registry || Racket::Utils::Application.build_registry({})
+      registry = @registry || Utils::Application::RegistryBuilder.new(settings).registry
       (::Kernel.require registry.resolve(:utils).build_path(*args)) && nil
     end
 
