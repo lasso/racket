@@ -21,20 +21,25 @@ module Racket
     module Views
       # Class used for resolving template paths.
       class TemplateResolver
-        def initialize(utils, logger)
-          @utils = utils
-          @logger = logger
+        def initialize(options)
+          fail ArgumentError, 'Base dir is missing.' unless
+            (@base_dir = options.fetch(:base_dir, nil))
+          fail ArgumentError, 'Logger is missing.' unless
+            (@logger = options.fetch(:logger, nil))
+          fail ArgumentError, 'Type is missing.' unless
+            (@type = options.fetch(:type, nil))
+          fail ArgumentError, 'Utils is missing.' unless
+            (@utils = options.fetch(:utils, nil))
         end
 
-        def get_template_object(path, template_params)
-          type, controller, base_dir = template_params.to_a
-          default_template = controller.settings.fetch("default_#{type}".to_sym)
+        def get_template_object(path, controller)
+          default_template = controller.settings.fetch("default_#{@type}".to_sym)
           template =
             lookup_template_with_default(
-              @utils.fs_path(base_dir, path), default_template
+              @utils.fs_path(@base_dir, path), default_template
             )
           @logger.inform_dev(
-            "Using #{type} #{template.inspect} for #{controller.class}.#{controller.racket.action}."
+            "Using #{@type} #{template.inspect} for #{controller.class}.#{controller.racket.action}."
           )
           template
         end
@@ -56,12 +61,11 @@ module Racket
         # @param [Proc|String|nil] template
         # @param [TemplateParams] template_params
         # @return [pathname|nil]
-        def resolve_template(path, template, template_params)
+        def resolve_template(path, template, controller)
           return template unless template.is_a?(Proc)
-          _, controller, base_dir = template_params.to_a
           lookup_template(
             @utils.fs_path(
-              @utils.fs_path(base_dir, path).dirname,
+              @utils.fs_path(@base_dir, path).dirname,
               call_template_proc(template, controller)
             )
           )

@@ -22,13 +22,3 @@ require_relative 'views/renderer.rb'
 require_relative 'views/template_cache.rb'
 require_relative 'views/template_locator.rb'
 require_relative 'views/template_resolver.rb'
-
-module Racket
-  module Utils
-    # Utility functions for views.
-    module Views
-      # Struct for holding template data.
-      TemplateParams = Struct.new(:type, :controller, :base_dir, :cache)
-    end
-  end
-end

@@ -27,22 +27,23 @@ module Racket
 
         def initialize(settings = {})
           @registry = IOC::Container.new
-          register_application_cache
+          register_action_cache
           register_application_logger
           register_application_settings(settings)
           register_layout_cache
+          register_layout_resolver
           register_router
           register_template_locator
           register_template_renderer
-          register_template_resolver
           register_view_cache
           register_view_manager
+          register_view_resolver
           register_utils
         end
 
         private
 
-        def register_application_cache
+        def register_action_cache
           @registry.register(:action_cache) do |reg|
             Racket::Utils::Routing::ActionCache.new(reg.resolve(:application_logger))
           end
@@ -63,7 +64,21 @@ module Racket
 
         def register_layout_cache
           @registry.register(:layout_cache) do
-            Racket::Utils::Views::TemplateCache.new
+            Racket::Utils::Views::TemplateCache.new({})
+          end
+        end
+
+        def register_layout_resolver
+          @registry.register(:layout_resolver) do |reg|
+            settings = reg.resolve(:application_settings)
+            Racket::Utils::Views::TemplateResolver.new(
+              {
+                base_dir: reg.resolve(:application_settings).layout_dir,
+                logger: reg.resolve(:application_logger),
+                type: :layout,
+                utils:  reg.resolve(:utils)
+              }
+            )
           end
         end
 
@@ -81,11 +96,10 @@ module Racket
           @registry.register(:template_locator) do |reg|
             settings = reg.resolve(:application_settings)
             Racket::Utils::Views::TemplateLocator.new(
-              layout_base_dir: settings.layout_dir,
               layout_cache: reg.resolve(:layout_cache),
-              template_resolver: reg.resolve(:template_resolver),
-              view_base_dir: settings.view_dir,
-              view_cache: reg.resolve(:view_cache)
+              layout_resolver: reg.resolve(:layout_resolver),
+              view_cache: reg.resolve(:view_cache),
+              view_resolver: reg.resolve(:view_resolver)
             )
           end
         end
@@ -96,17 +110,9 @@ module Racket
           end
         end
 
-        def register_template_resolver
-          @registry.register(:template_resolver) do |reg|
-            Racket::Utils::Views::TemplateResolver.new(
-              reg.resolve(:utils), reg.resolve(:application_logger)
-            )
-          end
-        end
-
         def register_view_cache
           @registry.register(:view_cache) do
-            Racket::Utils::Views::TemplateCache.new
+            Racket::Utils::Views::TemplateCache.new({})
           end
         end
 
@@ -114,6 +120,20 @@ module Racket
           @registry.register(:view_manager) do |reg|
             Racket::ViewManager.new(
               reg.resolve(:template_locator), reg.resolve(:template_renderer)
+            )
+          end
+        end
+
+        def register_view_resolver
+          @registry.register(:view_resolver) do |reg|
+            settings = reg.resolve(:application_settings)
+            Racket::Utils::Views::TemplateResolver.new(
+              {
+                base_dir: reg.resolve(:application_settings).view_dir,
+                logger: reg.resolve(:application_logger),
+                type: :view,
+                utils:  reg.resolve(:utils)
+              }
             )
           end
         end

@@ -15,19 +15,47 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with Racket.  If not, see <http://www.gnu.org/licenses/>.
+
 module Racket
   module Utils
     module Views
+      # Class for caching templates.
+      # This class adheres to the Moneta API
+      # (https://github.com/minad/moneta#user-content-moneta-api), even though it is not using the
+      # Moneta framework.
       class TemplateCache
-        extend Forwardable
-
-        # Match interface provided by Moneta. 
-        def_delegator :@items, :key?
-        def_delegator :@items, :[], :load
-        def_delegator :@items, :[]=, :store
-
-        def initialize
+        def initialize(options)
           @items = {}
+          @options = options
+        end
+
+        def [](key)
+          @items[key]
+        end
+
+        def load(key, options = {})
+          @items[key]
+        end
+
+        def fetch(key, options, &blk)
+          return @items[key] if items.key?(key)
+          block.call
+        end
+
+        def []=(key, value)
+          @items[key] = value
+        end
+
+        def store(key, value, options = {})
+          @items[key] = value
+        end
+
+        def delete(key, value, options = {})
+          @items.delete(key)
+        end
+
+        def key?(key)
+          @items.key?(key)
         end
       end
     end

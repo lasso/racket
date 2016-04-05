@@ -24,14 +24,14 @@ module Racket
       # will not need to resolve the template again.
       class TemplateLocator
         def initialize(options)
-          fail ArgumentError, 'Layout base path is missing.' unless
-            (@layout_base_dir = options.fetch(:layout_base_dir, nil))
-          fail ArgumentError, 'View base path is missing.' unless
-            (@view_base_dir = options.fetch(:view_base_dir, nil))
-          fail ArgumentError, 'Template resolver is missing.' unless
-            (@template_resolver = options.fetch(:template_resolver, nil))
-          @layout_cache = options.fetch(:layout_cache, TemplateCache.new)
-          @view_cache = options.fetch(:view_cache, TemplateCache.new)
+          fail ArgumentError, 'Layout cache is missing.' unless
+            (@layout_cache = options.fetch(:layout_cache, nil))
+          fail ArgumentError, 'Layout resolver is missing.' unless
+            (@layout_resolver = options.fetch(:layout_resolver, nil))
+          fail ArgumentError, 'View cache is missing.' unless
+            (@view_cache = options.fetch(:view_cache, nil))
+          fail ArgumentError, 'View resolver is missing.' unless
+            (@view_resolver = options.fetch(:view_resolver, nil))
         end
 
         # Returns the layout associated with the current request. On the first request to any action
@@ -40,7 +40,7 @@ module Racket
         # @param [Racket::Controller] controller
         # @return [String|nil]
         def get_layout(controller)
-          get_template(TemplateParams.new(:layout, controller, @layout_base_dir, @layout_cache))
+          get_template(:layout, controller)
         end
 
         # Returns the view associated with the current request. On the first request to any action
@@ -49,10 +49,17 @@ module Racket
         # @param [Racket::Controller] controller
         # @return [String|nil]
         def get_view(controller)
-          get_template(TemplateParams.new(:view, controller, @view_base_dir, @view_cache))
+          get_template(:view, controller)
         end
 
         private
+
+        def get_cache_and_resolver_by_type(type)
+          case type
+          when :layout then [@layout_cache, @layout_resolver]
+          when :view then [@view_cache, @view_resolver]
+          end
+        end
 
         # Tries to locate a template matching +path+ in the file system and returns the path if a
         # matching file is found. If no matching file is found, +nil+ is returned. The result is
@@ -60,14 +67,14 @@ module Racket
         #
         # @param [TemplateParams] template_params
         # @return [String|nil]
-        def get_template(template_params)
-          path = @template_resolver.get_template_path(template_params.controller)
-          cache = template_params.cache
+        def get_template(type, controller)
+          cache, resolver = get_cache_and_resolver_by_type(type)
+          path = resolver.get_template_path(controller)
           unless cache.key?(path)
-            template = @template_resolver.get_template_object(path, template_params)
+            template = resolver.get_template_object(path, controller)
             cache.store(path, template)
           end
-          @template_resolver.resolve_template(path, cache.load(path), template_params)
+          resolver.resolve_template(path, cache.load(path), controller)
         end
       end
     end
