@@ -24,38 +24,91 @@ module Racket
       # (https://github.com/minad/moneta#user-content-moneta-api), even though it is not using the
       # Moneta framework.
       class TemplateCache
+        DEFAULT_OPTIONS = { expires: 0 }
         def initialize(options)
+          @expirations = {}
           @items = {}
-          @options = options
+          @options = DEFAULT_OPTIONS.merge(options)
         end
 
         def [](key)
-          @items[key]
-        end
-
-        def load(key, options = {})
-          @items[key]
-        end
-
-        def fetch(key, options, &blk)
-          return @items[key] if items.key?(key)
-          block.call
+          load(key)
         end
 
         def []=(key, value)
-          @items[key] = value
+          store(key, value)
         end
 
-        def store(key, value, options = {})
-          @items[key] = value
+        def clear(options = {})
+          @expirations.clear
+          @items.clear
+        end
+
+        def close
+          clear
+        end
+
+        def create(key, value, options = {})
+          fail NotImplementedError
+        end
+
+        def decrement(key, amount = 1, options = {})
+          fail NotImplementedError
         end
 
         def delete(key, value, options = {})
+          @expirations.delete(key)
           @items.delete(key)
+        end
+
+        def features
+          return []
+        end
+
+        # This method handles both forms of fetch.
+        # With a default block - fetch(key, options = {}, &block)
+        # With a default value - fetch(key, value, options = {})
+        def fetch(*args, &block)
+          key = args.shift
+          return load(key) if key?(key)
+          block_given? ? block.call : args.first
+        end
+
+        def increment(key, amount = 1, options = {})
+          fail NotImplementedError
         end
 
         def key?(key)
           @items.key?(key)
+        end
+
+        def load(key, _ = {})
+          return @items[key] unless @expirations.key?(key)
+          if (Time.now > @expirations[key])
+            @expirations.delete(key)
+            @items.delete(key)
+          end
+          @items[key]
+        end
+
+        def store(key, value, options = {})
+          set_expiration(key, options.fetch(:expires, @options[:expires]))
+          @items[key] = value
+        end
+
+        def supports?(feature)
+          features.include?(feature)
+        end
+
+        private
+
+        def set_expiration(key, expires)
+          expire_at = expires > 0 ? Time.now + expires : nil
+          if expire_at
+            @expirations[key] = expire_at
+          else
+            @expirations.delete(key)
+          end
         end
       end
     end

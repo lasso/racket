@@ -27,6 +27,9 @@ require 'bacon'
 # Method tests should always be run first.
 require File.join(TEST_DIR, '_request.rb')
 
+# Next up, tests for Template caching.
+require File.join(TEST_DIR, '_template_cache.rb')
+
 # Application tests.
 suites = [
   -> { Dir.chdir(TEST_DEFAULT_APP_DIR) { require File.join(TEST_DIR, '_default.rb') } },
