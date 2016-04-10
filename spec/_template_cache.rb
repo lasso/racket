@@ -85,6 +85,21 @@ describe 'Racket::Utils::Vievs::TemplateCache should adhere to Moneta::Cache int
         cache.fetch(key) { 'out of space' }.should.equal('out of space')
       end
     end
+    it 'should handle deletes correctly' do
+      cache = Racket::Utils::Views::TemplateCache.new({})
+      cache['number'] = 'one'
+      cache['number'].should.equal('one')
+      cache.delete('number')
+      cache['number'].should.equal(nil)
+      cache['number'] = 'two'
+      cache['number'].should.equal('two')
+      cache.clear
+      cache['number'].should.equal(nil)
+      cache['number'] = 'three'
+      cache['number'].should.equal('three')
+      cache.close
+      cache['number'].should.equal(nil)
+    end
   end
 
   describe 'Cache with default expiration' do
@@ -141,6 +156,21 @@ describe 'Racket::Utils::Vievs::TemplateCache should adhere to Moneta::Cache int
       templates.each_key do |key|
         cache.fetch(key) { 'out of space' }.should.equal('out of space')
       end
+    end
+    it 'should handle deletes correctly' do
+      cache = Racket::Utils::Views::TemplateCache.new(expires: 60)
+      cache['number'] = 'one'
+      cache['number'].should.equal('one')
+      cache.delete('number')
+      cache['number'].should.equal(nil)
+      cache['number'] = 'two'
+      cache['number'].should.equal('two')
+      cache.clear
+      cache['number'].should.equal(nil)
+      cache['number'] = 'three'
+      cache['number'].should.equal('three')
+      cache.close
+      cache['number'].should.equal(nil)
     end
   end
 

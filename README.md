@@ -23,14 +23,15 @@ Let us just say it is good _enough_ for my needs at the moment. I plan to add mo
 whenever I am finished porting most of my old apps from Ramaze.
 
 ## Where are the tests?
-Have a look in the `spec` directory. The code base have tests covering 100 per cent of the code and I am planning on keeping it that way. At the moment the code is tested on the following platforms (using [Travis CI](https://travis-ci.org/)):
+Have a look in the `spec` directory. The code base have tests covering (almost) 100 per cent of the code and I am planning on keeping it that way. At the moment the code is tested on the following platforms (using [Travis CI](https://travis-ci.org/)):
 
 - 1.9.3
 - 2.0.0
-- 2.1.7
-- 2.2.3
+- 2.1.10
+- 2.2.4
+- 2.3.0
 - jruby-19mode
-- jruby-head
+- <strike>jruby-head</strike> (seems to be in a bad state at the moment)
 - rbx-2
 
 I am using [bacon](https://github.com/chneukirchen/bacon) and [rack-test](https://github.com/brynary/rack-test) for testing. Run the tests by typing `rake test`in the root directory. Code coverage reports are provided by [simplecov](https://rubygems.org/gems/simplecov). After the tests have run the an HTML report can be found in the `coverage` directory.

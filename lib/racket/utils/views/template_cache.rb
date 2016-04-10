@@ -56,7 +56,7 @@ module Racket
           fail NotImplementedError
         end
 
-        def delete(key, value, options = {})
+        def delete(key, options = {})
           @expirations.delete(key)
           @items.delete(key)
         end
