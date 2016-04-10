@@ -70,14 +70,11 @@ module Racket
 
         def register_layout_resolver
           @registry.register(:layout_resolver) do |reg|
-            settings = reg.resolve(:application_settings)
             Racket::Utils::Views::TemplateResolver.new(
-              {
-                base_dir: reg.resolve(:application_settings).layout_dir,
-                logger: reg.resolve(:application_logger),
-                type: :layout,
-                utils:  reg.resolve(:utils)
-              }
+              base_dir: reg.resolve(:application_settings).layout_dir,
+              logger: reg.resolve(:application_logger),
+              type: :layout,
+              utils: reg.resolve(:utils)
             )
           end
         end
@@ -94,7 +91,6 @@ module Racket
 
         def register_template_locator
           @registry.register(:template_locator) do |reg|
-            settings = reg.resolve(:application_settings)
             Racket::Utils::Views::TemplateLocator.new(
               layout_cache: reg.resolve(:layout_cache),
               layout_resolver: reg.resolve(:layout_resolver),
@@ -126,14 +122,11 @@ module Racket
 
         def register_view_resolver
           @registry.register(:view_resolver) do |reg|
-            settings = reg.resolve(:application_settings)
             Racket::Utils::Views::TemplateResolver.new(
-              {
-                base_dir: reg.resolve(:application_settings).view_dir,
-                logger: reg.resolve(:application_logger),
-                type: :view,
-                utils:  reg.resolve(:utils)
-              }
+              base_dir: reg.resolve(:application_settings).view_dir,
+              logger: reg.resolve(:application_logger),
+              type: :view,
+              utils: reg.resolve(:utils)
             )
           end
         end

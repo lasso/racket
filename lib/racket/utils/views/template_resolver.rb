@@ -39,7 +39,8 @@ module Racket
               @utils.fs_path(@base_dir, path), default_template
             )
           @logger.inform_dev(
-            "Using #{@type} #{template.inspect} for #{controller.class}.#{controller.racket.action}."
+            "Using #{@type} #{template.inspect} for #{controller.class}." \
+            "#{controller.racket.action}."
           )
           template
         end

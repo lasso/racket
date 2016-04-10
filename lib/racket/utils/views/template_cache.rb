@@ -39,7 +39,7 @@ module Racket
           store(key, value)
         end
 
-        def clear(options = {})
+        def clear(_options = {})
           @expirations.clear
           @items.clear
         end
@@ -48,21 +48,21 @@ module Racket
           clear
         end
 
-        def create(key, value, options = {})
+        def create(_key, _value, _options = {})
           fail NotImplementedError
         end
 
-        def decrement(key, amount = 1, options = {})
+        def decrement(_key, _amount = 1, _options = {})
           fail NotImplementedError
         end
 
-        def delete(key, options = {})
+        def delete(key, _options = {})
           @expirations.delete(key)
           @items.delete(key)
         end
 
         def features
-          return []
+          []
         end
 
         # This method handles both forms of fetch.
@@ -74,7 +74,7 @@ module Racket
           block_given? ? block.call : args.first
         end
 
-        def increment(key, amount = 1, options = {})
+        def increment(_key, _amount = 1, _options = {})
           fail NotImplementedError
         end
 
@@ -82,9 +82,9 @@ module Racket
           @items.key?(key)
         end
 
-        def load(key, _ = {})
+        def load(key, _options = {})
           return @items[key] unless @expirations.key?(key)
-          if (Time.now > @expirations[key])
+          if Time.now > @expirations[key]
             @expirations.delete(key)
             @items.delete(key)
           end
