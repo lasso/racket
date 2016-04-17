@@ -116,32 +116,30 @@ describe 'A default Racket test application' do
     last_response.body.should.equal('/sub3/inherited/nonono/with/params')
   end
 
-=begin
-  # Replace with tests actually testing logging.
-  it 'should be able to log messages to everybody' do
-    original_logger = app.settings.logger
-    sio = StringIO.new
-    app.settings.logger = Logger.new(sio)
-    app.inform_all('Informational message')
-    sio.string.should.match(/Informational message/)
-    app.settings.logger = original_logger
-  end
-
-  it 'should be able to log messages to developer' do
-    original_logger = app.settings.logger
-    original_mode = app.settings.mode
-    sio = StringIO.new
-    app.settings.logger = Logger.new(sio)
-    app.settings.mode = :live
-    app.inform_dev('Development message')
-    sio.string.should.be.empty
-    app.settings.mode = :dev
-    app.inform_dev('Hey, listen up!')
-    sio.string.should.match(/Hey, listen up!/)
-    app.settings.mode = original_mode
-    app.settings.logger = original_logger
-  end
-=end
+  # # Replace with tests actually testing logging.
+  # it 'should be able to log messages to everybody' do
+  #   original_logger = app.settings.logger
+  #   sio = StringIO.new
+  #   app.settings.logger = Logger.new(sio)
+  #   app.inform_all('Informational message')
+  #   sio.string.should.match(/Informational message/)
+  #   app.settings.logger = original_logger
+  # end
+  #
+  # it 'should be able to log messages to developer' do
+  #   original_logger = app.settings.logger
+  #   original_mode = app.settings.mode
+  #   sio = StringIO.new
+  #   app.settings.logger = Logger.new(sio)
+  #   app.settings.mode = :live
+  #   app.inform_dev('Development message')
+  #   sio.string.should.be.empty
+  #   app.settings.mode = :dev
+  #   app.inform_dev('Hey, listen up!')
+  #   sio.string.should.match(/Hey, listen up!/)
+  #   app.settings.mode = original_mode
+  #   app.settings.logger = original_logger
+  # end
 
   it 'should be able to set and clear session variables' do
     get '/session_as_json'

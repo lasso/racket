@@ -40,7 +40,7 @@ module Racket
         # @param [Racket::Controller] controller
         # @return [String|nil]
         def get_layout(controller)
-          get_template(:layout, controller)
+          self.class.get_template(@layout_cache, @layout_resolver, controller)
         end
 
         # Returns the view associated with the current request. On the first request to any action
@@ -49,27 +49,20 @@ module Racket
         # @param [Racket::Controller] controller
         # @return [String|nil]
         def get_view(controller)
-          get_template(:view, controller)
+          self.class.get_template(@view_cache, @view_resolver, controller)
         end
 
-        private
-
-        def get_cache_and_resolver_by_type(type)
-          case type
-          when :layout then [@layout_cache, @layout_resolver]
-          when :view then [@view_cache, @view_resolver]
-          end
-        end
-
-        # Tries to locate a template matching +path+ in the file system and returns the path if a
-        # matching file is found. If no matching file is found, +nil+ is returned. The result is
-        # cached, meaning that the filesystem lookup for a specific path will only happen once.
+        # Tries to locate a template matching the controllers action in the file system and returns
+        # the path if a matching file is found. If no matching file is found, +nil+ is returned.
+        # The result is cached, meaning that the filesystem lookup for a specific path will only
+        # happen once.
         #
-        # @param [TemplateParams] template_params
+        # @param [TemplateCache] cache
+        # @param [TemplateResolver] resolver
+        # @param [Racket::Controller] controller
         # @return [String|nil]
-        def get_template(type, controller)
-          cache, resolver = get_cache_and_resolver_by_type(type)
-          path = resolver.get_template_path(controller)
+        def self.get_template(cache, resolver, controller)
+          path = TemplateResolver.get_template_path(controller)
           unless cache.key?(path)
             template = resolver.get_template_object(path, controller)
             cache.store(path, template)

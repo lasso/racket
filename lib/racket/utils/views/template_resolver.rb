@@ -45,34 +45,21 @@ module Racket
           template
         end
 
-        # Returns the "url path" that should be used when searching for templates.
-        #
-        # @param [Racket::Controller] controller
-        # @return [String]
-        def get_template_path(controller)
-          template_path =
-            [::Racket::Application.get_route(controller.class), controller.racket.action].join('/')
-          template_path = template_path[1..-1] if template_path.start_with?('//')
-          template_path
-        end
-
         # Returns the "resolved" path for the given parameters. This is either a pathname or nil.
         #
         # @param [String] path
         # @param [Proc|String|nil] template
-        # @param [TemplateParams] template_params
+        # @param [Racket::Controller] controller
         # @return [pathname|nil]
         def resolve_template(path, template, controller)
           return template unless template.is_a?(Proc)
           lookup_template(
             @utils.fs_path(
               @utils.fs_path(@base_dir, path).dirname,
-              call_template_proc(template, controller)
+              self.class.call_template_proc(template, controller)
             )
           )
         end
-
-        private
 
         # Calls a template proc. Depending on how many parameters the template proc takes, different
         # types of information will be passed to the proc.
@@ -86,11 +73,24 @@ module Racket
         # @param [Proc] proc
         # @param [Racket::Controller] controller
         # @return [String]
-        def call_template_proc(proc, controller)
+        def self.call_template_proc(proc, controller)
           racket = controller.racket
           proc_args = [racket.action, racket.params, controller.request].slice(0...proc.arity)
           proc.call(*proc_args).to_s
         end
+
+        # Returns the "url path" that should be used when searching for templates.
+        #
+        # @param [Racket::Controller] controller
+        # @return [String]
+        def self.get_template_path(controller)
+          template_path =
+            [::Racket::Application.get_route(controller.class), controller.racket.action].join('/')
+          template_path = template_path[1..-1] if template_path.start_with?('//')
+          template_path
+        end
+
+        private
 
         # Locates a file in the filesystem matching an URL path. If there exists a matching file,
         # the path to it is returned. If there is no matching file, +nil+ is returned.

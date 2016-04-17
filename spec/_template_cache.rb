@@ -3,7 +3,7 @@ describe 'Racket::Utils::Vievs::TemplateCache should adhere to Moneta::Cache int
     'template_1' => nil,
     'template_2' => 'template.haml',
     'template_3' => :template,
-    'template_4' => lambda { |action| action.to_s }
+    'template_4' => -> (action) { action.to_s }
   }.freeze
 
   describe 'API compliance' do
@@ -11,7 +11,7 @@ describe 'Racket::Utils::Vievs::TemplateCache should adhere to Moneta::Cache int
     it 'should respond to all methods in the Moneta API' do
       [:[], :load, :fetch, :[]=, :store, :delete, :key?, :increment, :decrement, :create, :clear,
        :close, :features, :supports?].each do |meth|
-         cache.should.respond_to?(meth)
+        cache.should.respond_to?(meth)
       end
     end
 
@@ -39,7 +39,7 @@ describe 'Racket::Utils::Vievs::TemplateCache should adhere to Moneta::Cache int
   end
 
   describe 'Cache without default expiration' do
-    it "should not expire items set with []= by default" do
+    it 'should not expire items set with []= by default' do
       cache = Racket::Utils::Views::TemplateCache.new({})
       templates.each_pair do |key, val|
         cache[key] = val
@@ -49,7 +49,7 @@ describe 'Racket::Utils::Vievs::TemplateCache should adhere to Moneta::Cache int
         cache[key].should.equal(val)
       end
     end
-    it "should not expire items set with store by default" do
+    it 'should not expire items set with store by default' do
       cache = Racket::Utils::Views::TemplateCache.new({})
       templates.each_pair do |key, val|
         cache.store(key, val)
@@ -59,7 +59,7 @@ describe 'Racket::Utils::Vievs::TemplateCache should adhere to Moneta::Cache int
         cache.fetch(key).should.equal(val)
       end
     end
-    it "should expire items set with store and an explicit expire time" do
+    it 'should expire items set with store and an explicit expire time' do
       cache = Racket::Utils::Views::TemplateCache.new({})
       templates.each_pair do |key, val|
         cache.store(key, val, expires: 3)
@@ -103,7 +103,7 @@ describe 'Racket::Utils::Vievs::TemplateCache should adhere to Moneta::Cache int
   end
 
   describe 'Cache with default expiration' do
-    it "should expire items set with []= by default" do
+    it 'should expire items set with []= by default' do
       cache = Racket::Utils::Views::TemplateCache.new(expires: 3)
       templates.each_pair do |key, val|
         cache[key] = val
@@ -117,7 +117,7 @@ describe 'Racket::Utils::Vievs::TemplateCache should adhere to Moneta::Cache int
         cache[key].should.equal(nil)
       end
     end
-    it "should expire items set with store by default" do
+    it 'should expire items set with store by default' do
       cache = Racket::Utils::Views::TemplateCache.new(expires: 3)
       templates.each_pair do |key, val|
         cache.store(key, val)
@@ -131,7 +131,7 @@ describe 'Racket::Utils::Vievs::TemplateCache should adhere to Moneta::Cache int
         cache.fetch(key).should.equal(nil)
       end
     end
-    it "should not expire items set with a longer expire time" do
+    it 'should not expire items set with a longer expire time' do
       cache = Racket::Utils::Views::TemplateCache.new(expires: 3)
       templates.each_pair do |key, val|
         cache.store(key, val, expires: 5)
@@ -173,5 +173,4 @@ describe 'Racket::Utils::Vievs::TemplateCache should adhere to Moneta::Cache int
       cache['number'].should.equal(nil)
     end
   end
-
 end
