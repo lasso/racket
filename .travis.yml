@@ -14,4 +14,4 @@ before_install:
   # https://github.com/travis-ci/travis-ci/issues/5861
   - gem install bundler
 env:
-  - JRUBY_OPTS="--debug --fast --server"
+  - JRUBY_OPTS="-d --fast --server"
