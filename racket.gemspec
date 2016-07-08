@@ -1,4 +1,3 @@
-require 'rake'
 require './rake/utils.rb'
 
 Gem::Specification.new do |s|
