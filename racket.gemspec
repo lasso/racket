@@ -15,14 +15,13 @@ Gem::Specification.new do |s|
   s.require_path          = 'lib'
   s.required_ruby_version = '>= 1.9.3'
 
-  # Enforce lower json version in order to work on 1.9.3
-  s.add_dependency('json', '<2')
   s.add_dependency('http_router', '~>0')
   s.add_dependency('rack', '~>1.6')
   s.add_dependency('tilt', '~>2.0')
 
   s.add_development_dependency('bacon', '~>1.2')
   s.add_development_dependency('codecov', '~>0.1.5')
+  s.add_dependency('json', '<2') # Enforce lower json version in order to work on MRI 1.9.3
   s.add_development_dependency('rack-test', '~>0.6')
   s.add_development_dependency('rake', '~>11')
   s.add_development_dependency('sass', '~>3.4') # Needed by SASS plugin
