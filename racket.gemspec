@@ -15,6 +15,8 @@ Gem::Specification.new do |s|
   s.require_path          = 'lib'
   s.required_ruby_version = '>= 1.9.3'
 
+  # Enforce lower json version in order to work on 1.9.3
+  s.add_dependency('json', '<2')
   s.add_dependency('http_router', '~>0')
   s.add_dependency('rack', '~>1.6')
   s.add_dependency('tilt', '~>2.0')
