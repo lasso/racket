@@ -1,6 +1,5 @@
 require 'simplecov'
 require 'stringio'
-require 'tilt/erb'
 
 SimpleCov.start do
   add_filter 'spec'
@@ -17,6 +16,11 @@ TEST_CUSTOM_APP_DIR = File.join(TEST_DIR, 'test_custom_app')
 TEST_PLUGIN_APP_DIR = File.join(TEST_DIR, 'test_plugin_app')
 
 require 'racket'
+
+# Force use of ERB (not Erubis) during testing.
+# This is a workaround for Rubinius not finding ERubis.
+# @see https://gist.github.com/jodosha/9662268
+Tilt.register Tilt::ERBTemplate, 'erb'
 
 # Make sure some files that are loaded dynamically get coverage as well.
 require 'racket/helpers/file.rb'

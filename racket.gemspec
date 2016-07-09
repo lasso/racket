@@ -1,4 +1,3 @@
-require 'rake'
 require './rake/utils.rb'
 
 Gem::Specification.new do |s|
@@ -22,10 +21,11 @@ Gem::Specification.new do |s|
   s.add_dependency('tilt', '~>2.0')
 
   s.add_development_dependency('bacon', '~>1.2')
-  s.add_development_dependency('codecov', '~>0.0.8')
+  s.add_development_dependency('codecov', '~>0.1.5')
+  s.add_dependency('json', '<2') # Enforce lower json version in order to work on MRI 1.9.3
   s.add_development_dependency('rack-test', '~>0.6')
-  s.add_development_dependency('rake', '~>10')
+  s.add_development_dependency('rake', '~>11')
   s.add_development_dependency('sass', '~>3.4') # Needed by SASS plugin
-  s.add_development_dependency('simplecov', '~>0.10')
+  s.add_development_dependency('simplecov', '~>0.11')
   s.add_development_dependency('yard', '~>0')
 end

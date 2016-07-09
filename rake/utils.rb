@@ -28,9 +28,9 @@ end
 
 def racket_files
   Dir.chdir(File.dirname(File.dirname(__FILE__))) do
-    files = FileList['lib/**/*.rb'].to_a
-    files.concat(FileList['rake/**/*'].to_a)
-    files.concat(FileList['spec/**/*'].to_a)
-    files.concat(FileList['COPYING.AGPL', 'Rakefile', 'README.md'].to_a)
+    files = Dir.glob('lib/**/*.rb')
+    files.concat(Dir.glob('rake/**/*'))
+    files.concat(Dir.glob('spec/**/*'))
+    files.concat(['COPYING.AGPL', 'Rakefile', 'README.md'])
   end
 end
