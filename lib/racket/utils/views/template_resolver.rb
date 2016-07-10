@@ -22,13 +22,13 @@ module Racket
       # Class used for resolving template paths.
       class TemplateResolver
         def initialize(options)
-          fail ArgumentError, 'Base dir is missing.' unless
+          raise ArgumentError, 'Base dir is missing.' unless
             (@base_dir = options.fetch(:base_dir, nil))
-          fail ArgumentError, 'Logger is missing.' unless
+          raise ArgumentError, 'Logger is missing.' unless
             (@logger = options.fetch(:logger, nil))
-          fail ArgumentError, 'Type is missing.' unless
+          raise ArgumentError, 'Type is missing.' unless
             (@type = options.fetch(:type, nil))
-          fail ArgumentError, 'Utils is missing.' unless
+          raise ArgumentError, 'Utils is missing.' unless
             (@utils = options.fetch(:utils, nil))
         end
 
@@ -109,17 +109,15 @@ module Racket
         # @param [String|Symbol|Proc|nil] default_template
         # @return [String|Proc|nil]
         def lookup_template_with_default(path, default_template)
+          # Return template if it can be found in the file system
           template = lookup_template(path)
-          unless template
-            if default_template.is_a?(String) || default_template.is_a?(Symbol)
-              # Strings and symbols can be lookup up in the file system...
-              template = lookup_template(Utils.fs_path(path.dirname, default_template))
-            else
-              # ...but not nils/procs!
-              template = default_template
-            end
-          end
-          template
+          return template if template
+          # No template found for path. Try the default template instead.
+          # If default template is a string or a symbol, look it up in the file system
+          return lookup_template(Utils.fs_path(path.dirname, default_template)) if
+            default_template.is_a?(String) || default_template.is_a?(Symbol)
+          # If default template is a proc or nil, just return it
+          default_template
         end
       end
     end

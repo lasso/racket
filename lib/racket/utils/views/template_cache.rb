@@ -49,11 +49,11 @@ module Racket
         end
 
         def create(_key, _value, _options = {})
-          fail NotImplementedError
+          raise NotImplementedError
         end
 
         def decrement(_key, _amount = 1, _options = {})
-          fail NotImplementedError
+          raise NotImplementedError
         end
 
         def delete(key, _options = {})
@@ -68,14 +68,14 @@ module Racket
         # This method handles both forms of fetch.
         # With a default block - fetch(key, options = {}, &block)
         # With a default value - fetch(key, value, options = {})
-        def fetch(*args, &block)
+        def fetch(*args)
           key = args.shift
           return load(key) if key?(key)
-          block_given? ? block.call : args.first
+          block_given? ? yield : args.first
         end
 
         def increment(_key, _amount = 1, _options = {})
-          fail NotImplementedError
+          raise NotImplementedError
         end
 
         def key?(key)

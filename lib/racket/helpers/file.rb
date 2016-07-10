@@ -83,7 +83,8 @@ module Racket
       # @param [Hash] options
       # @return [Array]
       def send_file(file, options = {})
-        respond!(*(Response.new(@utils, file, options).to_a))
+        response = Response.new(@utils, file, options).to_a
+        respond!(*response)
       end
     end
   end

@@ -31,7 +31,7 @@ module Racket
         # @param [Array] errors
         # @return [true|flase]
         def self.run_block(errors)
-          fail 'Need a block' unless block_given?
+          raise 'Need a block' unless block_given?
           begin
             true.tap { yield }
           rescue boolean_module(errors)

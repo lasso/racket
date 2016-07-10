@@ -29,7 +29,7 @@ module Racket
     def inspect
       "#<#{self.class}:#{object_id}>"
     end
-    alias_method(:to_s, :inspect)
-    alias_method(:to_str, :inspect)
+    alias to_s inspect
+    alias to_str inspect
   end
 end

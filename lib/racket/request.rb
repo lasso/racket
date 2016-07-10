@@ -27,7 +27,7 @@ module Racket
     undef_method :session, :session_options
 
     # Redefine methods for handling GET parameters
-    alias_method(:get_params, :GET)
+    alias get_params GET
     undef_method :GET
 
     # Returns a value from the GET parameter hash.
@@ -40,7 +40,7 @@ module Racket
     end
 
     # Redefine methods for handling POST parameters
-    alias_method(:post_params, :POST)
+    alias post_params POST
     undef_method :POST
 
     # Returns a value from the POST parameter hash.

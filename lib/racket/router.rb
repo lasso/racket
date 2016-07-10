@@ -52,7 +52,7 @@ module Racket
     # @param [Array] params
     # @return [String]
     def get_route(controller_class, action, params)
-      fail "Cannot find controller #{controller_class}" unless @routes.key?(controller_class)
+      raise "Cannot find controller #{controller_class}" unless @routes.key?(controller_class)
       params.flatten!
       Route.new(@routes[controller_class], action, params).to_s
     end
@@ -71,7 +71,7 @@ module Racket
     # @todo: Allow the user to set custom handlers for different errors
     def render_error(status, error = nil)
       # If running in dev mode, let Rack::ShowExceptions handle the error.
-      fail(error) if error && Application.dev_mode?
+      raise error if error && Application.dev_mode?
 
       # Not running in dev mode, let us handle the error ourselves.
       Response.generate_error_response(status)

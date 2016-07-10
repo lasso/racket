@@ -79,7 +79,7 @@ module Racket
         def build_path
           @args.each do |arg|
             path_part = Pathname.new(arg)
-            fail ArgumentError, arg unless path_part.relative?
+            raise ArgumentError, arg unless path_part.relative?
             @path = @path.join(path_part)
           end
           remove_instance_variable :@args

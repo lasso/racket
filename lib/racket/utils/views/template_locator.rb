@@ -24,13 +24,13 @@ module Racket
       # will not need to resolve the template again.
       class TemplateLocator
         def initialize(options)
-          fail ArgumentError, 'Layout cache is missing.' unless
+          raise ArgumentError, 'Layout cache is missing.' unless
             (@layout_cache = options.fetch(:layout_cache, nil))
-          fail ArgumentError, 'Layout resolver is missing.' unless
+          raise ArgumentError, 'Layout resolver is missing.' unless
             (@layout_resolver = options.fetch(:layout_resolver, nil))
-          fail ArgumentError, 'View cache is missing.' unless
+          raise ArgumentError, 'View cache is missing.' unless
             (@view_cache = options.fetch(:view_cache, nil))
-          fail ArgumentError, 'View resolver is missing.' unless
+          raise ArgumentError, 'View resolver is missing.' unless
             (@view_resolver = options.fetch(:view_resolver, nil))
         end
 
