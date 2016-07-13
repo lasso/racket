@@ -28,7 +28,8 @@ Have a look in the `spec` directory. The code base have tests covering 100 per c
 - 1.9.3
 - 2.0.0
 - 2.1.7
-- 2.2.3
+- 2.2.5
+- 2.3.1
 - jruby-19mode
 - jruby-head
 - rbx-2
