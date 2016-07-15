@@ -13,6 +13,6 @@ class DefaultSubController1 < Racket::Controller
   end
 
   def epic_fail
-    fail 'Epic fail!'
+    raise 'Epic fail!'
   end
 end
