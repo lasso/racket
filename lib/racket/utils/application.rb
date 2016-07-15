@@ -19,19 +19,3 @@
 require_relative 'application/builder.rb'
 require_relative 'application/logger.rb'
 require_relative 'application/registry_builder.rb'
-
-module Racket
-  # Collects utilities needed by different objects in Racket.
-  module Utils
-    # Utility functions for filesystem.
-    module Application
-      # Builds and returns a Rack::Builder using the provided Racket::Application
-      #
-      # @param [Racket::Application] application
-      # @return [Rack::Builder]
-      def build_application(application, utils)
-        Builder.new(application, utils).build
-      end
-    end
-  end
-end

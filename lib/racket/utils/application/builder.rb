@@ -21,12 +21,14 @@ module Racket
     module Application
       # Class used for building a proper Rack application.
       class Builder
-        def initialize(application, utils)
-          @application = application
+        def initialize(options)
           @builder = Rack::Builder.new
-          @settings = @application.settings
+          @logger = options[:logger]
+          @router = options[:router]
+          @settings = options[:settings]
+          @static_server = options[:static_server]
+          @utils = options[:utils]
           @middleware = @settings.middleware
-          @utils = utils
         end
 
         # Builds a Rack application representing Racket.
@@ -47,7 +49,7 @@ module Racket
           expand_middleware_list
           @middleware.each do |ware|
             klass, opts = ware
-            @application.inform_dev("Loading middleware #{klass} with settings #{opts.inspect}.")
+            @logger.inform_dev("Loading middleware #{klass} with settings #{opts.inspect}.")
             @builder.use(*ware)
           end
         end
@@ -64,11 +66,15 @@ module Racket
 
         # Returns a lambda that represenents that application flow.
         def application_proc
-          application = @application
+          router = @router
+          # If static server is not used, call router immediately
+          return ->(env) { router.route(env) } unless @static_server
+          # If static server is used we should call it first, then call router
+          static_server = @static_server
           lambda do |env|
-            static_result = application.serve_static_file(env)
+            static_result = static_server.call(env)
             return static_result if static_result && static_result.first < 400
-            application.router.route(env)
+            router.route(env)
           end
         end
 
@@ -78,7 +84,7 @@ module Racket
           default_content_type = @settings.default_content_type
           @middleware.unshift(session_handler) if session_handler
           @middleware.unshift([Rack::ContentType, default_content_type]) if default_content_type
-          @middleware.unshift([Rack::ShowExceptions]) if @application.dev_mode?
+          @middleware.unshift([Rack::ShowExceptions]) if @settings.mode == :dev
         end
 
         # Returns an instance of a specific plugin.
@@ -112,7 +118,7 @@ module Racket
         # Visits a list of warmup URLs.
         def visit_warmup_urls(client, urls)
           urls.each do |url|
-            @application.inform_dev("Visiting warmup url #{url}.")
+            @logger.inform_dev("Visiting warmup url #{url}.")
             client.get(url)
           end
         end

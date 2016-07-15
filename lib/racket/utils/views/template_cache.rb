@@ -24,7 +24,7 @@ module Racket
       # (https://github.com/minad/moneta#user-content-moneta-api), even though it is not using the
       # Moneta framework.
       class TemplateCache
-        DEFAULT_OPTIONS = { expires: 0 }
+        DEFAULT_OPTIONS = { expires: 0 }.freeze
         def initialize(options)
           @expirations = {}
           @items = {}

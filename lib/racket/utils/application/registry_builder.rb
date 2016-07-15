@@ -30,6 +30,7 @@ module Racket
           register_action_cache
           register_application_logger
           register_application_settings(settings)
+          register_handler_stack
           register_layout_cache
           register_layout_resolver
           register_router
@@ -63,6 +64,18 @@ module Racket
           end
         end
 
+        def register_handler_stack
+          @registry.singleton(:handler_stack) do |reg|
+            Racket::Utils::Application::Builder.new(
+              logger: reg.application_logger,
+              static_server: reg.static_server,
+              router: reg.router,
+              settings: reg.application_settings,
+              utils: reg.utils
+            ).build
+          end
+        end
+
         def register_layout_cache
           @registry.singleton(:layout_cache) do
             Racket::Utils::Views::TemplateCache.new({})
@@ -92,16 +105,16 @@ module Racket
 
         def register_static_server
           @registry.singleton(:static_server) do |reg|
+            server = nil
             if (public_dir = reg.application_settings.public_dir) &&
                reg.utils.dir_readable?(Pathname.new(public_dir))
               reg.application_logger.inform_dev(
                 "Setting up static server to serve files from #{public_dir}."
               )
               handler = Rack::File.new(public_dir)
-              ->(env) { handler.call(env) }
-            else
-              ->(_env) { nil }
+              server = ->(env) { handler.call(env) }
             end
+            server
           end
         end
 

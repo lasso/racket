@@ -19,14 +19,6 @@
 module Racket
   # Racket main application class.
   class Application
-    # Returns the internal application object. When called for the first time this method will use
-    # Rack::Builder to construct the application.
-    #
-    # @return [Rack::Builder]
-    def self.application
-      @application ||= utils.build_application(self, utils)
-    end
-
     def self.calculate_url_path(file)
       url_path = "/#{file.relative_path_from(settings.controller_dir).dirname}"
       url_path = '' if url_path == '/.'
@@ -38,7 +30,7 @@ module Racket
     # @param [Hash] env Rack environment
     # @return [Array] A Rack response array
     def self.call(env)
-      application.call(env.dup)
+      @registry.handler_stack.call(env.dup)
     end
 
     # Returns whether the application runs in dev mode.
@@ -89,7 +81,7 @@ module Racket
     # @return [Class]
     def self.init(settings = {})
       @registry = Utils::Application::RegistryBuilder.new(settings).registry
-      application # This will make sure all plugins and helpers are loaded before any controllers
+      @registry.handler_stack # Makes sure all plugins and helpers are loaded before any controllers
       reload
       self
       # Return application from registry
@@ -184,7 +176,7 @@ module Racket
       @view_manager ||= @registry.view_manager
     end
 
-    private_class_method :application, :calculate_url_path, :init, :load_controller_file,
+    private_class_method :calculate_url_path, :init, :load_controller_file,
                          :load_controller_files, :load_controllers, :utils
   end
 end
