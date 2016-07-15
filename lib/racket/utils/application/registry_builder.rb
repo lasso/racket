@@ -33,6 +33,7 @@ module Racket
           register_layout_cache
           register_layout_resolver
           register_router
+          register_static_server
           register_template_locator
           register_template_renderer
           register_view_cache
@@ -89,6 +90,21 @@ module Racket
           end
         end
 
+        def register_static_server
+          @registry.singleton(:static_server) do |reg|
+            if (public_dir = reg.application_settings.public_dir) &&
+               reg.utils.dir_readable?(Pathname.new(public_dir))
+              reg.application_logger.inform_dev(
+                "Setting up static server to serve files from #{public_dir}."
+              )
+              handler = Rack::File.new(public_dir)
+              ->(env) { handler.call(env) }
+            else
+              ->(_env) { nil }
+            end
+          end
+        end
+
         def register_template_locator
           @registry.singleton(:template_locator) do |reg|
             Racket::Utils::Views::TemplateLocator.new(
@@ -113,7 +129,8 @@ module Racket
         end
 
         def register_view_manager
-          @registry.singleton(:view_manager) do |reg|
+          # No singleton - if application is reloaded, we want a new view manager
+          @registry.register(:view_manager) do |reg|
             Racket::ViewManager.new(
               reg.template_locator, reg.template_renderer
             )
