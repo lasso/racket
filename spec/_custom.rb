@@ -6,7 +6,8 @@ describe 'A custom Racket test application' do
       logger: nil,
       my_custom_secret: 42,
       mode: :dev,
-      view_dir: 'templates'
+      view_dir: 'templates',
+      warmup_urls: ['/sub1', '/sub2', '/sub3']
     )
   end
 

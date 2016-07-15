@@ -66,13 +66,23 @@ module Racket
 
         def register_handler_stack
           @registry.singleton(:handler_stack) do |reg|
-            Racket::Utils::Application::Builder.new(
-              logger: reg.application_logger,
-              static_server: reg.static_server,
-              router: reg.router,
-              settings: reg.application_settings,
-              utils: reg.utils
-            ).build
+            settings = reg.application_settings
+
+            options = {
+              default_content_type:       settings.default_content_type,
+              default_controller_helpers: settings.default_controller_helpers,
+              dev_mode:                   settings.mode == :dev,
+              logger:                     reg.application_logger,
+              middleware:                 settings.middleware,
+              plugins:                    settings.plugins,
+              router:                     reg.router,
+              session_handler:            settings.session_handler,
+              static_server:              reg.static_server,
+              utils:                      reg.utils,
+              warmup_urls:                settings.warmup_urls
+            }
+
+            Racket::Utils::Application::Builder.new(options).build
           end
         end
 
@@ -105,16 +115,17 @@ module Racket
 
         def register_static_server
           @registry.singleton(:static_server) do |reg|
-            server = nil
+            logger = reg.application_logger
             if (public_dir = reg.application_settings.public_dir) &&
                reg.utils.dir_readable?(Pathname.new(public_dir))
-              reg.application_logger.inform_dev(
+              logger.inform_dev(
                 "Setting up static server to serve files from #{public_dir}."
               )
               handler = Rack::File.new(public_dir)
-              server = ->(env) { handler.call(env) }
+              ->(env) { handler.call(env) }
+            else
+              logger.inform_dev("Static server disabled.") && nil
             end
-            server
           end
         end
 

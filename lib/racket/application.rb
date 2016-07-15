@@ -116,6 +116,10 @@ module Racket
       end
     end
 
+    def self.registry
+      @registry
+    end
+
     # Reloads the application, making any changes to the controller configuration visible
     # to the application.
     #
