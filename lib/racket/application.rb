@@ -146,14 +146,6 @@ module Racket
       @registry.router
     end
 
-    # Serves a static file (if Racket is configured to serve static files).
-    #
-    # @param [Hash] env Rack environment
-    # @return [Array|nil] A Rack response array if Rack::File handled the file, nil otherwise.
-    def self.serve_static_file(env)
-      @registry.static_server.call(env)
-    end
-
     # Returns settings for the application
     #
     # @return [Racket::Settings::Application]

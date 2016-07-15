@@ -16,6 +16,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Racket.  If not, see <http://www.gnu.org/licenses/>.
 
+require 'ostruct'
 require 'set'
 
 require 'http_router'
@@ -34,15 +35,16 @@ module Racket
       end
     end
 
-    attr_reader :action_cache
     attr_reader :routes
 
-    def initialize(action_cache, logger, utils)
-      @action_cache = action_cache
-      @logger = logger
+    def action_cache
+      @options.action_cache
+    end
+
+    def initialize(options)
+      @options = OpenStruct.new(options)
       @router = HttpRouter.new
       @routes = {}
-      @utils = utils
     end
 
     # Returns a route to the specified controller/action/parameter combination.
@@ -65,13 +67,13 @@ module Racket
     def map(path, controller_class)
       map_controller(path.empty? ? '/' : path, controller_class)
       @router.add("#{path}(/*params)").to(controller_class)
-      @action_cache.add(controller_class)
+      action_cache.add(controller_class)
     end
 
     # @todo: Allow the user to set custom handlers for different errors
     def render_error(status, error = nil)
       # If running in dev mode, let Rack::ShowExceptions handle the error.
-      raise error if error && Application.dev_mode?
+      raise error if error && @options.dev_mode
 
       # Not running in dev mode, let us handle the error ourselves.
       Response.generate_error_response(status)
@@ -85,7 +87,7 @@ module Racket
       catch :response do # Catches early exits from Controller.respond.
         # Ensure that that a controller will respond to the request. If not, send a 404.
         return render_error(404) unless (target_info = target_info(env))
-        @utils.render_controller(env, target_info)
+        @options.utils.render_controller(env, target_info)
       end
     rescue => err
       render_error(500, err)
@@ -94,7 +96,7 @@ module Racket
     private
 
     def map_controller(base_path, controller_class)
-      @logger.inform_dev("Mapping #{controller_class} to #{base_path}.")
+      @options.logger.inform_dev("Mapping #{controller_class} to #{base_path}.")
       @routes[controller_class] = base_path
     end
 
@@ -108,9 +110,9 @@ module Racket
       # Exit early if no controller is responsible for the route
       return nil unless matching_route
       # Some controller is claiming to be responsible for the route
-      result = @utils.extract_target(matching_route.first)
+      result = @options.utils.extract_target(matching_route.first)
       # Exit early if action is not available on target
-      return nil unless @action_cache.present?(result.first, result.last)
+      return nil unless action_cache.present?(result.first, result.last)
       result
     end
   end

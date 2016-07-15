@@ -106,9 +106,10 @@ module Racket
         def register_router
           @registry.singleton(:router) do |reg|
             Racket::Router.new(
-              reg.action_cache,
-              reg.application_logger,
-              reg.utils
+              action_cache: reg.action_cache,
+              dev_mode: reg.application_settings.mode == :dev,
+              logger: reg.application_logger,
+              utils: reg.utils
             )
           end
         end
