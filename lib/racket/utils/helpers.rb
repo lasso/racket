@@ -22,9 +22,10 @@ module Racket
     module Helpers
       # Cache for helpers, ensuring that helpers get loaded exactly once.
       class HelperCache
-        def initialize(helper_dir)
+        def initialize(helper_dir, logger)
           @helper_dir = helper_dir
           @helpers = {}
+          @logger = logger
         end
 
         # Loads helper files and return the loadad modules as a hash. Any helper files that
@@ -64,7 +65,7 @@ module Racket
           Utils.run_block(NameError) do
             helper_module =
               Racket::Helpers.const_get(helper.to_s.split('_').collect(&:capitalize).join.to_sym)
-            ::Racket::Application.inform_dev("Loaded helper module #{helper.inspect}.")
+            @logger.inform_dev("Loaded helper module #{helper.inspect}.")
           end
           helper_module
         end
@@ -82,7 +83,7 @@ module Racket
       def __apply_helpers(klass)
         klass.settings.fetch(:helpers).reverse_each do |pair|
           helper_key, helper = pair
-          ::Racket::Application.inform_dev(
+          ::Racket::Application.registry.application_logger.inform_dev(
             "Adding helper module #{helper_key.inspect} to #{klass}"
           )
           klass.send(:include, helper)

@@ -31,6 +31,7 @@ module Racket
           register_application_logger
           register_application_settings(settings)
           register_handler_stack
+          register_helper_cache
           register_layout_cache
           register_layout_resolver
           register_router
@@ -86,6 +87,15 @@ module Racket
           end
         end
 
+        def register_helper_cache
+          @registry.singleton(:helper_cache) do |reg|
+            Racket::Utils::Helpers::HelperCache.new(
+              reg.application_settings.helper_dir,
+              reg.application_logger
+            )
+          end
+        end
+
         def register_layout_cache
           @registry.singleton(:layout_cache) do
             Racket::Utils::Views::TemplateCache.new({})
@@ -125,7 +135,7 @@ module Racket
               handler = Rack::File.new(public_dir)
               ->(env) { handler.call(env) }
             else
-              logger.inform_dev("Static server disabled.") && nil
+              logger.inform_dev('Static server disabled.') && nil
             end
           end
         end

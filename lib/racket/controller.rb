@@ -25,15 +25,14 @@ module Racket
       @utils = utils
     end
 
+    # @fixme
     def self.__helper_cache
-      settings = Controller.settings
-      helper_cache =
-        settings.fetch(
-          :helper_cache,
-          Utils::Helpers::HelperCache.new(Application.settings.helper_dir)
-        )
-      settings.store(:helper_cache, helper_cache) unless settings.present?(:helper_cache)
-      helper_cache
+      Application.registry.helper_cache
+    end
+
+    # @fixme
+    def self.__logger
+      Application.registry.application_logger
     end
 
     # Adds a hook to one or more actions.
@@ -46,7 +45,7 @@ module Racket
       meths = public_instance_methods(false)
       meths &= methods.map(&:to_sym) unless methods.empty?
       __update_hooks("#{type}_hooks".to_sym, meths, blk)
-      Application.inform_dev("Adding #{type} hook #{blk} for actions #{meths} for #{self}.")
+      __logger.inform_dev("Adding #{type} hook #{blk} for actions #{meths} for #{self}.")
     end
 
     # Updates hooks in settings object.
