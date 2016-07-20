@@ -59,7 +59,7 @@ describe 'A default Racket test application' do
     true.should.equal(true)
   end
 
-  it 'returns the correct respnse when calling index action' do
+  it 'returns the correct response when calling index action' do
     # RootController
     get '/'
     last_response.status.should.equal(200)

@@ -30,6 +30,7 @@ module Racket
           register_action_cache
           register_application_logger
           register_application_settings(settings)
+          register_controller_settings
           register_handler_stack
           register_helper_cache
           register_layout_cache
@@ -62,6 +63,12 @@ module Racket
         def register_application_settings(settings)
           @registry.singleton(:application_settings) do |reg|
             Racket::Settings::Application.new(reg.utils, settings)
+          end
+        end
+
+        def register_controller_settings
+          @registry.singleton(:controller_settings) do |reg|
+            Racket::Settings::Builder::Controller.new(reg.application_settings).build
           end
         end
 

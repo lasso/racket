@@ -18,6 +18,7 @@
 
 module Racket
   module Utils
+    # Namespace for application utilities
     module Application
       # Class for logging messages in the application.
       class Logger

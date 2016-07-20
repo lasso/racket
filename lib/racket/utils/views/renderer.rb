@@ -18,6 +18,7 @@
 
 module Racket
   module Utils
+    # Namespace for view utilities
     module Views
       # Class responsible for rendering a controller/view/layout combination.
       class Renderer

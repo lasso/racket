@@ -80,7 +80,8 @@ module Racket
           session_handler = @options.session_handler
           default_content_type = @options.default_content_type
           @options.middleware.unshift(session_handler) if session_handler
-          @options.middleware.unshift([Rack::ContentType, default_content_type]) if default_content_type
+          @options.middleware.unshift([Rack::ContentType, default_content_type]) if
+            default_content_type
           @options.middleware.unshift([Rack::ShowExceptions]) if @options.dev_mode
         end
 

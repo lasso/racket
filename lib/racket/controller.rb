@@ -25,12 +25,12 @@ module Racket
       @utils = utils
     end
 
-    # @fixme
+    # @todo - Don't rely on Application'
     def self.__helper_cache
       Application.registry.helper_cache
     end
 
-    # @fixme
+    # @todo - Don't rely on Application'
     def self.__logger
       Application.registry.application_logger
     end
@@ -114,33 +114,17 @@ module Racket
 
     # :nodoc:
     def self.inherited(klass)
-      Application.settings.fetch(:last_added_controller).push(klass)
+      settings.fetch(:last_added_controller).push(klass)
     end
 
-    # Returns the settings associated with the current controller class.
+    # Injects settings module
     #
-    # @return [Racket::Settings::Controller]
-    def self.settings
-      @settings ||= Settings::Controller.new(self)
-    end
-
-    # Creates/updates a setting for the current controller class.
-    #
-    # @param [Symbol] key
-    # @param [Object] value
-    # @return [nil]
-    def self.setting(key, value)
-      settings.store(key, value)
+    # @param [Module] mod
+    def self.__inject_settings(mod)
+      include mod
     end
 
     private_class_method :__helper_cache, :__load_helpers, :__register_hook, :__update_hooks
-
-    # Returns the settings for a controller instance.
-    #
-    # @return [Racket::Settings::Controller]
-    def settings
-      self.class.settings
-    end
 
     # Redirects the client. After hooks are run.
     #

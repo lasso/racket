@@ -29,15 +29,17 @@ module Racket
         @owner = owner
       end
 
-      # Fetches settings from the current object. If the setting cannot be found in the Current
-      # object, the controller superklass will be queried. If all controller classes in the
-      # inheritance chain has been queried, the Application settings will be used as a final
+      # Fetches settings from the current object. If the setting cannot be found in the current
+      # object, the objects class/superclass will be queried. If all controller classes in the
+      # inheritance chain has been queried, the application settings will be used as a final
       # fallback.
       def fetch(key, default = nil)
         return @custom[key] if @custom.key?(key)
-        parent = @owner.superclass
-        return ::Racket::Application.settings.fetch(key, default) if
-            [@owner, parent].include?(::Racket::Controller)
+        parent = @owner.is_a?(Class) ? @owner.superclass : @owner.class
+        return @owner.__application_settings.fetch(key, default) if
+          @owner == ::Racket::Controller
+        return parent.__application_settings.fetch(key, default) if
+          parent == ::Racket::Controller
         parent.settings.fetch(key, default)
       end
     end

@@ -37,6 +37,7 @@ module Racket
 
     attr_reader :routes
 
+    # @return [Racket::Utils::Routing::ActionCache]
     def action_cache
       @options.action_cache
     end

@@ -80,6 +80,10 @@ module Racket
         nil
       end
 
+      # Applies helpers to a controller class by including the modules in the class.
+      #
+      # @param [Class] klass
+      # @return [Class]
       def __apply_helpers(klass)
         klass.settings.fetch(:helpers).reverse_each do |pair|
           helper_key, helper = pair
