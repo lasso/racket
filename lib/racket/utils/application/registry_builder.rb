@@ -27,22 +27,10 @@ module Racket
 
         def initialize(settings = {})
           @registry = Racket::Registry.new
-          register_action_cache
-          register_application_logger
-          register_application_settings(settings)
-          register_controller_settings
-          register_handler_stack
-          register_helper_cache
-          register_layout_cache
-          register_layout_resolver
-          register_router
-          register_static_server
-          register_template_locator
-          register_template_renderer
-          register_view_cache
-          register_view_manager
-          register_view_resolver
-          register_utils
+          @registry.singleton(:application_settings) do |reg|
+            Racket::Settings::Application.new(reg.utils, settings)
+          end
+          private_methods(false).grep(/^register_/).each { |meth| send(meth) }
         end
 
         private
@@ -60,15 +48,14 @@ module Racket
           end
         end
 
-        def register_application_settings(settings)
-          @registry.singleton(:application_settings) do |reg|
-            Racket::Settings::Application.new(reg.utils, settings)
-          end
-        end
-
-        def register_controller_settings
-          @registry.singleton(:controller_settings) do |reg|
-            Racket::Settings::Builder::Controller.new(reg.application_settings).build
+        def register_controller_context
+          @registry.singleton(:controller_context) do |reg|
+            Module.new do
+              define_singleton_method(:application_settings) { reg.application_settings }
+              define_singleton_method(:helper_cache) { reg.helper_cache }
+              define_singleton_method(:logger) { reg.application_logger }
+              define_singleton_method(:utils) { reg.utils }
+            end
           end
         end
 

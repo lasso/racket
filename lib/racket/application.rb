@@ -92,7 +92,7 @@ module Racket
     # @return [nil]
     def self.load_controllers
       inform_dev('Loading controllers.')
-      Controller.__inject_settings(@registry.controller_settings)
+      Controller.__set_context(@registry.controller_context)
       settings.store(:last_added_controller, [])
       load_controller_files
       settings.delete(:last_added_controller)

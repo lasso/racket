@@ -19,22 +19,6 @@
 module Racket
   # Base controller class. Your controllers should inherit this class.
   class Controller
-    attr_reader :utils
-
-    def initialize(utils)
-      @utils = utils
-    end
-
-    # @todo - Don't rely on Application'
-    def self.__helper_cache
-      Application.registry.helper_cache
-    end
-
-    # @todo - Don't rely on Application'
-    def self.__logger
-      Application.registry.application_logger
-    end
-
     # Adds a hook to one or more actions.
     #
     # @param [Symbol] type
@@ -45,7 +29,7 @@ module Racket
       meths = public_instance_methods(false)
       meths &= methods.map(&:to_sym) unless methods.empty?
       __update_hooks("#{type}_hooks".to_sym, meths, blk)
-      __logger.inform_dev("Adding #{type} hook #{blk} for actions #{meths} for #{self}.")
+      @@context.logger.inform_dev("Adding #{type} hook #{blk} for actions #{meths} for #{self}.")
     end
 
     # Updates hooks in settings object.
@@ -93,11 +77,36 @@ module Racket
       unless settings.fetch(:helpers)
         # No helpers has been loaded yet. Load the default helpers first.
         helper_modules.merge!(
-          __helper_cache.load_helpers(Application.settings.default_controller_helpers)
+          @@context.helper_cache.load_helpers(settings.fetch(:default_controller_helpers))
         )
       end
       # Load new helpers
       __load_helpers(helpers.map(&:to_sym), helper_modules)
+    end
+
+    # :@private
+    def self.inherited(klass)
+      settings.fetch(:last_added_controller).push(klass)
+    end
+
+    # Add a setting for the current controller class
+    #
+    # @param [Symbol] key
+    # @param [Object] val
+    def self.setting(key, val)
+      settings.store(key, val)
+    end
+
+    # Returns the settings for the current controller class
+    #
+    # @return [Racket::Settings::Controller]
+    def self.settings
+      @settings ||= Racket::Settings::Controller.new(self)
+    end
+
+    # :@private
+    def self.__application_settings
+      @@context.application_settings
     end
 
     # Loads new helpers and stores the list of helpers associated with the currenct controller
@@ -108,23 +117,19 @@ module Racket
     # @return nil
     def self.__load_helpers(helpers, helper_modules)
       helpers.reject! { |helper| helper_modules.key?(helper) }
-      helper_modules.merge!(__helper_cache.load_helpers(helpers))
+      helper_modules.merge!(@@context.helper_cache.load_helpers(helpers))
       setting(:helpers, helper_modules) && nil
     end
 
-    # :nodoc:
-    def self.inherited(klass)
-      settings.fetch(:last_added_controller).push(klass)
-    end
-
-    # Injects settings module
+    # Injects context in Controller class. Context represents
+    # the current application state.
     #
-    # @param [Module] mod
-    def self.__inject_settings(mod)
-      include mod
+    # @param [Module] context
+    def self.__set_context(context)
+      @@context = context
     end
 
-    private_class_method :__helper_cache, :__load_helpers, :__register_hook, :__update_hooks
+    private_class_method :__load_helpers, :__register_hook, :__update_hooks
 
     # Redirects the client. After hooks are run.
     #
@@ -167,6 +172,11 @@ module Racket
       throw :response, [status, headers, body]
     end
 
+    # Returns settings associated with the current controller
+    def settings
+      self.class.settings
+    end
+
     # Calls hooks, action and renderer.
     #
     # @return [String]
@@ -178,6 +188,10 @@ module Racket
     end
 
     private
+
+    def __context
+      self.class.class_variable_get(:@@context)
+    end
 
     def __run_action
       meth = method(racket.action)

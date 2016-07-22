@@ -81,12 +81,6 @@ module Racket
         [target_klass, params, action]
       end
 
-      def call_controller(target_klass, mod)
-        target = target_klass.new(self)
-        target.extend(mod)
-        target.__run
-      end
-
       # Renders a controller. This is the default action whenever a matching route for a request
       # is found.
       #
@@ -104,6 +98,14 @@ module Racket
           controller_class,
           Current.init(RouterParams.new(action, params, env))
         )
+      end
+
+      private
+
+      def call_controller(target_klass, mod)
+        target = target_klass.new
+        target.extend(mod)
+        target.__run
       end
 
       # Updates the PATH_INFO environment variable.
