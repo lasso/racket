@@ -29,7 +29,7 @@ module Racket
       meths = public_instance_methods(false)
       meths &= methods.map(&:to_sym) unless methods.empty?
       __update_hooks("#{type}_hooks".to_sym, meths, blk)
-      @@context.logger.inform_dev("Adding #{type} hook #{blk} for actions #{meths} for #{self}.")
+      context.logger.inform_dev("Adding #{type} hook #{blk} for actions #{meths} for #{self}.")
     end
 
     # Updates hooks in settings object.
@@ -62,6 +62,19 @@ module Racket
       __register_hook(:before, methods, blk) if block_given?
     end
 
+    def self.context
+      Controller.instance_variable_get(:@context)
+    end
+
+    # Injects context in Controller class. Context represents
+    # the current application state.
+    #
+    # @param [Module] context
+    def self.context=(context)
+      raise 'Context should only be set on Controller class' unless self == Controller
+      @context = context
+    end
+
     # Adds one or more helpers to the controller. All controllers get some default helpers
     # (:routing and :view by default), but if you have your own helpers you want to load this
     # is the preferred method.
@@ -77,7 +90,7 @@ module Racket
       unless settings.fetch(:helpers)
         # No helpers has been loaded yet. Load the default helpers first.
         helper_modules.merge!(
-          @@context.helper_cache.load_helpers(settings.fetch(:default_controller_helpers))
+          context.helper_cache.load_helpers(settings.fetch(:default_controller_helpers))
         )
       end
       # Load new helpers
@@ -104,11 +117,6 @@ module Racket
       @settings ||= Racket::Settings::Controller.new(self)
     end
 
-    # :@private
-    def self.__application_settings
-      @@context.application_settings
-    end
-
     # Loads new helpers and stores the list of helpers associated with the currenct controller
     # in the settings.
     #
@@ -117,16 +125,8 @@ module Racket
     # @return nil
     def self.__load_helpers(helpers, helper_modules)
       helpers.reject! { |helper| helper_modules.key?(helper) }
-      helper_modules.merge!(@@context.helper_cache.load_helpers(helpers))
+      helper_modules.merge!(context.helper_cache.load_helpers(helpers))
       setting(:helpers, helper_modules) && nil
-    end
-
-    # Injects context in Controller class. Context represents
-    # the current application state.
-    #
-    # @param [Module] context
-    def self.__set_context(context)
-      @@context = context
     end
 
     private_class_method :__load_helpers, :__register_hook, :__update_hooks
@@ -188,10 +188,6 @@ module Racket
     end
 
     private
-
-    def __context
-      self.class.class_variable_get(:@@context)
-    end
 
     def __run_action
       meth = method(racket.action)

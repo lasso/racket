@@ -150,7 +150,7 @@ module Racket
       # @param [Pathname] glob
       # @return [Array]
       def matching_paths(base_path, glob)
-        return [] unless Utils.dir_readable?(base_path)
+        return [] unless dir_readable?(base_path)
         Dir.chdir(base_path) { Pathname.glob(glob) }.map { |path| base_path.join(path) }
       end
 
@@ -181,7 +181,7 @@ module Racket
       # @param [String] resource
       # @return [true|false]
       def safe_require(resource)
-        Utils.run_block(LoadError) { require resource }
+        run_block(LoadError) { require resource }
       end
 
       # @TODO: Remove when Racket::Utils stops being a singleton

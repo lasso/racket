@@ -36,9 +36,9 @@ module Racket
       def fetch(key, default = nil)
         return @custom[key] if @custom.key?(key)
         parent = @owner.is_a?(Class) ? @owner.superclass : @owner.class
-        return @owner.__application_settings.fetch(key, default) if
+        return @owner.context.application_settings.fetch(key, default) if
           @owner == ::Racket::Controller
-        return parent.__application_settings.fetch(key, default) if
+        return parent.context.application_settings.fetch(key, default) if
           parent == ::Racket::Controller
         parent.settings.fetch(key, default)
       end

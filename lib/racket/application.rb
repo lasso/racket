@@ -19,6 +19,10 @@
 module Racket
   # Racket main application class.
   class Application
+    class << self
+      attr_reader :registry
+    end
+
     def self.calculate_url_path(file)
       url_path = "/#{file.relative_path_from(settings.controller_dir).dirname}"
       url_path = '' if url_path == '/.'
@@ -92,10 +96,8 @@ module Racket
     # @return [nil]
     def self.load_controllers
       inform_dev('Loading controllers.')
-      Controller.__set_context(@registry.controller_context)
-      settings.store(:last_added_controller, [])
+      Controller.context = @registry.controller_context
       load_controller_files
-      settings.delete(:last_added_controller)
       inform_dev('Done loading controllers.') && nil
     end
 
@@ -112,14 +114,11 @@ module Racket
     end
 
     def self.load_controller_files
+      settings.store(:last_added_controller, [])
       utils.paths_by_longest_path(settings.controller_dir, File.join('**', '*.rb')).each do |path|
         load_controller_file(path)
       end
-    end
-
-    # @return [Racket::Registry]
-    def self.registry
-      @registry
+      settings.delete(:last_added_controller)
     end
 
     # Reloads the application, making any changes to the controller configuration visible

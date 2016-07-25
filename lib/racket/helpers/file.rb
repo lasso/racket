@@ -83,7 +83,7 @@ module Racket
       # @param [Hash] options
       # @return [Array]
       def send_file(file, options = {})
-        response = Response.new(__context.utils, file, options).to_a
+        response = Response.new(Controller.context.utils, file, options).to_a
         respond!(*response)
       end
     end

@@ -33,8 +33,9 @@ module Racket
 
       def self.add_template_location(route)
         root_dir = Application.settings.root_dir
-        sass_dir = Utils.build_path(root_dir, 'sass', route).to_s
-        css_dir = Utils.build_path(root_dir, 'public', 'css', route).to_s
+        utils = Controller.context.utils
+        sass_dir = utils.build_path(root_dir, 'sass', route).to_s
+        css_dir = utils.build_path(root_dir, 'public', 'css', route).to_s
         ::Sass::Plugin.add_template_location(sass_dir, css_dir)
         sass_dir
       end

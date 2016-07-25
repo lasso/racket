@@ -85,7 +85,8 @@ module Racket
           @registry.singleton(:helper_cache) do |reg|
             Racket::Utils::Helpers::HelperCache.new(
               reg.application_settings.helper_dir,
-              reg.application_logger
+              reg.application_logger,
+              reg.utils
             )
           end
         end

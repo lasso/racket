@@ -34,7 +34,7 @@ module Racket
         def build
           init_plugins
           add_warmup_hook
-          add_middleware
+          add_middleware(@options.middleware)
           @builder.run(application_proc)
           @builder
         end
@@ -42,9 +42,9 @@ module Racket
         private
 
         # Add middleware to the builder.
-        def add_middleware
-          expand_middleware_list
-          @options.middleware.each do |ware|
+        def add_middleware(middleware)
+          expand_middleware_list(middleware)
+          middleware.each do |ware|
             klass, opts = ware
             @options.logger.inform_dev("Loading middleware #{klass} with settings #{opts.inspect}.")
             @builder.use(*ware)
@@ -63,11 +63,15 @@ module Racket
 
         # Returns a lambda that represenents that application flow.
         def application_proc
+          if (static_server = @options.static_server)
+            application_proc_with_static_server(static_server)
+          else
+            application_proc_without_static_server
+          end
+        end
+
+        def application_proc_with_static_server(static_server)
           router = @options.router
-          # If static server is not used, call router immediately
-          return ->(env) { router.route(env) } unless @options.static_server
-          # If static server is used we should call it first, then call router
-          static_server = @options.static_server
           lambda do |env|
             static_result = static_server.call(env)
             return static_result if static_result && static_result.first < 400
@@ -75,14 +79,19 @@ module Racket
           end
         end
 
+        def application_proc_without_static_server
+          router = @options.router
+          ->(env) { router.route(env) }
+        end
+
         # Expands middleware list based on application settings.
-        def expand_middleware_list
+        def expand_middleware_list(middleware)
           session_handler = @options.session_handler
           default_content_type = @options.default_content_type
-          @options.middleware.unshift(session_handler) if session_handler
-          @options.middleware.unshift([Rack::ContentType, default_content_type]) if
+          middleware.unshift(session_handler) if session_handler
+          middleware.unshift([Rack::ContentType, default_content_type]) if
             default_content_type
-          @options.middleware.unshift([Rack::ShowExceptions]) if @options.dev_mode
+          middleware.unshift([Rack::ShowExceptions]) if @options.dev_mode
         end
 
         # Returns an instance of a specific plugin.

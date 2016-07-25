@@ -13,6 +13,7 @@ describe 'A custom Racket test application' do
 
   it 'should set requested settings' do
     app.settings.default_layout.should.equal('zebra.*')
+    p app.settings.view_dir
     app.settings.view_dir.should.equal(Racket::Utils.build_path('templates'))
   end
 

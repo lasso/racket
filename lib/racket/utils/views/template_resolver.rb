@@ -114,7 +114,7 @@ module Racket
           return template if template
           # No template found for path. Try the default template instead.
           # If default template is a string or a symbol, look it up in the file system
-          return lookup_template(Utils.fs_path(path.dirname, default_template)) if
+          return lookup_template(@utils.fs_path(path.dirname, default_template)) if
             default_template.is_a?(String) || default_template.is_a?(Symbol)
           # If default template is a proc or nil, just return it
           default_template
