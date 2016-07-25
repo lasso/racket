@@ -183,9 +183,6 @@ module Racket
       def safe_require(resource)
         run_block(LoadError) { require resource }
       end
-
-      # @TODO: Remove when Racket::Utils stops being a singleton
-      extend self
     end
   end
 end

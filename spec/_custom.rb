@@ -13,8 +13,8 @@ describe 'A custom Racket test application' do
 
   it 'should set requested settings' do
     app.settings.default_layout.should.equal('zebra.*')
-    p app.settings.view_dir
-    app.settings.view_dir.should.equal(Racket::Utils.build_path('templates'))
+    expected_path = Pathname.new('templates').cleanpath.expand_path
+    app.settings.view_dir.should.equal(expected_path)
   end
 
   it 'should get the correct middleware' do

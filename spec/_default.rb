@@ -182,13 +182,6 @@ describe 'A default Racket test application' do
     response.each { |elem| elem.should.match(/Racket::Session/) }
   end
 
-  it 'should be able to build paths correctly' do
-    Racket::Utils.build_path.should.equal(Pathname.pwd)
-    Racket::Utils.build_path('foo', 'bar', 'baz').should.equal(
-      Pathname.pwd.join('foo').join('bar').join('baz')
-    )
-  end
-
   it 'should handle GET parameters correctly' do
     get '/sub2/some_get_data/?data1=foo&data3=bar'
     last_response.status.should.equal(200)
