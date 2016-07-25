@@ -92,7 +92,7 @@ module Racket
       def __apply_helpers(klass)
         klass.settings.fetch(:helpers).reverse_each do |pair|
           helper_key, helper = pair
-          ::Racket::Application.registry.application_logger.inform_dev(
+          klass.context.logger.inform_dev(
             "Adding helper module #{helper_key.inspect} to #{klass}"
           )
           klass.send(:include, helper)

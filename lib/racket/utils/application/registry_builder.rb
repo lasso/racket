@@ -54,6 +54,9 @@ module Racket
               define_singleton_method(:application_settings) { reg.application_settings }
               define_singleton_method(:helper_cache) { reg.helper_cache }
               define_singleton_method(:logger) { reg.application_logger }
+              define_singleton_method(:get_route) do |klass, action, params|
+                reg.router.get_route(klass, action, params)
+              end
               define_singleton_method(:utils) { reg.utils }
             end
           end

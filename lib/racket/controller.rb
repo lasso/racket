@@ -75,6 +75,10 @@ module Racket
       @context = context
     end
 
+    def self.get_route(action = nil, *params)
+      context.get_route(self, action, params)
+    end
+
     # Adds one or more helpers to the controller. All controllers get some default helpers
     # (:routing and :view by default), but if you have your own helpers you want to load this
     # is the preferred method.

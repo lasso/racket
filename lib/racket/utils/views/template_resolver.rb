@@ -85,7 +85,7 @@ module Racket
         # @return [String]
         def self.get_template_path(controller)
           template_path =
-            [::Racket::Application.get_route(controller.class), controller.racket.action].join('/')
+            [controller.class.get_route, controller.racket.action].join('/')
           template_path = template_path[1..-1] if template_path.start_with?('//')
           template_path
         end

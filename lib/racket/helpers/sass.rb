@@ -26,25 +26,25 @@ module Racket
       # @param [Symbol] sym
       # @return [String]
       def css(sym)
-        route = Application.get_route(self.class)
+        route = self.class.get_route
         route = '' if route == '/' # Special case for root controller
         "/css#{route}/#{sym}.css"
       end
 
-      def self.add_template_location(route)
-        root_dir = Application.settings.root_dir
-        utils = Controller.context.utils
+      def self.add_template_location(klass, route)
+        root_dir = klass.settings.fetch(:root_dir)
+        utils = klass.context.utils
         sass_dir = utils.build_path(root_dir, 'sass', route).to_s
         css_dir = utils.build_path(root_dir, 'public', 'css', route).to_s
         ::Sass::Plugin.add_template_location(sass_dir, css_dir)
         sass_dir
       end
 
-      def self.add_warmup_urls(sass_dir, route)
+      def self.add_warmup_urls(klass, sass_dir, route)
         Dir.chdir(sass_dir) do
           basedir = route.empty? ? '/css' : "/css/#{route}"
           Dir.glob('*.s[ac]ss').each do |file|
-            Application.settings.warmup_urls << "#{basedir}/#{::File.basename(file, '.*')}.css"
+            klass.settings.fetch(:warmup_urls) << "#{basedir}/#{::File.basename(file, '.*')}.css"
           end
         end
       end
@@ -55,9 +55,9 @@ module Racket
       # @param [Class] klass
       # @return [nil]
       def self.included(klass)
-        route = Application.get_route(klass)[1..-1] # Remove leading slash
-        sass_dir = add_template_location(route)
-        add_warmup_urls(sass_dir, route)
+        route = klass.get_route()[1..-1] # Remove leading slash
+        sass_dir = add_template_location(klass, route)
+        add_warmup_urls(klass, sass_dir, route)
         nil
       end
 

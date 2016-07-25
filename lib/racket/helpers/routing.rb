@@ -28,7 +28,7 @@ module Racket
       # @param [Array] params
       # @return [String]
       def route(controller, action = nil, *params)
-        Application.get_route(controller, action, params)
+        controller.get_route(action, params)
       end
 
       alias r route
@@ -39,7 +39,7 @@ module Racket
       # @param [Array] params
       # @return [String]
       def route_self(action = nil, *params)
-        Application.get_route(self.class, action, params)
+        self.class.get_route(action, params)
       end
 
       alias rs route_self
