@@ -76,9 +76,8 @@ module Racket
     def self.init(settings = {})
       @registry = Utils::Application::RegistryBuilder.new(settings).registry
       @registry.handler_stack # Makes sure all plugins and helpers are loaded before any controllers
-      reload
+      load_controllers
       self
-      # Return application from registry
     end
 
     # Loads controllers and associates each controller with a route.
@@ -116,8 +115,8 @@ module Racket
     #
     # @return [nil]
     def self.reload
+      @registry.forget(:controller_context)
       load_controllers
-      @view_manager = nil
     end
 
     # Requires a file using the current application directory as a base path.
@@ -154,13 +153,6 @@ module Racket
 
     def self.utils
       @registry.utils
-    end
-
-    # Returns the view cache of the currently running application.
-    #
-    # @return [Racket::ViewManager]
-    def self.view_manager
-      @view_manager ||= @registry.view_manager
     end
 
     private_class_method :calculate_url_path, :init, :load_controller_file,

@@ -188,7 +188,7 @@ module Racket
       __run_hook(:before)
       __run_action
       __run_hook(:after)
-      Application.view_manager.render(self)
+      self.class.context.view_manager.render(self)
     end
 
     private

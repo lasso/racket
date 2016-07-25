@@ -58,6 +58,7 @@ module Racket
                 reg.router.get_route(klass, action, params)
               end
               define_singleton_method(:utils) { reg.utils }
+              define_singleton_method(:view_manager) { reg.view_manager }
             end
           end
         end
@@ -162,8 +163,7 @@ module Racket
         end
 
         def register_view_manager
-          # No singleton - if application is reloaded, we want a new view manager
-          @registry.register(:view_manager) do |reg|
+          @registry.singleton(:view_manager) do |reg|
             Racket::ViewManager.new(
               reg.template_locator, reg.template_renderer
             )
