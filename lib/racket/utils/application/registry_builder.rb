@@ -120,8 +120,7 @@ module Racket
             Racket::Router.new(
               action_cache: reg.action_cache,
               dev_mode: reg.application_settings.mode == :dev,
-              logger: reg.application_logger,
-              utils: reg.utils
+              logger: reg.application_logger
             )
           end
         end

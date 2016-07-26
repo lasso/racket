@@ -70,54 +70,61 @@ module Racket
         end
       end
 
-      # Extracts the target class, target params and target action from a list of valid routes.
-      #
-      # @param [HttpRouter::Response] response
-      # @return [Array]
-      def extract_target(response)
-        target_klass = response.route.dest
-        params = response.param_values.first.reject(&:empty?)
-        action = params.empty? ? target_klass.settings.fetch(:default_action) : params.shift.to_sym
-        [target_klass, params, action]
-      end
+      # Class responsible for dispatching requests to controllers.
+      class Dispatcher
+        # Extracts the target class, target params and target action from a list of valid routes.
+        #
+        # @param [HttpRouter::Response] response
+        # @return [Array]
+        def self.extract_target(response)
+          target_klass = response.route.dest
+          params = response.param_values.first.reject(&:empty?)
+          action =
+            if params.empty?
+              target_klass.settings.fetch(:default_action)
+            else
+              params.shift.to_sym
+            end
+          [target_klass, params, action]
+        end
 
-      # Renders a controller. This is the default action whenever a matching route for a request
-      # is found.
-      #
-      # @param [Hash] env
-      # @param [Array] target_info
-      # @return [Array] A racket response triplet
-      def render_controller(env, target_info)
-        controller_class, params, action = target_info
+        # Constructor
+        #
+        # @param [Hash] env
+        # @param [Array] target_info
+        def initialize(env, target_info)
+          @env = env
+          @controller_class, @params, @action = target_info
+        end
 
-        # Rewrite PATH_INFO to reflect that we split out the parameters
-        update_path_info(env, params.length)
+        # Dispatches request to a controller. This is the default action whenever a matching
+        # route for a request is found.
+        #
+        # @return [Array] A racket response triplet
+        def dispatch
+          # Rewrite PATH_INFO to reflect that we split out the parameters
+          update_path_info(@params.length)
 
-        # Initialize and render target
-        call_controller(
-          controller_class,
-          Current.init(RouterParams.new(action, params, env))
-        )
-      end
+          # Call controller
+          call_controller(Current.init(RouterParams.new(@action, @params, @env)))
+        end
 
-      private
+        private
 
-      def call_controller(target_klass, mod)
-        target = target_klass.new
-        target.extend(mod)
-        target.__run
-      end
+        def call_controller(mod)
+          @controller_class.new.extend(mod).__run
+        end
 
-      # Updates the PATH_INFO environment variable.
-      #
-      # @param [Hash] env
-      # @param [Fixnum] num_params
-      # @return [nil]
-      def update_path_info(env, num_params)
-        env['PATH_INFO'] = env['PATH_INFO']
-                           .split('/')[0...-num_params]
-                           .join('/') unless num_params.zero?
-        nil
+        # Updates the PATH_INFO environment variable.
+        #
+        # @param [Fixnum] num_params
+        # @return [nil]
+        def update_path_info(num_params)
+          @env['PATH_INFO'] = @env['PATH_INFO']
+                              .split('/')[0...-num_params]
+                              .join('/') unless num_params.zero?
+          nil
+        end
       end
     end
   end

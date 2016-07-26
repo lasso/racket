@@ -88,7 +88,7 @@ module Racket
       catch :response do # Catches early exits from Controller.respond.
         # Ensure that that a controller will respond to the request. If not, send a 404.
         return render_error(404) unless (target_info = target_info(env))
-        @options.utils.render_controller(env, target_info)
+        Racket::Utils::Routing::Dispatcher.new(env, target_info).dispatch
       end
     rescue => err
       render_error(500, err)
@@ -110,8 +110,8 @@ module Racket
       matching_route = @router.recognize(env).first
       # Exit early if no controller is responsible for the route
       return nil unless matching_route
-      # Some controller is claiming to be responsible for the route
-      result = @options.utils.extract_target(matching_route.first)
+      # Some controller is claiming to be responsible for the route, find out which one.
+      result = Racket::Utils::Routing::Dispatcher.extract_target(matching_route.first)
       # Exit early if action is not available on target
       return nil unless action_cache.present?(result.first, result.last)
       result
