@@ -32,10 +32,9 @@ module Racket
       end
 
       def self.add_template_location(klass, route)
-        root_dir = klass.settings.fetch(:root_dir)
         utils = klass.context.utils
-        sass_dir = utils.build_path(root_dir, 'sass', route).to_s
-        css_dir = utils.build_path(root_dir, 'public', 'css', route).to_s
+        sass_dir = utils.build_path('sass', route).to_s
+        css_dir = utils.build_path('public', 'css', route).to_s
         ::Sass::Plugin.add_template_location(sass_dir, css_dir)
         sass_dir
       end
@@ -55,7 +54,7 @@ module Racket
       # @param [Class] klass
       # @return [nil]
       def self.included(klass)
-        route = klass.get_route()[1..-1] # Remove leading slash
+        route = klass.get_route.slice(1..-1) # Remove leading slash
         sass_dir = add_template_location(klass, route)
         add_warmup_urls(klass, sass_dir, route)
         nil

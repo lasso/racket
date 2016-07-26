@@ -34,6 +34,10 @@ module Racket
       include Helpers
       include Routing
       include Views
+
+      def initialize(root_dir)
+        @root_dir = Pathname.new(root_dir).cleanpath.expand_path
+      end
     end
   end
 end

@@ -57,10 +57,10 @@ describe 'A custom Racket test application' do
 
   it 'should be able to require custom files' do
     Module.constants.should.not.include(:Blob)
-    Racket.require 'extra/blob'
+    app.require 'extra/blob'
     Module.constants.should.include(:Blob)
     Module.constants.should.not.include(:InnerBlob)
-    Racket.require 'extra', 'blob', 'inner_blob'
+    app.require 'extra', 'blob', 'inner_blob'
     Module.constants.should.include(:InnerBlob)
   end
 

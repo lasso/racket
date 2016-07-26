@@ -47,15 +47,16 @@ module Racket
         #
         # @param [Array] args
         # @return [Pathname]
-        def self.to_pathname(*args)
-          new(args).path
+        def self.to_pathname(root_dir, *args)
+          new(root_dir, args).path
         end
 
         attr_reader :path
 
         private
 
-        def initialize(args)
+        def initialize(root_dir, args)
+          @root_dir = root_dir
           extract_base_path(args.dup)
           build_path
           clean_path
@@ -72,8 +73,7 @@ module Racket
           end
           @args.map!(&:to_s)
           @path = Pathname.new(@args.shift)
-          @path = Pathname.new(::Racket::Application.settings.root_dir).join(@path) if
-            @path.relative?
+          @path = Pathname.new(@root_dir).join(@path) if @path.relative?
         end
 
         def build_path
@@ -93,7 +93,7 @@ module Racket
       # @param [Array] args
       # @return [Pathname]
       def build_path(*args)
-        PathBuilder.to_pathname(*args)
+        PathBuilder.to_pathname(@root_dir, *args)
       end
 
       # Returns whether a directory is readable or not. In order to be readable, the directory must

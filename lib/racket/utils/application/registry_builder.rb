@@ -27,6 +27,9 @@ module Racket
 
         def initialize(settings = {})
           @registry = Racket::Registry.new
+          @registry.singleton(:utils) do
+            Racket::Utils::ToolBelt.new(settings.fetch(:root_dir, Dir.pwd))
+          end
           @registry.singleton(:application_settings) do |reg|
             Racket::Settings::Application.new(reg.utils, settings)
           end
@@ -178,12 +181,6 @@ module Racket
               type: :view,
               utils: reg.utils
             )
-          end
-        end
-
-        def register_utils
-          @registry.singleton(:utils) do
-            Racket::Utils::ToolBelt.new
           end
         end
       end

@@ -121,12 +121,10 @@ module Racket
 
     # Requires a file using the current application directory as a base path.
     #
-    # @TODO: Clean this mess up when Application stops being a sigleton.
     # @param [Object] args
     # @return [nil]
     def self.require(*args)
-      registry = @registry || Utils::Application::RegistryBuilder.new({}).registry
-      (::Kernel.require registry.utils.build_path(*args)) && nil
+      (::Kernel.require @registry.utils.build_path(*args)) && nil
     end
 
     # Returns the router associated with the application.
