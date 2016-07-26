@@ -23,9 +23,9 @@ module Racket
     # Major version
     MAJOR = 0
     # Minor version
-    MINOR = 4
+    MINOR = 5
     # Teeny version
-    TEENY = 1
+    TEENY = 0
     # Is it a prerelease?
     PRERELEASE = false
 
