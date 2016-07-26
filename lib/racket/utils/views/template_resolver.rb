@@ -21,6 +21,9 @@ module Racket
     module Views
       # Class used for resolving template paths.
       class TemplateResolver
+      # Alias for Racket::Utils::FileSystem module.
+        FSM = Racket::Utils::FileSystem
+
         def initialize(options)
           raise ArgumentError, 'Base dir is missing.' unless
             (@base_dir = options.fetch(:base_dir, nil))
@@ -32,11 +35,16 @@ module Racket
             (@utils = options.fetch(:utils, nil))
         end
 
+        # Returns the template object representing the specified path/controller combination.
+        #
+        # @param [String] path
+        # @param [Racket::Controller] controller
+        # @return [Pathname|Proc|nil]
         def get_template_object(path, controller)
           default_template = controller.settings.fetch("default_#{@type}".to_sym)
           template =
             lookup_template_with_default(
-              @utils.fs_path(@base_dir, path), default_template
+              FSM.fs_path(@base_dir, path), default_template
             )
           @logger.inform_dev(
             "Using #{@type} #{template.inspect} for #{controller.class}." \
@@ -54,8 +62,8 @@ module Racket
         def resolve_template(path, template, controller)
           return template unless template.is_a?(Proc)
           lookup_template(
-            @utils.fs_path(
-              @utils.fs_path(@base_dir, path).dirname,
+            FSM.fs_path(
+              FSM.fs_path(@base_dir, path).dirname,
               self.class.call_template_proc(template, controller)
             )
           )
@@ -92,12 +100,24 @@ module Racket
 
         private
 
+        # Extracts the correct directory and glob for a given base path/path combination.
+        #
+        # @param [Pathname] path
+        # @return [Array]
+        def extract_dir_and_glob(path)
+          basename = path.basename
+          [
+            path.dirname,
+            path.extname.empty? ? Pathname.new("#{basename}.*") : basename
+          ]
+        end
+
         # Locates a file in the filesystem matching an URL path. If there exists a matching file,
         # the path to it is returned. If there is no matching file, +nil+ is returned.
         # @param [Pathname] path
         # @return [Pathname|nil]
         def lookup_template(path)
-          @utils.first_matching_path(*@utils.extract_dir_and_glob(path))
+          FSM.first_matching_path(*extract_dir_and_glob(path))
         end
 
         # Locates a file in the filesystem matching an URL path. If there exists a matching file,
@@ -114,7 +134,7 @@ module Racket
           return template if template
           # No template found for path. Try the default template instead.
           # If default template is a string or a symbol, look it up in the file system
-          return lookup_template(@utils.fs_path(path.dirname, default_template)) if
+          return lookup_template(FSM.fs_path(path.dirname, default_template)) if
             default_template.is_a?(String) || default_template.is_a?(Symbol)
           # If default template is a proc or nil, just return it
           default_template

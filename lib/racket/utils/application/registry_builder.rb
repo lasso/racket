@@ -129,7 +129,7 @@ module Racket
           @registry.singleton(:static_server) do |reg|
             logger = reg.application_logger
             if (public_dir = reg.application_settings.public_dir) &&
-               reg.utils.dir_readable?(Pathname.new(public_dir))
+               Racket::Utils::FileSystem.dir_readable?(Pathname.new(public_dir))
               logger.inform_dev(
                 "Setting up static server to serve files from #{public_dir}."
               )

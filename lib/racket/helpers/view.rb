@@ -29,7 +29,7 @@ module Racket
       def render_template(template, context = self)
         utils = Controller.context.utils
         template = utils.build_path(template)
-        return nil unless utils.file_readable?(template)
+        return nil unless Racket::Utils::FileSystem.file_readable?(template)
         Tilt.new(template).render(context)
       end
     end

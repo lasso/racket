@@ -86,16 +86,6 @@ module Racket
         end
       end
 
-      # Builds and returns a path in the file system from the provided arguments. The first element
-      # in the argument list can be either absolute or relative, all other arguments must be
-      # relative, otherwise they will be removed from the final path.
-      #
-      # @param [Array] args
-      # @return [Pathname]
-      def build_path(*args)
-        PathBuilder.to_pathname(@root_dir, *args)
-      end
-
       # Returns whether a directory is readable or not. In order to be readable, the directory must
       # a) exist
       # b) be a directory
@@ -103,31 +93,8 @@ module Racket
       #
       # @param [Pathname] path
       # @return [true|false]
-      def dir_readable?(path)
+      def self.dir_readable?(path)
         path.exist? && path.directory? && path.readable?
-      end
-
-      # Extracts the correct directory and glob for a given base path/path combination.
-      #
-      # @param [Pathname] path
-      # @return [Array]
-      def extract_dir_and_glob(path)
-        basename = path.basename
-        [
-          path.dirname,
-          path.extname.empty? ? Pathname.new("#{basename}.*") : basename
-        ]
-      end
-
-      # Given a base pathname and a url path string, returns a pathname.
-      #
-      # @param [Pathname] base_pathname
-      # @param [String] url_path
-      # @return [Pathname]
-      def fs_path(base_pathname, url_path)
-        parts = url_path.split('/').reject(&:empty?)
-        parts.each { |part| base_pathname = base_pathname.join(part) }
-        base_pathname
       end
 
       # Returns whether a file is readable or not. In order to be readable, the file must
@@ -139,19 +106,9 @@ module Racket
       # @return [true|false]
       # @todo Remove temporary workaround for handling string, we want to use Pathname everywhere
       #   possible.
-      def file_readable?(path)
+      def self.file_readable?(path)
         # path = Pathname.new(path) unless path.is_a?(Pathname)
         path.exist? && path.file? && path.readable?
-      end
-
-      # Returns all paths under +base_path+ that matches +glob+.
-      #
-      # @param [Pathname] base_path
-      # @param [Pathname] glob
-      # @return [Array]
-      def matching_paths(base_path, glob)
-        return [] unless dir_readable?(base_path)
-        Dir.chdir(base_path) { Pathname.glob(glob) }.map { |path| base_path.join(path) }
       end
 
       # Returns the first matching path under +base_path+ matching +glob+. If no matching path can
@@ -160,19 +117,40 @@ module Racket
       # @param [Pathname] base_path
       # @param [Pathname] glob
       # @return [Pathname|nil]
-      def first_matching_path(base_path, glob)
+      def self.first_matching_path(base_path, glob)
         paths = matching_paths(base_path, glob)
         paths.empty? ? nil : paths.first
       end
 
-      # Returns a list of relative file paths, sorted by path (longest first).
+      # Given a base pathname and a url path string, returns a pathname.
       #
-      # @param [String] base_dir
-      # @param [String] glob
-      # return [Array]
-      def paths_by_longest_path(base_dir, glob)
-        paths = matching_paths(base_dir, glob).map { |path| SizedPath.new(path) }.sort
-        paths.map(&:path)
+      # @param [Pathname] base_pathname
+      # @param [String] url_path
+      # @return [Pathname]
+      def self.fs_path(base_pathname, url_path)
+        parts = url_path.split('/').reject(&:empty?)
+        parts.each { |part| base_pathname = base_pathname.join(part) }
+        base_pathname
+      end
+
+      # Returns all paths under +base_path+ that matches +glob+.
+      #
+      # @param [Pathname] base_path
+      # @param [Pathname] glob
+      # @return [Array]
+      def self.matching_paths(base_path, glob)
+        return [] unless dir_readable?(base_path)
+        Dir.chdir(base_path) { Pathname.glob(glob) }.map { |path| base_path.join(path) }
+      end
+
+      # Builds and returns a path in the file system from the provided arguments. The first element
+      # in the argument list can be either absolute or relative, all other arguments must be
+      # relative, otherwise they will be removed from the final path.
+      #
+      # @param [Array] args
+      # @return [Pathname]
+      def build_path(*args)
+        PathBuilder.to_pathname(@root_dir, *args)
       end
 
       # Safely requires a file. This method will catch load errors and return true (if the file

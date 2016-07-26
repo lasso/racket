@@ -62,6 +62,9 @@ module Racket
       __register_hook(:before, methods, blk) if block_given?
     end
 
+    # Returns the current context.
+    #
+    # @return [Module]
     def self.context
       Controller.instance_variable_get(:@context)
     end
@@ -75,6 +78,10 @@ module Racket
       @context = context
     end
 
+    # Returns the route representing the parameters.
+    #
+    # @param [Symbol|nil] action
+    # @param [Array] params
     def self.get_route(action = nil, *params)
       context.get_route(self, action, params)
     end

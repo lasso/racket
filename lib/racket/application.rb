@@ -100,6 +100,18 @@ module Racket
       url_path
     end
 
+    # Returns a list of relative file paths representing controllers,
+    # sorted by path length (longest first).
+    #
+    # return [Array]
+    def controller_files
+      controller_dir = @registry.application_settings.controller_dir
+      glob = File.join('**', '*.rb')
+      Utils::FileSystem.matching_paths(controller_dir, glob).map do |path|
+        Utils::FileSystem::SizedPath.new(path)
+      end.sort.map(&:path)
+    end
+
     # Loads controllers and associates each controller with a route.
     #
     # @return [nil]
@@ -125,11 +137,7 @@ module Racket
     def load_controller_files
       settings = @registry.application_settings
       settings.store(:last_added_controller, [])
-      @registry.utils.paths_by_longest_path(
-        settings.controller_dir, File.join('**', '*.rb')
-      ).each do |path|
-        load_controller_file(path)
-      end
+      controller_files.each { |path| load_controller_file(path) }
       settings.delete(:last_added_controller)
     end
   end

@@ -41,7 +41,7 @@ module Racket
         private
 
         def build
-          if @utils.file_readable?(@file) then build_success
+          if Racket::Utils::FileSystem.file_readable?(@file) then build_success
           else build_failure
           end
         end

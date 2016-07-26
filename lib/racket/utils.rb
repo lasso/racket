@@ -32,7 +32,6 @@ module Racket
       include Exceptions
       include FileSystem
       include Helpers
-      include Routing
       include Views
 
       def initialize(root_dir)
