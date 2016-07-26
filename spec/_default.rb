@@ -10,31 +10,32 @@ describe 'A default Racket test application' do
   end
 
   it 'has mapped controllers correctly' do
-    app.router.routes.length.should.equal(5)
-    app.router.routes[DefaultRootController].should.equal('/')
-    app.router.routes[DefaultSubController1].should.equal('/sub1')
-    app.router.routes[DefaultSubController2].should.equal('/sub2')
-    app.router.routes[DefaultSubController3].should.equal('/sub3')
-    app.router.routes[DefaultInheritedController].should.equal('/sub3/inherited')
+    router = app.instance_variable_get(:@registry).router
+    router.routes.length.should.equal(5)
+    router.routes[DefaultRootController].should.equal('/')
+    router.routes[DefaultSubController1].should.equal('/sub1')
+    router.routes[DefaultSubController2].should.equal('/sub2')
+    router.routes[DefaultSubController3].should.equal('/sub3')
+    router.routes[DefaultInheritedController].should.equal('/sub3/inherited')
 
-    app.router.action_cache.items[DefaultRootController].length.should.equal(5)
-    app.router.action_cache.items[DefaultRootController].include?(:index).should.equal(true)
-    app.router.action_cache.items[DefaultRootController].include?(:my_first_route)
+    router.action_cache.items[DefaultRootController].length.should.equal(5)
+    router.action_cache.items[DefaultRootController].include?(:index).should.equal(true)
+    router.action_cache.items[DefaultRootController].include?(:my_first_route)
        .should.equal(true)
-    app.router.action_cache.items[DefaultRootController].include?(:my_second_route)
+    router.action_cache.items[DefaultRootController].include?(:my_second_route)
        .should.equal(true)
-    app.router.action_cache.items[DefaultSubController1].length.should.equal(4)
-    app.router.action_cache.items[DefaultSubController1].include?(:route_to_root).should.equal(true)
-    app.router.action_cache.items[DefaultSubController1].include?(:route_to_nonexisting)
+    router.action_cache.items[DefaultSubController1].length.should.equal(4)
+    router.action_cache.items[DefaultSubController1].include?(:route_to_root).should.equal(true)
+    router.action_cache.items[DefaultSubController1].include?(:route_to_nonexisting)
        .should.equal(true)
-    app.router.action_cache.items[DefaultSubController2].length.should.equal(5)
-    app.router.action_cache.items[DefaultSubController2].include?(:index).should.equal(true)
-    app.router.action_cache.items[DefaultSubController2].include?(:current_action)
+    router.action_cache.items[DefaultSubController2].length.should.equal(5)
+    router.action_cache.items[DefaultSubController2].include?(:index).should.equal(true)
+    router.action_cache.items[DefaultSubController2].include?(:current_action)
        .should.equal(true)
-    app.router.action_cache.items[DefaultSubController2].include?(:current_params)
+    router.action_cache.items[DefaultSubController2].include?(:current_params)
        .should.equal(true)
-    app.router.action_cache.items[DefaultSubController3].should.equal([:index])
-    app.router.action_cache.items[DefaultInheritedController].should.equal([:index])
+    router.action_cache.items[DefaultSubController3].should.equal([:index])
+    router.action_cache.items[DefaultInheritedController].should.equal([:index])
   end
 
   it 'should set rack variables correctly' do
@@ -48,7 +49,7 @@ describe 'A default Racket test application' do
   end
 
   it 'should get the correct middleware' do
-    middleware = app.settings.middleware
+    middleware = app.instance_variable_get(:@registry).application_settings.middleware
     middleware.length.should.equal(2)
     middleware[0].class.should.equal(Array)
     middleware[0].length.should.equal(2)

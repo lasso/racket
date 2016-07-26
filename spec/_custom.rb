@@ -12,13 +12,14 @@ describe 'A custom Racket test application' do
   end
 
   it 'should set requested settings' do
-    app.settings.default_layout.should.equal('zebra.*')
-    expected_path = Pathname.new('templates').cleanpath.expand_path
-    app.settings.view_dir.should.equal(expected_path)
+    settings = app.instance_variable_get(:@registry).application_settings
+    settings.default_layout.should.equal('zebra.*')
+    view_dir = Pathname.new('templates').cleanpath.expand_path
+    settings.view_dir.should.equal(view_dir)
   end
 
   it 'should get the correct middleware' do
-    middleware = app.settings.middleware
+    middleware = app.instance_variable_get(:@registry).application_settings.middleware
     middleware.length.should.equal(3)
     middleware[0].class.should.equal(Array)
     middleware[0].length.should.equal(1)
@@ -139,18 +140,19 @@ describe 'A custom Racket test application' do
   end
 
   it 'should handle changes to global settings' do
-    app.settings.fetch(:my_custom_secret).should.equal(42)
-    app.settings.store(:my_custom_secret, '9Lazy9')
-    app.settings.fetch(:my_custom_secret).should.equal('9Lazy9')
-    app.settings.delete(:my_custom_secret)
-    app.settings.fetch(:my_custom_secret).should.equal(nil)
-    app.settings.default_content_type.should.equal('text/html')
-    app.settings.fetch(:default_content_type).should.equal('text/html')
-    app.settings.default_content_type = 'text/plain'
-    app.settings.default_content_type.should.equal('text/plain')
-    app.settings.fetch(:default_content_type).should.equal('text/plain')
-    app.settings.default_content_type = 'text/html'
-    app.settings.default_content_type.should.equal('text/html')
-    app.settings.fetch(:default_content_type).should.equal('text/html')
+    settings = app.instance_variable_get(:@registry).application_settings
+    settings.fetch(:my_custom_secret).should.equal(42)
+    settings.store(:my_custom_secret, '9Lazy9')
+    settings.fetch(:my_custom_secret).should.equal('9Lazy9')
+    settings.delete(:my_custom_secret)
+    settings.fetch(:my_custom_secret).should.equal(nil)
+    settings.default_content_type.should.equal('text/html')
+    settings.fetch(:default_content_type).should.equal('text/html')
+    settings.default_content_type = 'text/plain'
+    settings.default_content_type.should.equal('text/plain')
+    settings.fetch(:default_content_type).should.equal('text/plain')
+    settings.default_content_type = 'text/html'
+    settings.default_content_type.should.equal('text/html')
+    settings.fetch(:default_content_type).should.equal('text/html')
   end
 end

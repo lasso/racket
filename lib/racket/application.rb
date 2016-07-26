@@ -19,36 +19,46 @@
 module Racket
   # Racket main application class.
   class Application
-    class << self
-      attr_reader :registry
+    # Initializes a new Racket::Application object with default settings.
+    #
+    # @return [Class]
+    def self.default
+      new
     end
 
-    def self.calculate_url_path(file)
-      url_path = "/#{file.relative_path_from(settings.controller_dir).dirname}"
-      url_path = '' if url_path == '/.'
-      url_path
+    # Initializes a new Racket::Application object with settings specified by +settings+.
+    #
+    # @param [Hash] settings
+    # @return [Class]
+    def self.using(settings)
+      new(settings)
+    end
+
+    attr_reader :registry
+
+    # Initializes the Racket application.
+    #
+    # @param [Hash] settings
+    # @return [Class]
+    def initialize(settings = {})
+      @registry = Utils::Application::RegistryBuilder.new(settings).registry
+      @registry.handler_stack # Makes sure all plugins and helpers are loaded before any controllers
+      load_controllers
     end
 
     # Called whenever Rack sends a request to the application.
     #
     # @param [Hash] env Rack environment
     # @return [Array] A Rack response array
-    def self.call(env)
+    def call(env)
       @registry.handler_stack.call(env.dup)
     end
 
     # Returns whether the application runs in dev mode.
     #
     # @return [true|false]
-    def self.dev_mode?
+    def dev_mode?
       settings.mode == :dev
-    end
-
-    # Initializes a new Racket::Application object with default settings.
-    #
-    # @return [Class]
-    def self.default
-      init
     end
 
     # Sends a message to the logger.
@@ -56,7 +66,7 @@ module Racket
     # @param [String] message
     # @param [Symbol] level
     # @return nil
-    def self.inform_all(message, level = :info)
+    def inform_all(message, level = :info)
       @registry.application_logger.inform_all(message, level)
     end
 
@@ -65,25 +75,35 @@ module Racket
     # @param [String] message
     # @param [Symbol] level
     # @return nil
-    def self.inform_dev(message, level = :debug)
+    def inform_dev(message, level = :debug)
       @registry.application_logger.inform_dev(message, level)
     end
 
-    # Initializes the Racket application.
+    # Requires a file using the current application directory as a base path.
     #
-    # @param [Hash] settings
-    # @return [Class]
-    def self.init(settings = {})
-      @registry = Utils::Application::RegistryBuilder.new(settings).registry
-      @registry.handler_stack # Makes sure all plugins and helpers are loaded before any controllers
-      load_controllers
-      self
+    # @param [Object] args
+    # @return [nil]
+    def require(*args)
+      (::Kernel.require @registry.utils.build_path(*args)) && nil
+    end
+
+    private
+
+    # Calculates the url path for the specified (controller) file
+    #
+    # @param [Pathname] file
+    # @return [String]
+    def calculate_url_path(file)
+      controller_dir = @registry.application_settings.controller_dir
+      url_path = "/#{file.relative_path_from(controller_dir).dirname}"
+      url_path = '' if url_path == '/.'
+      url_path
     end
 
     # Loads controllers and associates each controller with a route.
     #
     # @return [nil]
-    def self.load_controllers
+    def load_controllers
       inform_dev('Loading controllers.')
       Controller.context = @registry.controller_context
       load_controller_files
@@ -94,66 +114,23 @@ module Racket
     #
     # @param [String] file Relative path from controller dir
     # @return nil
-    def self.load_controller_file(file)
+    def load_controller_file(file)
       ::Kernel.require file
-      klass = settings.fetch(:last_added_controller).pop
+      klass = @registry.application_settings.fetch(:last_added_controller).pop
       # Helpers may do stuff based on route, make sure it is available before applying helpers.
-      router.map(calculate_url_path(file), klass)
-      utils.apply_helpers(klass) && nil
+      @registry.router.map(calculate_url_path(file), klass)
+      @registry.utils.apply_helpers(klass) && nil
     end
 
-    def self.load_controller_files
+    def load_controller_files
+      settings = @registry.application_settings
       settings.store(:last_added_controller, [])
-      utils.paths_by_longest_path(settings.controller_dir, File.join('**', '*.rb')).each do |path|
+      @registry.utils.paths_by_longest_path(
+        settings.controller_dir, File.join('**', '*.rb')
+      ).each do |path|
         load_controller_file(path)
       end
       settings.delete(:last_added_controller)
     end
-
-    # Reloads the application, making any changes to the controller configuration visible
-    # to the application.
-    #
-    # @return [nil]
-    def self.reload
-      @registry.forget(:controller_context)
-      load_controllers
-    end
-
-    # Requires a file using the current application directory as a base path.
-    #
-    # @param [Object] args
-    # @return [nil]
-    def self.require(*args)
-      (::Kernel.require @registry.utils.build_path(*args)) && nil
-    end
-
-    # Returns the router associated with the application.
-    #
-    # @return [Racket::Router]
-    def self.router
-      @registry.router
-    end
-
-    # Returns settings for the application
-    #
-    # @return [Racket::Settings::Application]
-    def self.settings
-      @registry.application_settings
-    end
-
-    # Initializes a new Racket::Application object with settings specified by +settings+.
-    #
-    # @param [Hash] settings
-    # @return [Class]
-    def self.using(settings)
-      init(settings)
-    end
-
-    def self.utils
-      @registry.utils
-    end
-
-    private_class_method :calculate_url_path, :init, :load_controller_file,
-                         :load_controller_files, :load_controllers, :utils
   end
 end
