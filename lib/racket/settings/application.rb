@@ -47,7 +47,8 @@ module Racket
       setting(:root_dir, nil) # Will be set automatically by constructor.
       setting(:warmup_urls, Set.new)
 
-      def initialize(defaults = {})
+      def initialize(utils, defaults = {})
+        @utils = utils
         defaults[:root_dir] = Dir.pwd unless defaults.key?(:root_dir)
         super(defaults)
       end
@@ -66,7 +67,7 @@ module Racket
         define_method symbol do
           instance_variable_set(ivar, directory) unless instance_variables.include?(ivar)
           return nil unless (value = instance_variable_get(ivar))
-          Utils.build_path(value)
+          @utils.build_path(value)
         end
       end
 

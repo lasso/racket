@@ -26,21 +26,18 @@ require_relative 'utils/views.rb'
 module Racket
   # Collects utilities needed by different objects in Racket.
   module Utils
-    extend SingleForwardable
+    # Collects functionality from all utility modules into a handy class.
+    class ToolBelt
+      include Application
+      include Exceptions
+      include FileSystem
+      include Helpers
+      include Routing
+      include Views
 
-    # Embraces a module, making its class methods available as class methods on the current module.
-    #
-    # @param [Module] mod
-    # @return [nil]
-    def self.__embrace(mod)
-      def_single_delegators(mod, *mod.singleton_methods) && nil
+      def initialize(root_dir)
+        @root_dir = Pathname.new(root_dir).cleanpath.expand_path
+      end
     end
-
-    __embrace(Application)
-    __embrace(Exceptions)
-    __embrace(FileSystem)
-    __embrace(Helpers)
-    __embrace(Routing)
-    __embrace(Views)
   end
 end

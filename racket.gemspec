@@ -17,6 +17,7 @@ Gem::Specification.new do |s|
 
   s.add_dependency('http_router', '~>0')
   s.add_dependency('rack', '~>1.6')
+  s.add_dependency('racket-registry', '>0')
   s.add_dependency('tilt', '~>2.0')
 
   s.add_development_dependency('bacon', '~>1.2')

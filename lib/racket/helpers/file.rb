@@ -23,8 +23,9 @@ module Racket
     module File
       # Class for sending files.
       class Response
-        def initialize(file, options)
-          @file = Utils.build_path(file)
+        def initialize(utils, file, options)
+          @utils = utils
+          @file = @utils.build_path(file)
           @options = options
           @response = Racket::Response.new
           build
@@ -40,7 +41,7 @@ module Racket
         private
 
         def build
-          if Utils.file_readable?(@file) then build_success
+          if @utils.file_readable?(@file) then build_success
           else build_failure
           end
         end
@@ -82,7 +83,8 @@ module Racket
       # @param [Hash] options
       # @return [Array]
       def send_file(file, options = {})
-        respond!(*(Response.new(file, options).to_a))
+        response = Response.new(Controller.context.utils, file, options).to_a
+        respond!(*response)
       end
     end
   end

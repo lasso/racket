@@ -19,9 +19,9 @@
 module Racket
   # Handles rendering in Racket applications.
   class ViewManager
-    def initialize(layout_base_dir, view_base_dir)
-      @locator = Utils::Views::TemplateLocator.new(layout_base_dir, view_base_dir)
-      @renderer = Utils::Views::ViewRenderer
+    def initialize(locator, renderer)
+      @locator = locator
+      @renderer = renderer
     end
 
     # Renders a controller based on the request path and the variables set in the

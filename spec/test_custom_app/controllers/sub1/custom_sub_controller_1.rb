@@ -15,7 +15,7 @@ class CustomSubController1 < Racket::Controller
   end
 
   def epic_fail
-    fail 'Epic fail!'
+    raise 'Epic fail!'
   end
 
   def send_existing_file_auto_mime

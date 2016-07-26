@@ -27,8 +27,9 @@ module Racket
       # @param [Object] context
       # @return [String|nil]
       def render_template(template, context = self)
-        template = Utils.build_path(template)
-        return nil unless Utils.file_readable?(template)
+        utils = Controller.context.utils
+        template = utils.build_path(template)
+        return nil unless utils.file_readable?(template)
         Tilt.new(template).render(context)
       end
     end

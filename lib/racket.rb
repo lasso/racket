@@ -33,15 +33,6 @@ require_relative 'racket/utils.rb'
 
 # Racket main namespace
 module Racket
-  # Requires a file using the current application directory as a base path.
-  #
-  # @param [Object] args
-  # @return nil
-  def require(*args)
-    Application.require(*args)
-    nil
-  end
-
   # Returns the current version of Racket.
   #
   # @return [String]
@@ -50,5 +41,5 @@ module Racket
     Version.current
   end
 
-  module_function :require, :version
+  module_function :version
 end

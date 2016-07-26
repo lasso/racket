@@ -28,10 +28,10 @@ module Racket
       # @param [Array] params
       # @return [String]
       def route(controller, action = nil, *params)
-        Application.get_route(controller, action, params)
+        controller.get_route(action, params)
       end
 
-      alias_method(:r, :route)
+      alias r route
 
       # Returns a route to an action within the current controller.
       #
@@ -39,10 +39,10 @@ module Racket
       # @param [Array] params
       # @return [String]
       def route_self(action = nil, *params)
-        Application.get_route(self.class, action, params)
+        self.class.get_route(action, params)
       end
 
-      alias_method(:rs, :route_self)
+      alias rs route_self
     end
   end
 end

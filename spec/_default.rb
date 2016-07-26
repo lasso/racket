@@ -10,31 +10,32 @@ describe 'A default Racket test application' do
   end
 
   it 'has mapped controllers correctly' do
-    app.router.routes.length.should.equal(5)
-    app.router.routes[DefaultRootController].should.equal('/')
-    app.router.routes[DefaultSubController1].should.equal('/sub1')
-    app.router.routes[DefaultSubController2].should.equal('/sub2')
-    app.router.routes[DefaultSubController3].should.equal('/sub3')
-    app.router.routes[DefaultInheritedController].should.equal('/sub3/inherited')
+    router = app.instance_variable_get(:@registry).router
+    router.routes.length.should.equal(5)
+    router.routes[DefaultRootController].should.equal('/')
+    router.routes[DefaultSubController1].should.equal('/sub1')
+    router.routes[DefaultSubController2].should.equal('/sub2')
+    router.routes[DefaultSubController3].should.equal('/sub3')
+    router.routes[DefaultInheritedController].should.equal('/sub3/inherited')
 
-    app.router.action_cache.items[DefaultRootController].length.should.equal(5)
-    app.router.action_cache.items[DefaultRootController].include?(:index).should.equal(true)
-    app.router.action_cache.items[DefaultRootController].include?(:my_first_route)
-      .should.equal(true)
-    app.router.action_cache.items[DefaultRootController].include?(:my_second_route)
-      .should.equal(true)
-    app.router.action_cache.items[DefaultSubController1].length.should.equal(4)
-    app.router.action_cache.items[DefaultSubController1].include?(:route_to_root).should.equal(true)
-    app.router.action_cache.items[DefaultSubController1].include?(:route_to_nonexisting)
-      .should.equal(true)
-    app.router.action_cache.items[DefaultSubController2].length.should.equal(5)
-    app.router.action_cache.items[DefaultSubController2].include?(:index).should.equal(true)
-    app.router.action_cache.items[DefaultSubController2].include?(:current_action)
-      .should.equal(true)
-    app.router.action_cache.items[DefaultSubController2].include?(:current_params)
-      .should.equal(true)
-    app.router.action_cache.items[DefaultSubController3].should.equal([:index])
-    app.router.action_cache.items[DefaultInheritedController].should.equal([:index])
+    router.action_cache.items[DefaultRootController].length.should.equal(5)
+    router.action_cache.items[DefaultRootController].include?(:index).should.equal(true)
+    router.action_cache.items[DefaultRootController].include?(:my_first_route)
+       .should.equal(true)
+    router.action_cache.items[DefaultRootController].include?(:my_second_route)
+       .should.equal(true)
+    router.action_cache.items[DefaultSubController1].length.should.equal(4)
+    router.action_cache.items[DefaultSubController1].include?(:route_to_root).should.equal(true)
+    router.action_cache.items[DefaultSubController1].include?(:route_to_nonexisting)
+       .should.equal(true)
+    router.action_cache.items[DefaultSubController2].length.should.equal(5)
+    router.action_cache.items[DefaultSubController2].include?(:index).should.equal(true)
+    router.action_cache.items[DefaultSubController2].include?(:current_action)
+       .should.equal(true)
+    router.action_cache.items[DefaultSubController2].include?(:current_params)
+       .should.equal(true)
+    router.action_cache.items[DefaultSubController3].should.equal([:index])
+    router.action_cache.items[DefaultInheritedController].should.equal([:index])
   end
 
   it 'should set rack variables correctly' do
@@ -48,7 +49,7 @@ describe 'A default Racket test application' do
   end
 
   it 'should get the correct middleware' do
-    middleware = app.settings.middleware
+    middleware = app.instance_variable_get(:@registry).application_settings.middleware
     middleware.length.should.equal(2)
     middleware[0].class.should.equal(Array)
     middleware[0].length.should.equal(2)
@@ -59,7 +60,7 @@ describe 'A default Racket test application' do
     true.should.equal(true)
   end
 
-  it 'returns the correct respnse when calling index action' do
+  it 'returns the correct response when calling index action' do
     # RootController
     get '/'
     last_response.status.should.equal(200)
@@ -117,27 +118,34 @@ describe 'A default Racket test application' do
   end
 
   it 'should be able to log messages to everybody' do
-    original_logger = app.settings.logger
+    registry = app.registry
+    original_logger = registry.application_logger
     sio = StringIO.new
-    app.settings.logger = Logger.new(sio)
+    new_logger = Racket::Utils::Application::Logger.new(Logger.new(sio), :live)
+    registry.forget(:application_logger)
+    registry.singleton(:application_logger) { new_logger }
     app.inform_all('Informational message')
     sio.string.should.match(/Informational message/)
-    app.settings.logger = original_logger
+    registry.forget(:application_logger)
+    registry.singleton(:application_logger) { original_logger }
   end
 
   it 'should be able to log messages to developer' do
-    original_logger = app.settings.logger
-    original_mode = app.settings.mode
+    registry = app.registry
+    original_logger = registry.application_logger
     sio = StringIO.new
-    app.settings.logger = Logger.new(sio)
-    app.settings.mode = :live
+    live_logger = Racket::Utils::Application::Logger.new(Logger.new(sio), :live)
+    registry.forget(:application_logger)
+    registry.singleton(:application_logger) { live_logger }
     app.inform_dev('Development message')
     sio.string.should.be.empty
-    app.settings.mode = :dev
+    dev_logger = Racket::Utils::Application::Logger.new(Logger.new(sio), :dev)
+    registry.forget(:application_logger)
+    registry.singleton(:application_logger) { dev_logger }
     app.inform_dev('Hey, listen up!')
     sio.string.should.match(/Hey, listen up!/)
-    app.settings.mode = original_mode
-    app.settings.logger = original_logger
+    registry.forget(:application_logger)
+    registry.singleton(:application_logger) { original_logger }
   end
 
   it 'should be able to set and clear session variables' do
@@ -173,13 +181,6 @@ describe 'A default Racket test application' do
     response = JSON.parse(last_response.body)
     response.length.should.equal(3)
     response.each { |elem| elem.should.match(/Racket::Session/) }
-  end
-
-  it 'should be able to build paths correctly' do
-    Racket::Utils.build_path.should.equal(Pathname.pwd)
-    Racket::Utils.build_path('foo', 'bar', 'baz').should.equal(
-      Pathname.pwd.join('foo').join('bar').join('baz')
-    )
   end
 
   it 'should handle GET parameters correctly' do

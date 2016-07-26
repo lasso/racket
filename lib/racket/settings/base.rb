@@ -36,8 +36,8 @@ module Racket
       # @param [Symbol] key
       # @return [nil]
       def delete(key)
-        fail ArgumentErrpr,
-             "Cannot delete standard setting #{key}" if respond_to?(key.to_sym)
+        raise ArgumentErrpr,
+              "Cannot delete standard setting #{key}" if respond_to?(key.to_sym)
         @custom.delete(key) && nil
       end
 
@@ -68,8 +68,8 @@ module Racket
       # @param [Object] value
       # @return [nil]
       def store(key, value)
-        fail ArgumentError,
-             "Cannot overwrite standard setting #{key}" if respond_to?("#{key}=".to_sym)
+        raise ArgumentError,
+              "Cannot overwrite standard setting #{key}" if respond_to?("#{key}=".to_sym)
         (@custom[key] = value) && nil
       end
 

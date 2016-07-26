@@ -15,7 +15,7 @@ class CustomSubController3 < Racket::Controller
   end
 
   after :not_so_secret do
-    fail 'Should not happen!'
+    raise 'Should not happen!'
   end
 
   def render_a_file

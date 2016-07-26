@@ -47,15 +47,16 @@ module Racket
         #
         # @param [Array] args
         # @return [Pathname]
-        def self.to_pathname(*args)
-          new(args).path
+        def self.to_pathname(root_dir, *args)
+          new(root_dir, args).path
         end
 
         attr_reader :path
 
         private
 
-        def initialize(args)
+        def initialize(root_dir, args)
+          @root_dir = root_dir
           extract_base_path(args.dup)
           build_path
           clean_path
@@ -72,14 +73,13 @@ module Racket
           end
           @args.map!(&:to_s)
           @path = Pathname.new(@args.shift)
-          @path = Pathname.new(::Racket::Application.settings.root_dir).join(@path) if
-            @path.relative?
+          @path = Pathname.new(@root_dir).join(@path) if @path.relative?
         end
 
         def build_path
           @args.each do |arg|
             path_part = Pathname.new(arg)
-            fail ArgumentError, arg unless path_part.relative?
+            raise ArgumentError, arg unless path_part.relative?
             @path = @path.join(path_part)
           end
           remove_instance_variable :@args
@@ -92,8 +92,8 @@ module Racket
       #
       # @param [Array] args
       # @return [Pathname]
-      def self.build_path(*args)
-        PathBuilder.to_pathname(*args)
+      def build_path(*args)
+        PathBuilder.to_pathname(@root_dir, *args)
       end
 
       # Returns whether a directory is readable or not. In order to be readable, the directory must
@@ -103,7 +103,7 @@ module Racket
       #
       # @param [Pathname] path
       # @return [true|false]
-      def self.dir_readable?(path)
+      def dir_readable?(path)
         path.exist? && path.directory? && path.readable?
       end
 
@@ -111,7 +111,7 @@ module Racket
       #
       # @param [Pathname] path
       # @return [Array]
-      def self.extract_dir_and_glob(path)
+      def extract_dir_and_glob(path)
         basename = path.basename
         [
           path.dirname,
@@ -124,7 +124,7 @@ module Racket
       # @param [Pathname] base_pathname
       # @param [String] url_path
       # @return [Pathname]
-      def self.fs_path(base_pathname, url_path)
+      def fs_path(base_pathname, url_path)
         parts = url_path.split('/').reject(&:empty?)
         parts.each { |part| base_pathname = base_pathname.join(part) }
         base_pathname
@@ -139,7 +139,7 @@ module Racket
       # @return [true|false]
       # @todo Remove temporary workaround for handling string, we want to use Pathname everywhere
       #   possible.
-      def self.file_readable?(path)
+      def file_readable?(path)
         # path = Pathname.new(path) unless path.is_a?(Pathname)
         path.exist? && path.file? && path.readable?
       end
@@ -149,8 +149,8 @@ module Racket
       # @param [Pathname] base_path
       # @param [Pathname] glob
       # @return [Array]
-      def self.matching_paths(base_path, glob)
-        return [] unless Utils.dir_readable?(base_path)
+      def matching_paths(base_path, glob)
+        return [] unless dir_readable?(base_path)
         Dir.chdir(base_path) { Pathname.glob(glob) }.map { |path| base_path.join(path) }
       end
 
@@ -160,7 +160,7 @@ module Racket
       # @param [Pathname] base_path
       # @param [Pathname] glob
       # @return [Pathname|nil]
-      def self.first_matching_path(base_path, glob)
+      def first_matching_path(base_path, glob)
         paths = matching_paths(base_path, glob)
         paths.empty? ? nil : paths.first
       end
@@ -170,7 +170,7 @@ module Racket
       # @param [String] base_dir
       # @param [String] glob
       # return [Array]
-      def self.paths_by_longest_path(base_dir, glob)
+      def paths_by_longest_path(base_dir, glob)
         paths = matching_paths(base_dir, glob).map { |path| SizedPath.new(path) }.sort
         paths.map(&:path)
       end
@@ -180,8 +180,8 @@ module Racket
       #
       # @param [String] resource
       # @return [true|false]
-      def self.safe_require(resource)
-        Utils.run_block(LoadError) { require resource }
+      def safe_require(resource)
+        run_block(LoadError) { require resource }
       end
     end
   end

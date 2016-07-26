@@ -23,11 +23,11 @@ Let us just say it is good _enough_ for my needs at the moment. I plan to add mo
 whenever I am finished porting most of my old apps from Ramaze.
 
 ## Where are the tests?
-Have a look in the `spec` directory. The code base have tests covering 100 per cent of the code and I am planning on keeping it that way. At the moment the code is tested on the following platforms (using [Travis CI](https://travis-ci.org/)):
+Have a look in the `spec` directory. The code base have tests covering (almost) 100 per cent of the code and I am planning on keeping it that way. At the moment the code is tested on the following platforms (using [Travis CI](https://travis-ci.org/)):
 
 - 1.9.3
 - 2.0.0
-- 2.1.7
+- 2.1.10
 - 2.2.5
 - 2.3.1
 - jruby-19mode

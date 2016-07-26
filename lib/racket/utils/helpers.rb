@@ -22,9 +22,11 @@ module Racket
     module Helpers
       # Cache for helpers, ensuring that helpers get loaded exactly once.
       class HelperCache
-        def initialize(helper_dir)
+        def initialize(helper_dir, logger, utils)
           @helper_dir = helper_dir
           @helpers = {}
+          @logger = logger
+          @utils = utils
         end
 
         # Loads helper files and return the loadad modules as a hash. Any helper files that
@@ -51,20 +53,24 @@ module Racket
 
         def load_helper_file(helper)
           require_helper_file(helper)
-          self.class.load_helper_module(helper)
+          load_helper_module(helper)
         end
 
         def require_helper_file(helper)
-          loaded = Utils.safe_require("racket/helpers/#{helper}")
-          Utils.safe_require(Utils.build_path(@helper_dir, helper).to_s) if !loaded && @helper_dir
+          loaded = @utils.safe_require("racket/helpers/#{helper}")
+          @utils.safe_require(@utils.build_path(@helper_dir, helper).to_s) if !loaded && @helper_dir
         end
 
-        def self.load_helper_module(helper)
+        # Loads a helper module
+        #
+        # @param [Symbol] helper
+        # @return [Module]
+        def load_helper_module(helper)
           helper_module = nil
-          Utils.run_block(NameError) do
+          @utils.run_block(NameError) do
             helper_module =
               Racket::Helpers.const_get(helper.to_s.split('_').collect(&:capitalize).join.to_sym)
-            ::Racket::Application.inform_dev("Loaded helper module #{helper.inspect}.")
+            @logger.inform_dev("Loaded helper module #{helper.inspect}.")
           end
           helper_module
         end
@@ -73,23 +79,25 @@ module Racket
       # Applies helpers to a controller class by including the modules in the class.
       #
       # @param [Class] klass
-      def self.apply_helpers(klass)
+      def apply_helpers(klass)
         klass.helper unless klass.settings.fetch(:helpers) # Makes sure default helpers are loaded.
         __apply_helpers(klass)
         nil
       end
 
-      def self.__apply_helpers(klass)
+      # Applies helpers to a controller class by including the modules in the class.
+      #
+      # @param [Class] klass
+      # @return [Class]
+      def __apply_helpers(klass)
         klass.settings.fetch(:helpers).reverse_each do |pair|
           helper_key, helper = pair
-          ::Racket::Application.inform_dev(
+          klass.context.logger.inform_dev(
             "Adding helper module #{helper_key.inspect} to #{klass}"
           )
           klass.send(:include, helper)
         end
       end
-
-      private_class_method :__apply_helpers
     end
   end
 end
