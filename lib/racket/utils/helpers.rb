@@ -22,6 +22,20 @@ module Racket
     module Helpers
       # Cache for helpers, ensuring that helpers get loaded exactly once.
       class HelperCache
+        # Returns a service proc that can be used by the registry.
+        #
+        # @param  [Hash] _options (unused)
+        # @return [Proc]
+        def self.service(_options = {})
+          lambda do |reg|
+            new(
+              reg.application_settings.helper_dir,
+              reg.application_logger,
+              reg.utils
+            )
+          end
+        end
+
         def initialize(helper_dir, logger, utils)
           @helper_dir = helper_dir
           @helpers = {}

@@ -34,6 +34,14 @@ module Racket
       include Helpers
       include Views
 
+      # Returns a service proc that can be used by the registry.
+      #
+      # @param  [Hash] options
+      # @return [Proc]
+      def self.service(options = {})
+        -> { new(options[:root_dir]) }
+      end
+
       def initialize(root_dir)
         @root_dir = Pathname.new(root_dir).cleanpath.expand_path
       end

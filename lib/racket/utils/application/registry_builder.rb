@@ -27,32 +27,39 @@ module Racket
 
         def initialize(settings = {})
           @registry = Racket::Registry.new
-          @registry.singleton(:utils) do
-            Racket::Utils::ToolBelt.new(settings.fetch(:root_dir, Dir.pwd))
+          {
+            action_cache: [Racket::Utils::Routing::ActionCache, {}],
+            application_settings: [Racket::Settings::Application, settings],
+            application_logger: [Racket::Utils::Application::Logger, {}],
+            controller_context: [nil, {}],
+            handler_stack: [Racket::Utils::Application::HandlerStack, {}],
+            helper_cache: [Racket::Utils::Helpers::HelperCache, {}],
+            layout_cache: [Racket::Utils::Views::TemplateCache, {}],
+            layout_resolver: [Racket::Utils::Views::TemplateResolver, { type: :layout }],
+            router: [Racket::Router, {}],
+            static_server: [nil, {}],
+            template_locator: [Racket::Utils::Views::TemplateLocator, {}],
+            template_renderer: [Racket::Utils::Views::Renderer, {}],
+            view_cache: [Racket::Utils::Views::TemplateCache, {}],
+            view_manager: [Racket::ViewManager, {}],
+            view_resolver: [Racket::Utils::Views::TemplateResolver, { type: :view }],
+            utils: [Racket::Utils::ToolBelt, { root_dir: settings.fetch(:root_dir, Dir.pwd) }]
+          }.each_pair do |key, val|
+            klass, options = val
+            if klass
+              # Service available
+              @registry.singleton(key, klass.send(:service, options))
+            else
+              # No service, we should handle it ourselves
+              @registry.singleton(key, send(key))
+            end
           end
-          @registry.singleton(:application_settings) do |reg|
-            Racket::Settings::Application.new(reg.utils, settings)
-          end
-          private_methods(false).grep(/^register_/).each { |meth| send(meth) }
         end
 
         private
 
-        def register_action_cache
-          @registry.singleton(:action_cache) do |reg|
-            Racket::Utils::Routing::ActionCache.new(reg.application_logger)
-          end
-        end
-
-        def register_application_logger
-          @registry.singleton(:application_logger) do |reg|
-            settings = reg.application_settings
-            Racket::Utils::Application::Logger.new(settings.logger, settings.mode)
-          end
-        end
-
-        def register_controller_context
-          @registry.singleton(:controller_context) do |reg|
+        def controller_context
+          lambda do |reg|
             Module.new do
               define_singleton_method(:application_settings) { reg.application_settings }
               define_singleton_method(:helper_cache) { reg.helper_cache }
@@ -66,67 +73,8 @@ module Racket
           end
         end
 
-        def register_handler_stack
-          @registry.singleton(:handler_stack) do |reg|
-            settings = reg.application_settings
-
-            options = {
-              default_content_type:       settings.default_content_type,
-              default_controller_helpers: settings.default_controller_helpers,
-              dev_mode:                   settings.mode == :dev,
-              logger:                     reg.application_logger,
-              middleware:                 settings.middleware,
-              plugins:                    settings.plugins,
-              router:                     reg.router,
-              session_handler:            settings.session_handler,
-              static_server:              reg.static_server,
-              utils:                      reg.utils,
-              warmup_urls:                settings.warmup_urls
-            }
-
-            Racket::Utils::Application::Builder.new(options).build
-          end
-        end
-
-        def register_helper_cache
-          @registry.singleton(:helper_cache) do |reg|
-            Racket::Utils::Helpers::HelperCache.new(
-              reg.application_settings.helper_dir,
-              reg.application_logger,
-              reg.utils
-            )
-          end
-        end
-
-        def register_layout_cache
-          @registry.singleton(:layout_cache) do
-            Racket::Utils::Views::TemplateCache.new({})
-          end
-        end
-
-        def register_layout_resolver
-          @registry.singleton(:layout_resolver) do |reg|
-            Racket::Utils::Views::TemplateResolver.new(
-              base_dir: reg.application_settings.layout_dir,
-              logger: reg.application_logger,
-              type: :layout,
-              utils: reg.utils
-            )
-          end
-        end
-
-        def register_router
-          @registry.singleton(:router) do |reg|
-            Racket::Router.new(
-              action_cache: reg.action_cache,
-              dev_mode: reg.application_settings.mode == :dev,
-              logger: reg.application_logger
-            )
-          end
-        end
-
-        def register_static_server
-          @registry.singleton(:static_server) do |reg|
+        def static_server
+          lambda do |reg|
             logger = reg.application_logger
             if (public_dir = reg.application_settings.public_dir) &&
                Racket::Utils::FileSystem.dir_readable?(Pathname.new(public_dir))
@@ -138,48 +86,6 @@ module Racket
             else
               logger.inform_dev('Static server disabled.') && nil
             end
-          end
-        end
-
-        def register_template_locator
-          @registry.singleton(:template_locator) do |reg|
-            Racket::Utils::Views::TemplateLocator.new(
-              layout_cache: reg.layout_cache,
-              layout_resolver: reg.layout_resolver,
-              view_cache: reg.view_cache,
-              view_resolver: reg.view_resolver
-            )
-          end
-        end
-
-        def register_template_renderer
-          @registry.singleton(:template_renderer) do
-            Racket::Utils::Views::Renderer
-          end
-        end
-
-        def register_view_cache
-          @registry.singleton(:view_cache) do
-            Racket::Utils::Views::TemplateCache.new({})
-          end
-        end
-
-        def register_view_manager
-          @registry.singleton(:view_manager) do |reg|
-            Racket::ViewManager.new(
-              reg.template_locator, reg.template_renderer
-            )
-          end
-        end
-
-        def register_view_resolver
-          @registry.singleton(:view_resolver) do |reg|
-            Racket::Utils::Views::TemplateResolver.new(
-              base_dir: reg.application_settings.view_dir,
-              logger: reg.application_logger,
-              type: :view,
-              utils: reg.utils
-            )
           end
         end
       end

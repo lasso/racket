@@ -19,6 +19,14 @@
 module Racket
   # Handles rendering in Racket applications.
   class ViewManager
+    # Returns a service proc that can be used by the registry.
+    #
+    # @param  [Hash] _options (unused)
+    # @return [Proc]
+    def self.service(_options = {})
+      ->(reg) { new(reg.template_locator, reg.template_renderer) }
+    end
+
     def initialize(locator, renderer)
       @locator = locator
       @renderer = renderer

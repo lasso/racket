@@ -23,6 +23,21 @@ module Racket
       # for getting the template for the first time and caches the result so that subsequent Calls
       # will not need to resolve the template again.
       class TemplateLocator
+        # Returns a service proc that can be used by the registry.
+        #
+        # @param  [Hash] _options (unused)
+        # @return [Proc]
+        def self.service(_options = {})
+          lambda do |reg|
+            new(
+              layout_cache: reg.layout_cache,
+              layout_resolver: reg.layout_resolver,
+              view_cache: reg.view_cache,
+              view_resolver: reg.view_resolver
+            )
+          end
+        end
+
         def initialize(options)
           raise ArgumentError, 'Layout cache is missing.' unless
             (@layout_cache = options.fetch(:layout_cache, nil))

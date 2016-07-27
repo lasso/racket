@@ -21,8 +21,24 @@ module Racket
     module Views
       # Class used for resolving template paths.
       class TemplateResolver
-      # Alias for Racket::Utils::FileSystem module.
+        # Alias for Racket::Utils::FileSystem module.
         FSM = Racket::Utils::FileSystem
+
+        # Returns a service proc that can be used by the registry.
+        #
+        # @param  [Hash] options
+        # @return [Proc]
+        def self.service(options = {})
+          type = options[:type]
+          lambda do |reg|
+            new(
+              base_dir: reg.application_settings.send("#{type}_dir"),
+              logger: reg.application_logger,
+              type: type,
+              utils: reg.utils
+            )
+          end
+        end
 
         def initialize(options)
           raise ArgumentError, 'Base dir is missing.' unless

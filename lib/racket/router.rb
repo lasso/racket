@@ -37,6 +37,20 @@ module Racket
 
     attr_reader :routes
 
+    # Returns a service proc that can be used by the registry.
+    #
+    # @param  [Hash] _options (unused)
+    # @return [Proc]
+    def self.service(_options = {})
+      lambda do |reg|
+        new(
+          action_cache: reg.action_cache,
+          dev_mode: reg.application_settings.mode == :dev,
+          logger: reg.application_logger
+        )
+      end
+    end
+
     # @return [Racket::Utils::Routing::ActionCache]
     def action_cache
       @options.action_cache

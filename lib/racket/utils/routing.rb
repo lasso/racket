@@ -25,6 +25,14 @@ module Racket
 
       # Class for caching actions
       class ActionCache
+        # Returns a service proc that can be used by the registry.
+        #
+        # @param  [Hash] _options (unused)
+        # @return [Proc]
+        def self.service(_options = {})
+          ->(reg) { new(reg.application_logger) }
+        end
+
         attr_reader :items
 
         def initialize(logger)

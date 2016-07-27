@@ -22,6 +22,14 @@ module Racket
     module Views
       # Class responsible for rendering a controller/view/layout combination.
       class Renderer
+        # Returns a service proc that can be used by the registry.
+        #
+        # @param  [Hash] _options (unused)
+        # @return [Proc]
+        def self.service(_options = {})
+          -> { self }
+        end
+
         # Renders a page using the provided controller/view and layout combination and returns an
         # response array that can be sent to the client.
         #

@@ -22,11 +22,42 @@ module Racket
   module Utils
     module Application
       # Class used for building a proper Rack application.
-      class Builder
-        def initialize(options)
-          @builder = Rack::Builder.new
-          @options = OpenStruct.new(options)
+      class HandlerStack
+        attr_reader :stack
+
+        # Returns a service proc that can be used by the registry.
+        #
+        # @param  [Hash] _options (unused)
+        # @return [Proc]
+        def self.service(_options = {})
+          lambda do |reg|
+            settings = reg.application_settings
+
+            options = {
+              default_content_type:       settings.default_content_type,
+              default_controller_helpers: settings.default_controller_helpers,
+              dev_mode:                   settings.mode == :dev,
+              logger:                     reg.application_logger,
+              middleware:                 settings.middleware,
+              plugins:                    settings.plugins,
+              router:                     reg.router,
+              session_handler:            settings.session_handler,
+              static_server:              reg.static_server,
+              utils:                      reg.utils,
+              warmup_urls:                settings.warmup_urls
+            }
+
+            new(options).stack
+          end
         end
+
+        def initialize(options)
+          @stack = Rack::Builder.new
+          @options = OpenStruct.new(options)
+          build
+        end
+
+        private
 
         # Builds a Rack application representing Racket.
         #
@@ -35,11 +66,8 @@ module Racket
           init_plugins
           add_warmup_hook
           add_middleware(@options.middleware)
-          @builder.run(application_proc)
-          @builder
+          @stack.run(application_proc)
         end
-
-        private
 
         # Add middleware to the builder.
         def add_middleware(middleware)
@@ -47,7 +75,7 @@ module Racket
           middleware.each do |ware|
             klass, opts = ware
             @options.logger.inform_dev("Loading middleware #{klass} with settings #{opts.inspect}.")
-            @builder.use(*ware)
+            @stack.use(*ware)
           end
         end
 
@@ -55,7 +83,7 @@ module Racket
         def add_warmup_hook
           warmup_urls = @options.warmup_urls
           return if warmup_urls.empty?
-          @builder.warmup do |app|
+          @stack.warmup do |app|
             client = Rack::MockRequest.new(app)
             visit_warmup_urls(client, warmup_urls)
           end

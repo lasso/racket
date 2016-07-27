@@ -22,6 +22,17 @@ module Racket
     module Application
       # Class for logging messages in the application.
       class Logger
+        # Returns a service proc that can be used by the registry.
+        #
+        # @param  [Hash] _options (unused)
+        # @return [Proc]
+        def self.service(_options = {})
+          lambda do |reg|
+            settings = reg.application_settings
+            new(settings.logger, settings.mode)
+          end
+        end
+
         def initialize(logger, mode)
           @logger = logger
           @in_dev_mode = (mode == :dev)

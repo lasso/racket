@@ -47,6 +47,14 @@ module Racket
       setting(:root_dir, nil) # Will be set automatically by constructor.
       setting(:warmup_urls, Set.new)
 
+      # Returns a service proc that can be used by the registry.
+      #
+      # @param  [Hash] options
+      # @return [Proc]
+      def self.service(options = {})
+        ->(reg) { new(reg.utils, options) }
+      end
+
       def initialize(utils, defaults = {})
         @utils = utils
         defaults[:root_dir] = Dir.pwd unless defaults.key?(:root_dir)

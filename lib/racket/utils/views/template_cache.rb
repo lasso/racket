@@ -27,6 +27,14 @@ module Racket
         # Default options for template cache
         DEFAULT_OPTIONS = { expires: 0 }.freeze
 
+        # Returns a service proc that can be used by the registry.
+        #
+        # @param  [Hash] _options (unused)
+        # @return [Proc]
+        def self.service(_options = {})
+          -> { new({}) }
+        end
+
         def initialize(options)
           @expirations = {}
           @items = {}

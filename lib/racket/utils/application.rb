@@ -16,6 +16,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Racket.  If not, see <http://www.gnu.org/licenses/>.
 
-require_relative 'application/builder.rb'
+require_relative 'application/handler_stack.rb'
 require_relative 'application/logger.rb'
 require_relative 'application/registry_builder.rb'
