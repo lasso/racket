@@ -26,6 +26,7 @@ module Racket
       # @param [String] template
       # @param [Object] context
       # @return [String|nil]
+      # @todo Allow user to specify template options
       def render_template(template, context = self)
         utils = Controller.context.utils
         template = utils.build_path(template)
