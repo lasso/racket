@@ -11,6 +11,10 @@ describe 'A custom Racket test application' do
     )
   end
 
+  it 'should be able to locate a resource' do
+    Racket.resource_path('files', 'stuff.txt').should.equal(Pathname.new("#{Pathname.pwd}/files/stuff.txt"))
+  end
+
   it 'should set requested settings' do
     settings = app.instance_variable_get(:@registry).application_settings
     settings.default_layout.should.equal('zebra.*')

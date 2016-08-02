@@ -27,11 +27,19 @@ module Racket
       # @param [Object] context
       # @return [String|nil]
       # @todo Allow user to specify template options
-      def render_template(template, context = self)
+      def render_template(template, context = self, template_settings = nil)
         utils = Controller.context.utils
         template = utils.build_path(template)
         return nil unless Racket::Utils::FileSystem.file_readable?(template)
-        Tilt.new(template).render(context)
+        template_settings =
+          if context.respond_to?(:view_settings) && !template_settings
+            context.view_settings
+          elsif template_settings
+            template_settings
+          else
+            {}
+          end
+        Tilt.new(template, nil, template_settings).render(context)
       end
     end
   end

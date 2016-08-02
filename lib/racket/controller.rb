@@ -113,6 +113,11 @@ module Racket
       settings.fetch(:last_added_controller).push(klass)
     end
 
+    def self.layout_settings
+      template_settings = settings.fetch(:template_settings)
+      template_settings[:common].merge(template_settings[:layout])
+    end
+
     # Add a setting for the current controller class
     #
     # @param [Symbol] key
@@ -126,6 +131,21 @@ module Racket
     # @return [Racket::Settings::Controller]
     def self.settings
       @settings ||= Racket::Settings::Controller.new(self)
+    end
+    
+    def self.template_setting(key, value, type = :common)
+      # If controller has no template settings on its own, copy the template settings
+      # from the aplication settings.
+      settings.store(:template_settings, contect.application_settings.fetch(:template_settings)) if
+        !settings.present?(:template_settings)
+      template_settings = settings.fetch(:template_settings)
+      template_settings[type][key] = value
+      settings.store(:template_settings, template_settings)
+    end
+
+    def self.view_settings
+      template_settings = settings.fetch(:template_settings)
+      template_settings[:common].merge(template_settings[:view])
     end
 
     # Loads new helpers and stores the list of helpers associated with the currenct controller
@@ -141,6 +161,11 @@ module Racket
     end
 
     private_class_method :__load_helpers, :__register_hook, :__update_hooks
+
+    # Returns layout settings associated with the current controller
+    def layout_settings
+      self.class.layout_settings
+    end
 
     # Redirects the client. After hooks are run.
     #
@@ -186,6 +211,11 @@ module Racket
     # Returns settings associated with the current controller
     def settings
       self.class.settings
+    end
+
+    # Returns view settings associated with the current controller
+    def view_settings
+      self.class.view_settings
     end
 
     # Calls hooks, action and renderer.

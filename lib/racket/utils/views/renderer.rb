@@ -51,9 +51,8 @@ module Racket
         # @param [String|nil] layout
         # @return [String]
         def self.render_template(controller, view, layout)
-          layout_options, view_options = template_options(controller.settings)
-          output = Tilt.new(view, nil, view_options).render(controller)
-          output = Tilt.new(layout, nil, layout_options).render(controller) { output } if layout
+          output = Tilt.new(view, nil, controller.view_settings).render(controller)
+          output = Tilt.new(layout, nil, controller.layout_settings).render(controller) { output } if layout
           output
         end
 
@@ -67,21 +66,7 @@ module Racket
           response.finish
         end
 
-        # Extracts template settings from controller settings.
-        #
-        # @param [Racket::Settings::Controller] settings
-        # @return [Array]
-        def self.template_options(settings)
-          layout_options = settings.fetch(:layout_options, nil)
-          view_options = settings.fetch(:view_options, nil)
-          template_options = settings.fetch(:template_options, nil)
-          [
-            layout_options || template_options || {},
-            view_options || template_options || {}
-          ]
-        end
-
-        private_class_method :render_template, :send_response, :template_options
+        private_class_method :render_template, :send_response
       end
     end
   end

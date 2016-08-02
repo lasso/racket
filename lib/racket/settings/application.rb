@@ -45,6 +45,14 @@ module Racket
         ]
       )
       setting(:root_dir, nil) # Will be set automatically by constructor.
+      setting(
+        :template_settings,
+        {
+          common: {},
+          layout: {},
+          view: {}
+        }
+      )
       setting(:warmup_urls, Set.new)
 
       # Returns a service proc that can be used by the registry.

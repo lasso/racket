@@ -1,5 +1,6 @@
 *.gem
 .bundle
+.project
 .rubocop.yml
 .yardoc
 coverage
