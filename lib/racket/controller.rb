@@ -132,12 +132,13 @@ module Racket
     def self.settings
       @settings ||= Racket::Settings::Controller.new(self)
     end
-    
+
     def self.template_setting(key, value, type = :common)
       # If controller has no template settings on its own, copy the template settings
       # from the aplication settings.
-      settings.store(:template_settings, contect.application_settings.fetch(:template_settings)) if
-        !settings.present?(:template_settings)
+      settings.store(
+        :template_settings, contect.application_settings.fetch(:template_settings)
+      ) unless settings.present?(:template_settings)
       template_settings = settings.fetch(:template_settings)
       template_settings[type][key] = value
       settings.store(:template_settings, template_settings)

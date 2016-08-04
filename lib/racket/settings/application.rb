@@ -19,41 +19,25 @@
 require 'logger'
 
 require_relative 'base.rb'
+require_relative 'application_defaults.rb'
 
 module Racket
   module Settings
     # Class for storing application settings.
     class Application < Base
-      setting(:default_action, :index)
-      setting(:default_content_type, 'text/html')
-      setting(:default_controller_helpers, [:routing, :view])
-      setting(:default_layout, nil)
-      setting(:default_view, nil)
-      setting(:logger, Logger.new($stdout))
-      setting(:middleware, [])
-      setting(:mode, :live)
-      setting(:plugins, [])
-      setting(
-        :session_handler,
-        [
-          Rack::Session::Cookie,
-          {
-            key: 'racket.session',
-            old_secret: SecureRandom.hex(16),
-            secret: SecureRandom.hex(16)
-          }
-        ]
-      )
-      setting(:root_dir, nil) # Will be set automatically by constructor.
-      setting(
-        :template_settings,
-        {
-          common: {},
-          layout: {},
-          view: {}
-        }
-      )
-      setting(:warmup_urls, Set.new)
+      setting(:default_action, ApplicationDefaults)
+      setting(:default_content_type, ApplicationDefaults)
+      setting(:default_controller_helpers, ApplicationDefaults)
+      setting(:default_layout, ApplicationDefaults)
+      setting(:default_view, ApplicationDefaults)
+      setting(:logger, ApplicationDefaults)
+      setting(:middleware, ApplicationDefaults)
+      setting(:mode, ApplicationDefaults)
+      setting(:plugins, ApplicationDefaults)
+      setting(:session_handler, ApplicationDefaults)
+      setting(:root_dir, ApplicationDefaults)
+      setting(:template_settings, ApplicationDefaults)
+      setting(:warmup_urls, ApplicationDefaults)
 
       # Returns a service proc that can be used by the registry.
       #
@@ -65,7 +49,6 @@ module Racket
 
       def initialize(utils, defaults = {})
         @utils = utils
-        defaults[:root_dir] = Dir.pwd unless defaults.key?(:root_dir)
         super(defaults)
       end
 

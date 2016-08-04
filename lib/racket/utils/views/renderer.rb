@@ -52,7 +52,10 @@ module Racket
         # @return [String]
         def self.render_template(controller, view, layout)
           output = Tilt.new(view, nil, controller.view_settings).render(controller)
-          output = Tilt.new(layout, nil, controller.layout_settings).render(controller) { output } if layout
+          output =
+            Tilt.new(
+              layout, nil, controller.layout_settings
+            ).render(controller) { output } if layout
           output
         end
 

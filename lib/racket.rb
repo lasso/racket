@@ -34,15 +34,13 @@ require_relative 'racket/utils.rb'
 # Racket main namespace
 module Racket
   def require(*args)
-    raise RuntimeError,
-          'You must have a running Racket application before calling Racket.require' unless
+    raise 'You must have a running Racket application before calling Racket.require' unless
       Controller.context
     (::Kernel.require resource_path(*args)) && nil
   end
 
   def resource_path(*args)
-    raise RuntimeError,
-          'You must have a running Racket application before calling Racket.resource_path' unless
+    raise 'You must have a running Racket application before calling Racket.resource_path' unless
       Controller.context
     Controller.context.utils.build_path(*args)
   end

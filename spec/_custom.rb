@@ -12,7 +12,8 @@ describe 'A custom Racket test application' do
   end
 
   it 'should be able to locate a resource' do
-    Racket.resource_path('files', 'stuff.txt').should.equal(Pathname.new("#{Pathname.pwd}/files/stuff.txt"))
+    get '/' # Ensures that app is loaded, otherwise Racket.resource_path may pick up settings from previously run test suites.
+    Racket.resource_path('files', 'stuff.rb').should.equal(Pathname.new("files/stuff.rb").cleanpath.expand_path)
   end
 
   it 'should set requested settings' do
