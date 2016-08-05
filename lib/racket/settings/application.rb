@@ -17,27 +17,61 @@
 # along with Racket.  If not, see <http://www.gnu.org/licenses/>.
 
 require 'logger'
+require 'racket/registry'
 
 require_relative 'base.rb'
-require_relative 'application_defaults.rb'
 
 module Racket
   module Settings
     # Class for storing application settings.
     class Application < Base
-      setting(:default_action, ApplicationDefaults)
-      setting(:default_content_type, ApplicationDefaults)
-      setting(:default_controller_helpers, ApplicationDefaults)
-      setting(:default_layout, ApplicationDefaults)
-      setting(:default_view, ApplicationDefaults)
-      setting(:logger, ApplicationDefaults)
-      setting(:middleware, ApplicationDefaults)
-      setting(:mode, ApplicationDefaults)
-      setting(:plugins, ApplicationDefaults)
-      setting(:session_handler, ApplicationDefaults)
-      setting(:root_dir, ApplicationDefaults)
-      setting(:template_settings, ApplicationDefaults)
-      setting(:warmup_urls, ApplicationDefaults)
+      @defaults =
+        Racket::Registry.with_map(
+          default_action: -> { :index },
+          default_content_type: -> { 'text/html' },
+          default_controller_helpers: -> { [:routing, :view] },
+          default_layout: -> { nil },
+          default_view: -> { nil },
+          logger: -> { Logger.new($stdout) },
+          middleware: -> { [] },
+          mode: -> { :live },
+          plugins: -> { [] },
+          session_handler:
+            lambda do
+              [
+                Rack::Session::Cookie,
+                {
+                  key: 'racket.session',
+                  old_secret: SecureRandom.hex(16),
+                  secret: SecureRandom.hex(16)
+                }
+              ]
+            end,
+          root_dir: -> { Dir.pwd },
+          template_settings:
+            lambda do
+              {
+                common: {},
+                layout: {},
+                view: {}
+              }
+            end,
+          warmup_urls: -> { Set.new }
+        )
+
+      setting(:default_action)
+      setting(:default_content_type)
+      setting(:default_controller_helpers)
+      setting(:default_layout)
+      setting(:default_view)
+      setting(:logger)
+      setting(:middleware)
+      setting(:mode)
+      setting(:plugins)
+      setting(:session_handler)
+      setting(:root_dir)
+      setting(:template_settings)
+      setting(:warmup_urls)
 
       # Returns a service proc that can be used by the registry.
       #

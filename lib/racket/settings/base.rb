@@ -73,15 +73,29 @@ module Racket
         (@custom[key] = value) && nil
       end
 
+      # Returns a default value for a key. Default values are stored in @defaults, which is a
+      # Racket::Registry object.
+      #
+      # @param [Symbol] symbol
+      # @return [Object]
+      def self.default_value(symbol)
+        return nil unless defined?(@defaults)
+        begin
+          @defaults.send(symbol)
+        rescue Racket::Registry::KeyNotRegisteredError
+          nil
+        end
+      end
+
       # Creates a setting with a default value.
       #
       # @param [Symbol] symbol
-      # @param [Module] defaults_module
       # @return [nil]
-      def self.setting(symbol, defaults_module)
+      def self.setting(symbol)
+        klass = self
         ivar = "@#{symbol}".to_sym
         define_method symbol do
-          instance_variable_set(ivar, defaults_module.send(symbol)) unless
+          instance_variable_set(ivar, klass.default_value(symbol)) unless
             instance_variables.include?(ivar)
           instance_variable_get(ivar)
         end
