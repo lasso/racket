@@ -49,7 +49,7 @@ module Racket
   #
   # @return [String]
   def version
-    require_relative 'racket/version.rb'
+    ::Kernel.require_relative 'racket/version.rb'
     Version.current
   end
 
