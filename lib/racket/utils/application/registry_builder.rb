@@ -26,34 +26,25 @@ module Racket
         attr_reader :registry
 
         def initialize(settings = {})
-          @registry = Racket::Registry.new
-          {
-            action_cache: [Racket::Utils::Routing::ActionCache, {}],
-            application_settings: [Racket::Settings::Application, settings],
-            application_logger: [Racket::Utils::Application::Logger, {}],
-            controller_context: [nil, {}],
-            handler_stack: [Racket::Utils::Application::HandlerStack, {}],
-            helper_cache: [Racket::Utils::Helpers::HelperCache, {}],
-            layout_cache: [Racket::Utils::Views::TemplateCache, {}],
-            layout_resolver: [Racket::Utils::Views::TemplateResolver, { type: :layout }],
-            router: [Racket::Router, {}],
-            static_server: [nil, {}],
-            template_locator: [Racket::Utils::Views::TemplateLocator, {}],
-            template_renderer: [Racket::Utils::Views::Renderer, {}],
-            view_cache: [Racket::Utils::Views::TemplateCache, {}],
-            view_manager: [Racket::ViewManager, {}],
-            view_resolver: [Racket::Utils::Views::TemplateResolver, { type: :view }],
-            utils: [Racket::Utils::ToolBelt, { root_dir: settings.fetch(:root_dir, Dir.pwd) }]
-          }.each_pair do |key, val|
-            klass, options = val
-            if klass
-              # Service available
-              @registry.singleton(key, klass.send(:service, options))
-            else
-              # No service, we should handle it ourselves
-              @registry.singleton(key, send(key))
-            end
-          end
+          @registry =
+            Racket::Registry.singleton_map(
+              action_cache: Racket::Utils::Routing::ActionCache.service,
+              application_settings: Racket::Settings::Application.service(settings),
+              application_logger: Racket::Utils::Application::Logger.service,
+              controller_context: controller_context,
+              handler_stack: Racket::Utils::Application::HandlerStack.service,
+              helper_cache: Racket::Utils::Helpers::HelperCache.service,
+              layout_cache: Racket::Utils::Views::TemplateCache.service,
+              layout_resolver: Racket::Utils::Views::TemplateResolver.service(type: :layout),
+              router: Racket::Router.service,
+              static_server: static_server,
+              template_locator: Racket::Utils::Views::TemplateLocator.service,
+              template_renderer: Racket::Utils::Views::Renderer.service,
+              view_cache: Racket::Utils::Views::TemplateCache.service,
+              view_manager: Racket::ViewManager.service,
+              view_resolver: Racket::Utils::Views::TemplateResolver.service(type: :view),
+              utils: Racket::Utils::ToolBelt.service(root_dir: settings.fetch(:root_dir, Dir.pwd))
+            )
         end
 
         private
