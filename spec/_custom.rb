@@ -16,6 +16,10 @@ describe 'A custom Racket test application' do
     Racket.resource_path('files', 'stuff.rb').should.equal(Pathname.new("files/stuff.rb").cleanpath.expand_path)
   end
 
+    it 'should run in dev mode when requested' do
+      app.dev_mode?.should.equal(true)
+    end
+
   it 'should set requested settings' do
     settings = app.instance_variable_get(:@registry).application_settings
     settings.default_layout.should.equal('zebra.*')
@@ -142,6 +146,12 @@ describe 'A custom Racket test application' do
     get '/sub4/baz'
     last_response.status.should.equal(200)
     last_response.body.should.equal("LAYOUT: default: BAZ\n\n")
+  end
+
+  it 'should be able to set template settings' do
+    get '/sub5/text'
+    last_response.status.should.equal(200)
+    last_response.body.should.equal("Hello World!")
   end
 
   it 'should handle changes to global settings' do

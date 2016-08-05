@@ -113,6 +113,9 @@ module Racket
       settings.fetch(:last_added_controller).push(klass)
     end
 
+    # Returns the layout settings for the current controller.
+    #
+    # @return [Hash]
     def self.layout_settings
       template_settings = settings.fetch(:template_settings)
       template_settings[:common].merge(template_settings[:layout])
@@ -133,17 +136,30 @@ module Racket
       @settings ||= Racket::Settings::Controller.new(self)
     end
 
+    # Add a setting used by Tilt when rendering views/layouts.
+    #
+    # @param [Symbol] key
+    # @param [Object] value
+    # @param [Symbol] type One of +:common+, +:layout+ or +:view+
     def self.template_setting(key, value, type = :common)
       # If controller has no template settings on its own, copy the template settings
-      # from the aplication settings.
+      # from its "closest" parent (might even be application settings)
+      # @todo - How about template options that are unmarshallable?
       settings.store(
-        :template_settings, contect.application_settings.fetch(:template_settings)
+        :template_settings, Marshal.load(Marshal.dump(settings.fetch(:template_settings)))
       ) unless settings.present?(:template_settings)
+
+      # Fetch current settings (guaranteed to be in controller by now)
       template_settings = settings.fetch(:template_settings)
+
+      # Update settings
       template_settings[type][key] = value
       settings.store(:template_settings, template_settings)
     end
 
+    # Returns the view settings for the current controller.
+    #
+    # @return [Hash]
     def self.view_settings
       template_settings = settings.fetch(:template_settings)
       template_settings[:common].merge(template_settings[:view])

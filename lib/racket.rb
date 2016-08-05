@@ -33,12 +33,22 @@ require_relative 'racket/utils.rb'
 
 # Racket main namespace
 module Racket
+  # Requires a file relative to the current Racket application dir. Will raise an exception if no
+  # Racket application is initialized.
+  #
+  # @param [Array] args
+  # @return nil
   def require(*args)
     raise 'You must have a running Racket application before calling Racket.require' unless
       Controller.context
     (::Kernel.require resource_path(*args)) && nil
   end
 
+  # Returns the path to a resource relative to the Racket application dir. Will raise an exception
+  # if no Racket is initialized.
+  #
+  # @param [Array] args
+  # @return [Pathname]
   def resource_path(*args)
     raise 'You must have a running Racket application before calling Racket.resource_path' unless
       Controller.context

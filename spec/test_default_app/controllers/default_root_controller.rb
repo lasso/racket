@@ -28,4 +28,7 @@ class DefaultRootController < Racket::Controller
   def session_strings
     [session.inspect, session.to_s, session.to_str].to_json
   end
+  
+  def empty
+  end
 end

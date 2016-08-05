@@ -58,7 +58,7 @@ module Racket
     #
     # @return [true|false]
     def dev_mode?
-      settings.mode == :dev
+      @registry.application_settings.mode == :dev
     end
 
     # Sends a message to the logger.

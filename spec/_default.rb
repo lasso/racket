@@ -18,7 +18,7 @@ describe 'A default Racket test application' do
     router.routes[DefaultSubController3].should.equal('/sub3')
     router.routes[DefaultInheritedController].should.equal('/sub3/inherited')
 
-    router.action_cache.items[DefaultRootController].length.should.equal(5)
+    router.action_cache.items[DefaultRootController].length.should.equal(6)
     router.action_cache.items[DefaultRootController].include?(:index).should.equal(true)
     router.action_cache.items[DefaultRootController].include?(:my_first_route)
        .should.equal(true)
@@ -36,6 +36,10 @@ describe 'A default Racket test application' do
        .should.equal(true)
     router.action_cache.items[DefaultSubController3].should.equal([:index])
     router.action_cache.items[DefaultInheritedController].should.equal([:index])
+  end
+
+  it 'should run in live mode by default' do
+    app.dev_mode?.should.equal(false)
   end
 
   it 'should set rack variables correctly' do
@@ -95,6 +99,12 @@ describe 'A default Racket test application' do
     get '/sub2/nonono'
     last_response.status.should.equal(404)
     last_response.body.should.equal('404 Not Found')
+  end
+
+  it 'should return a valid response on empty action' do
+    get '/empty'
+    last_response.status.should.equal(200)
+    last_response.body.should.equal('')
   end
 
   it 'should be able to find routes within the same controller' do
