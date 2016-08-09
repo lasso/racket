@@ -23,4 +23,22 @@ class CustomSubController3 < Racket::Controller
     obj.instance_eval { @secret = 42 }
     render_template('files/secret.erb', obj)
   end
+
+  def render_a_file_with_controller
+    @one = 1
+    @two = 2
+    @three = 3
+    render_template('files/triplet.erb', self)
+  end
+  
+  def render_a_file_with_settings
+    obj = Object.new
+    obj.instance_eval do
+      @one = 1
+      @two = 2
+      @three = 3
+    end
+    settings = { trim: '-' }
+    render_template('files/triplet.erb', obj, settings)
+  end
 end

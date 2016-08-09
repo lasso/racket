@@ -96,6 +96,20 @@ describe 'A custom Racket test application' do
     last_response.body.should.equal("The secret is 42!\n")
   end
 
+  it 'should be able to render custom files with controller' do
+    get '/sub3/render_a_file_with_controller'
+    last_response.status.should.equal(200)
+    last_response.headers['Content-Type'].should.equal('text/html')
+    last_response.body.should.equal("123")
+  end
+  
+  it 'should be able to render custom files with settings' do
+    get '/sub3/render_a_file_with_settings'
+    last_response.status.should.equal(200)
+    last_response.headers['Content-Type'].should.equal('text/html')
+    last_response.body.should.equal("\n1\n2\n3\n")
+  end
+
   it 'should be able to send files with auto mime type' do
     get '/sub1/send_existing_file_auto_mime'
     last_response.status.should.equal(200)

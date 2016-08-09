@@ -32,8 +32,8 @@ Have a look in the `spec` directory. The code base have tests covering (almost) 
 - 2.3.1
 - jruby-19mode
 - jruby-9.0.5.0
-- rbx-2.11
-- rbx-3.51
+- rbx-2
+- rbx-3
 
 I am using [bacon](https://github.com/chneukirchen/bacon) and [rack-test](https://github.com/brynary/rack-test) for testing. Run the tests by typing `rake test`in the root directory. Code coverage reports are provided by [simplecov](https://rubygems.org/gems/simplecov). After the tests have run the an HTML report can be found in the `coverage` directory.
 
