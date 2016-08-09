@@ -170,4 +170,14 @@ describe 'A custom Racket test application' do
     settings.default_content_type.should.equal('text/html')
     settings.fetch(:default_content_type).should.equal('text/html')
   end
+  
+  it 'should return nil on settings without a default' do
+    settings = app.instance_variable_get(:@registry).application_settings
+    Racket::Settings::Application.setting(:nonexisting)
+    settings.nonexisting.should.equal(nil)
+    Racket::Settings::Application.instance_eval do
+      remove_method(:nonexisting)
+      remove_method(:nonexisting=)
+    end
+  end
 end

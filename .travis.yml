@@ -8,7 +8,8 @@ rvm:
   - 2.3.1
   - jruby-19mode
   - jruby-9.0.5.0
-  - rbx-2
+  - rbx-2.11
+  - rbx-3.51
 before_install:
   # bundler installation needed for jruby-head
   # https://github.com/travis-ci/travis-ci/issues/5861

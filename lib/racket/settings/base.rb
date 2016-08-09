@@ -79,12 +79,8 @@ module Racket
       # @param [Symbol] symbol
       # @return [Object]
       def self.default_value(symbol)
-        return nil unless defined?(@defaults)
-        begin
-          @defaults.send(symbol)
-        rescue Racket::Registry::KeyNotRegisteredError
-          nil
-        end
+        return nil unless defined?(@defaults) && @defaults.respond_to?(symbol)
+        @defaults.send(symbol)
       end
 
       # Creates a setting with a default value.
