@@ -228,4 +228,9 @@ describe 'A default Racket test application' do
     last_response.headers['Content-Type'].should.equal('text/plain')
     last_response.body.should.equal('500 Internal Server Error')
   end
+  
+  it 'should be able to resolve paths using the file system utilities' do
+    utils = app.instance_variable_get(:@registry).utils
+    utils.build_path.should.equal(Pathname.pwd)
+  end
 end

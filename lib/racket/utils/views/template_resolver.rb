@@ -41,14 +41,15 @@ module Racket
         end
 
         def initialize(options)
-          raise ArgumentError, 'Base dir is missing.' unless
-            (@base_dir = options.fetch(:base_dir, nil))
-          raise ArgumentError, 'Logger is missing.' unless
-            (@logger = options.fetch(:logger, nil))
-          raise ArgumentError, 'Type is missing.' unless
-            (@type = options.fetch(:type, nil))
-          raise ArgumentError, 'Utils is missing.' unless
-            (@utils = options.fetch(:utils, nil))
+          required_options =
+            {
+              base_dir: 'Base dir is missing.', logger: 'Logger is missing.',
+              type: 'Type is missing.', utils: 'Utils is missing.'
+            }
+          ::Racket::Utils::Options.validate_options(required_options, options)
+          required_options.each_key do |key|
+            instance_variable_set("@#{key}".to_sym, options[key])
+          end
         end
 
         # Returns the template object representing the specified path/controller combination.

@@ -39,14 +39,16 @@ module Racket
         end
 
         def initialize(options)
-          raise ArgumentError, 'Layout cache is missing.' unless
-            (@layout_cache = options.fetch(:layout_cache, nil))
-          raise ArgumentError, 'Layout resolver is missing.' unless
-            (@layout_resolver = options.fetch(:layout_resolver, nil))
-          raise ArgumentError, 'View cache is missing.' unless
-            (@view_cache = options.fetch(:view_cache, nil))
-          raise ArgumentError, 'View resolver is missing.' unless
-            (@view_resolver = options.fetch(:view_resolver, nil))
+          required_options =
+            {
+              layout_cache: 'Layout cache is missing.',
+              layout_resolver: 'Layout resolver is missing.',
+              view_cache: 'View cache is missing.', view_resolver: 'View resolver is missing.'
+            }
+          ::Racket::Utils::Options.validate_options(required_options, options)
+          required_options.each_key do |key|
+            instance_variable_set("@#{key}".to_sym, options[key])
+          end
         end
 
         # Returns the layout associated with the current request. On the first request to any action
