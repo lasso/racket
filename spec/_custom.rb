@@ -13,12 +13,19 @@ describe 'A custom Racket test application' do
 
   it 'should be able to locate a resource' do
     get '/' # Ensures that app is loaded, otherwise Racket.resource_path may pick up settings from previously run test suites.
-    Racket.resource_path('files', 'stuff.rb').should.equal(Pathname.new("files/stuff.rb").cleanpath.expand_path)
+    resource_path = Racket.resource_path('files', 'stuff.rb')
+    resource_path.should.equal(Pathname.new("files/stuff.rb").cleanpath.expand_path)
   end
 
-    it 'should run in dev mode when requested' do
-      app.dev_mode?.should.equal(true)
-    end
+  it 'should be able to require a resource' do
+    get '/' # Ensures that app is loaded, otherwise Racket.resource_path may pick up settings from previously run test suites.
+    Racket.require('files', 'stuff.rb')
+    stuff.should.equal('Stuff That Dreams Are Made of')
+  end
+
+  it 'should run in dev mode when requested' do
+    app.dev_mode?.should.equal(true)
+  end
 
   it 'should set requested settings' do
     settings = app.instance_variable_get(:@registry).application_settings
