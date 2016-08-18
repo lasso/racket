@@ -50,9 +50,10 @@ module Racket
   # @param [Array] args
   # @return [Pathname]
   def resource_path(*args)
+    context = Controller.context
     raise 'You must have a running Racket application before calling Racket.resource_path' unless
-      Controller.context
-    Controller.context.utils.build_path(*args)
+      context
+    context.utils.build_path(*args)
   end
 
   # Returns the current version of Racket.

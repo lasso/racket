@@ -18,6 +18,8 @@
 
 require 'racket/registry'
 
+require_relative 'stateless_services.rb'
+
 module Racket
   module Utils
     module Application
@@ -26,25 +28,8 @@ module Racket
         attr_reader :registry
 
         def initialize(settings = {})
-          @registry =
-            Racket::Registry.singleton_map(
-              action_cache: Racket::Utils::Routing::ActionCache.service,
-              application_settings: Racket::Settings::Application.service(settings),
-              application_logger: Racket::Utils::Application::Logger.service,
-              controller_context: controller_context,
-              handler_stack: Racket::Utils::Application::HandlerStack.service,
-              helper_cache: Racket::Utils::Helpers::HelperCache.service,
-              layout_cache: Racket::Utils::Views::TemplateCache.service,
-              layout_resolver: Racket::Utils::Views::TemplateResolver.service(type: :layout),
-              router: Racket::Router.service,
-              static_server: static_server,
-              template_locator: Racket::Utils::Views::TemplateLocator.service,
-              template_renderer: Racket::Utils::Views::Renderer.service,
-              view_cache: Racket::Utils::Views::TemplateCache.service,
-              view_manager: Racket::ViewManager.service,
-              view_resolver: Racket::Utils::Views::TemplateResolver.service(type: :view),
-              utils: Racket::Utils::ToolBelt.service(root_dir: settings.fetch(:root_dir, Dir.pwd))
-            )
+          @settings = settings
+          @registry = Racket::Registry.singleton_map(service_map)
         end
 
         private
@@ -62,6 +47,15 @@ module Racket
               define_singleton_method(:view_manager) { reg.view_manager }
             end
           end
+        end
+
+        def service_map
+          {
+            application_settings: Racket::Settings::Application.service(@settings),
+            controller_context: controller_context,
+            static_server: static_server,
+            utils: Racket::Utils::ToolBelt.service(root_dir: @settings.fetch(:root_dir, Dir.pwd))
+          }.merge!(StatelessServices.services)
         end
 
         def static_server

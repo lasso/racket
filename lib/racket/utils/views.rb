@@ -22,3 +22,25 @@ require_relative 'views/renderer.rb'
 require_relative 'views/template_cache.rb'
 require_relative 'views/template_locator.rb'
 require_relative 'views/template_resolver.rb'
+
+module Racket
+  module Utils
+    # Namespace for view utilities
+    module Views
+      # Extracts what template settings to use based on context and incoming parameters.
+      #
+      # @param [Object] context
+      # @param [Hash] template_settings
+      # @return [Hash]
+      def self.extract_template_settings(context, template_settings)
+        if context.respond_to?(:view_settings) && !template_settings
+          context.view_settings
+        elsif template_settings
+          template_settings
+        else
+          {}
+        end
+      end
+    end
+  end
+end

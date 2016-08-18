@@ -20,10 +20,18 @@ module Racket
   module Utils
     # Utility functions for options handling.
     module Options
+      # Validates that all required options are not false or nil
+      # in a list of options.
+      #
+      # @param [Hash] required
+      # @param [Hash] incoming
+      # @return nil
+      # @raise ArgumentError
       def self.validate_options(required, incoming)
         required.each_pair do |key, message|
           raise ArgumentError, message unless incoming[key]
         end
+        nil
       end
     end
   end

@@ -31,15 +31,8 @@ module Racket
         utils = Controller.context.utils
         template = utils.build_path(template)
         return nil unless Racket::Utils::FileSystem.file_readable?(template)
-        template_settings =
-          if context.respond_to?(:view_settings) && !template_settings
-            context.view_settings
-          elsif template_settings
-            template_settings
-          else
-            {}
-          end
-        Tilt.new(template, nil, template_settings).render(context)
+        settings = ::Racket::Utils::Views.extract_template_settings(context, template_settings)
+        Tilt.new(template, nil, settings).render(context)
       end
     end
   end
