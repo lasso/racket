@@ -16,62 +16,20 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Racket.  If not, see <http://www.gnu.org/licenses/>.
 
-require 'logger'
-require 'racket/registry'
-
 require_relative 'base.rb'
+require_relative 'defaults.rb'
 
 module Racket
   module Settings
     # Class for storing application settings.
     class Application < Base
-      @defaults =
-        Racket::Registry.with_map(
-          default_action: -> { :index },
-          default_content_type: -> { 'text/html' },
-          default_controller_helpers: -> { [:routing, :view] },
-          default_layout: -> { nil },
-          default_view: -> { nil },
-          logger: -> { Logger.new($stdout) },
-          middleware: -> { [] },
-          mode: -> { :live },
-          plugins: -> { [] },
-          session_handler:
-            lambda do
-              [
-                Rack::Session::Cookie,
-                {
-                  key: 'racket.session',
-                  old_secret: SecureRandom.hex(16),
-                  secret: SecureRandom.hex(16)
-                }
-              ]
-            end,
-          root_dir: -> { Dir.pwd },
-          template_settings:
-            lambda do
-              {
-                common: {},
-                layout: {},
-                view: {}
-              }
-            end,
-          warmup_urls: -> { Set.new }
-        )
+      @defaults = Defaults.application_defaults
 
-      setting(:default_action)
-      setting(:default_content_type)
-      setting(:default_controller_helpers)
-      setting(:default_layout)
-      setting(:default_view)
-      setting(:logger)
-      setting(:middleware)
-      setting(:mode)
-      setting(:plugins)
-      setting(:session_handler)
-      setting(:root_dir)
-      setting(:template_settings)
-      setting(:warmup_urls)
+      [
+        :default_action, :default_content_type, :default_controller_helpers,
+        :default_layout, :default_view, :logger, :middleware, :mode, :plugins,
+        :session_handler, :root_dir, :template_settings, :warmup_urls
+      ].each { |key| setting(key) }
 
       # Returns a service proc that can be used by the registry.
       #
@@ -104,11 +62,13 @@ module Racket
         end
       end
 
-      directory_setting(:controller_dir, 'controllers')
-      directory_setting(:helper_dir, 'helpers')
-      directory_setting(:layout_dir, 'layouts')
-      directory_setting(:public_dir, 'public')
-      directory_setting(:view_dir, 'views')
+      {
+        controller_dir: 'controllers',
+        helper_dir: 'helpers',
+        layout_dir: 'layouts',
+        public_dir: 'public',
+        view_dir: 'views'
+      }.each_pair { |key, value| directory_setting(key, value) }
 
       private_class_method :define_directory_method
     end

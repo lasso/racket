@@ -39,16 +39,7 @@ module Racket
         end
 
         def initialize(options)
-          required_options =
-            {
-              layout_cache: 'Layout cache is missing.',
-              layout_resolver: 'Layout resolver is missing.',
-              view_cache: 'View cache is missing.', view_resolver: 'View resolver is missing.'
-            }
-          ::Racket::Utils::Options.validate_options(required_options, options)
-          required_options.each_key do |key|
-            instance_variable_set("@#{key}".to_sym, options[key])
-          end
+          options.each_pair { |key, value| instance_variable_set("@#{key}".to_sym, value) }
         end
 
         # Returns the layout associated with the current request. On the first request to any action

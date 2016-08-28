@@ -41,15 +41,7 @@ module Racket
         end
 
         def initialize(options)
-          required_options =
-            {
-              base_dir: 'Base dir is missing.', logger: 'Logger is missing.',
-              type: 'Type is missing.', utils: 'Utils is missing.'
-            }
-          ::Racket::Utils::Options.validate_options(required_options, options)
-          required_options.each_key do |key|
-            instance_variable_set("@#{key}".to_sym, options[key])
-          end
+          options.each_pair { |key, value| instance_variable_set("@#{key}".to_sym, value) }
         end
 
         # Returns the template object representing the specified path/controller combination.
