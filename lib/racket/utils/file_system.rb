@@ -97,6 +97,28 @@ module Racket
         path.exist? && path.directory? && path.readable?
       end
 
+      # Return a Pathname for a directory if the directory is readable, otherwise returns nil.
+      #
+      # @param [String] path
+      # @return [Pathname|nil]
+      def self.dir_or_nil(path)
+        return nil unless path
+        path = Pathname.new(path)
+        dir_readable?(path) ? path : nil
+      end
+
+      # Extracts the correct directory and glob for a given base path/path combination.
+      #
+      # @param [Pathname] path
+      # @return [Array]
+      def self.extract_dir_and_glob(path)
+        basename = path.basename
+        [
+          path.dirname,
+          path.extname.empty? ? Pathname.new("#{basename}.*") : basename
+        ]
+      end
+
       # Returns whether a file is readable or not. In order to be readable, the file must
       # a) exist
       # b) be a file
@@ -131,6 +153,34 @@ module Racket
         parts = url_path.split('/').reject(&:empty?)
         parts.each { |part| base_pathname = base_pathname.join(part) }
         base_pathname
+      end
+
+      # Locates a file in the filesystem matching an URL path. If there exists a matching file,
+      # the path to it is returned. If there is no matching file, +nil+ is returned.
+      # @param [Pathname] path
+      # @return [Pathname|nil]
+      def self.resolve_path(path)
+        first_matching_path(*extract_dir_and_glob(path))
+      end
+
+      # Locates a file in the filesystem matching an URL path. If there exists a matching file,
+      # the path to it is returned. If there is no matching file and +default+ is a
+      # String or a Symbol, another lookup will be performed using +default+. If
+      # +default+ is a Proc or nil, +default+ will be used as is instead.
+      #
+      # @param [Pathname] path
+      # @param [String|Symbol|Proc|nil] default
+      # @return [String|Proc|nil]
+      def self.resolve_path_with_default(path, default)
+        # Return template if it can be found in the file system
+        template = resolve_path(path)
+        return template if template
+        # No template found for path. Try the default template instead.
+        # If default template is a string or a symbol, look it up in the file system
+        return resolve_path(fs_path(path.dirname, default)) if
+          default.is_a?(String) || default.is_a?(Symbol)
+        # If default template is a proc or nil, just return it
+        default
       end
 
       # Returns all paths under +base_path+ that matches +glob+.

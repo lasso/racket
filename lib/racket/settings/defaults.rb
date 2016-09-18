@@ -23,6 +23,9 @@ module Racket
   module Settings
     # Module used for storing default values.
     module Defaults
+      # Returns a Racke::Registry object containing application defaults.
+      #
+      # @return [Racket::Registry]
       def self.application_defaults
         Racket::Registry.with_map(
           default_action: -> { :index },

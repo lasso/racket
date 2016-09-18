@@ -32,6 +32,21 @@ module Racket
           @registry = Racket::Registry.singleton_map(service_map)
         end
 
+        # Sets up a static server with the specified directory and logger.
+        #
+        # @param [Pathname|nil] static_dir
+        # @param [Logger] logger
+        # @return [Proc|nil]
+        def self.static_server(static_dir, logger)
+          unless static_dir
+            logger.inform_dev('Static server disabled.')
+            return nil
+          end
+          logger.inform_dev("Setting up static server to serve files from #{static_dir}.")
+          handler = Rack::File.new(static_dir)
+          ->(env) { handler.call(env) }
+        end
+
         private
 
         def controller_context
@@ -59,18 +74,12 @@ module Racket
         end
 
         def static_server
+          klass = self.class
           lambda do |reg|
-            logger = reg.application_logger
-            if (public_dir = reg.application_settings.public_dir) &&
-               Racket::Utils::FileSystem.dir_readable?(Pathname.new(public_dir))
-              logger.inform_dev(
-                "Setting up static server to serve files from #{public_dir}."
-              )
-              handler = Rack::File.new(public_dir)
-              ->(env) { handler.call(env) }
-            else
-              logger.inform_dev('Static server disabled.') && nil
-            end
+            klass.static_server(
+              Racket::Utils::FileSystem.dir_or_nil(reg.application_settings.public_dir),
+              reg.application_logger
+            )
           end
         end
       end

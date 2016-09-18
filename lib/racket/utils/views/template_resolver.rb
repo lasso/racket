@@ -52,7 +52,7 @@ module Racket
         def get_template_object(path, controller)
           default_template = controller.settings.fetch("default_#{@type}".to_sym)
           template =
-            lookup_template_with_default(
+            FSM.resolve_path_with_default(
               FSM.fs_path(@base_dir, path), default_template
             )
           @logger.inform_dev(
@@ -70,7 +70,7 @@ module Racket
         # @return [pathname|nil]
         def resolve_template(path, template, controller)
           return template unless template.is_a?(Proc)
-          lookup_template(
+          FSM.resolve_path(
             FSM.fs_path(
               FSM.fs_path(@base_dir, path).dirname,
               self.class.call_template_proc(template, controller)
@@ -105,48 +105,6 @@ module Racket
             [controller.class.get_route, controller.racket.action].join('/')
           template_path = template_path[1..-1] if template_path.start_with?('//')
           template_path
-        end
-
-        private
-
-        # Extracts the correct directory and glob for a given base path/path combination.
-        #
-        # @param [Pathname] path
-        # @return [Array]
-        def extract_dir_and_glob(path)
-          basename = path.basename
-          [
-            path.dirname,
-            path.extname.empty? ? Pathname.new("#{basename}.*") : basename
-          ]
-        end
-
-        # Locates a file in the filesystem matching an URL path. If there exists a matching file,
-        # the path to it is returned. If there is no matching file, +nil+ is returned.
-        # @param [Pathname] path
-        # @return [Pathname|nil]
-        def lookup_template(path)
-          FSM.first_matching_path(*extract_dir_and_glob(path))
-        end
-
-        # Locates a file in the filesystem matching an URL path. If there exists a matching file,
-        # the path to it is returned. If there is no matching file and +default_template+ is a
-        # String or a Symbol, another lookup will be performed using +default_template+. If
-        # +default_template+ is a Proc or nil, +default_template+ will be used as is instead.
-        #
-        # @param [Pathname] path
-        # @param [String|Symbol|Proc|nil] default_template
-        # @return [String|Proc|nil]
-        def lookup_template_with_default(path, default_template)
-          # Return template if it can be found in the file system
-          template = lookup_template(path)
-          return template if template
-          # No template found for path. Try the default template instead.
-          # If default template is a string or a symbol, look it up in the file system
-          return lookup_template(FSM.fs_path(path.dirname, default_template)) if
-            default_template.is_a?(String) || default_template.is_a?(Symbol)
-          # If default template is a proc or nil, just return it
-          default_template
         end
       end
     end
