@@ -4,7 +4,7 @@ Gem::Specification.new do |s|
   s.name                  = 'racket-mvc'
   s.email                 = 'lasso@lassoweb.se'
   s.homepage              = 'https://github.com/lasso/racket'
-  s.license               = 'GNU AFFERO GENERAL PUBLIC LICENSE, version 3'
+  s.license               = 'AGPL-3.0'
   s.authors               = ['Lars Olsson']
   s.version               = racket_version
   s.date                  = Time.now.strftime('%Y-%m-%d')
