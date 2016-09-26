@@ -79,12 +79,14 @@ module Racket
       @registry.application_logger.inform_dev(message, level)
     end
 
+    alias kernel_require require
+
     # Requires a file using the current application directory as a base path.
     #
     # @param [Object] args
     # @return [nil]
     def require(*args)
-      (::Kernel.require @registry.utils.build_path(*args)) && nil
+      (kernel_require @registry.utils.build_path(*args)) && nil
     end
 
     private
@@ -127,7 +129,7 @@ module Racket
     # @param [String] file Relative path from controller dir
     # @return nil
     def load_controller_file(file)
-      ::Kernel.require file
+      kernel_require file
       klass = @registry.application_settings.fetch(:last_added_controller).pop
       # Helpers may do stuff based on route, make sure it is available before applying helpers.
       @registry.router.map(calculate_url_path(file), klass)
