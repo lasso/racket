@@ -87,10 +87,12 @@ module Racket
 
     # @todo: Allow the user to set custom handlers for different errors
     def render_error(status, error = nil)
-      # If running in dev mode, let Rack::ShowExceptions handle the error.
-      raise error if error && @options.dev_mode
-
-      # Not running in dev mode, let us handle the error ourselves.
+      if (error)
+        # If running in dev mode, let Rack::ShowExceptions handle the error.
+        raise error if @options.dev_mode
+        # Not running in dev mode, let us handle the error ourselves.
+        $stderr.write("#{error.class}: #{error.message}\n#{error.backtrace.map { |l| "\t#{l}" }.join("\n")}\n\n")
+      end
       Response.generate_error_response(status)
     end
 
