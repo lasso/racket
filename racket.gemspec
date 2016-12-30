@@ -16,7 +16,7 @@ Gem::Specification.new do |s|
   s.required_ruby_version = '>= 2.0.0'
 
   s.add_dependency('http_router', '~>0.11')
-  s.add_dependency('rack', '>=1.6', '~>2.0')
+  s.add_dependency('rack', '~>1.6')
   s.add_dependency('racket-registry', '~>0.5')
   s.add_dependency('tilt', '~>2.0')
 
