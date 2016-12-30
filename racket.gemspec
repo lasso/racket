@@ -13,19 +13,19 @@ Gem::Specification.new do |s|
   s.files                 = racket_files
   s.platform              = Gem::Platform::RUBY
   s.require_path          = 'lib'
-  s.required_ruby_version = '>= 1.9.3'
+  s.required_ruby_version = '>= 2.0.0'
 
-  s.add_dependency('http_router', '~>0')
+  s.add_dependency('http_router', '~>0.11')
   s.add_dependency('rack', '~>1.6')
   s.add_dependency('racket-registry', '~>0.5')
   s.add_dependency('tilt', '~>2.0')
 
   s.add_development_dependency('bacon', '~>1.2')
-  s.add_development_dependency('codecov', '~>0.1.5')
-  s.add_dependency('json', '<2') # Enforce lower json version in order to work on MRI 1.9.3
+  s.add_development_dependency('codecov', '~>0.1')
+  s.add_dependency('json', '~>2.0')
   s.add_development_dependency('rack-test', '~>0.6')
-  s.add_development_dependency('rake', '~>11')
+  s.add_development_dependency('rake', '~>12')
   s.add_development_dependency('sass', '~>3.4') # Needed by SASS plugin
-  s.add_development_dependency('simplecov', '~>0.11')
-  s.add_development_dependency('yard', '~>0')
+  s.add_development_dependency('simplecov', '~>0.12')
+  s.add_development_dependency('yard', '~>0.9')
 end
