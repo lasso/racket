@@ -1,5 +1,5 @@
 # Racket - The noisy Rack MVC framework
-# Copyright (C) 2015-2016  Lars Olsson <lasso@lassoweb.se>
+# Copyright (C) 2015-2017  Lars Olsson <lasso@lassoweb.se>
 #
 # This file is part of Racket.
 #
