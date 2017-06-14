@@ -14,6 +14,7 @@ TEST_DIR = File.absolute_path(File.dirname(__FILE__))
 TEST_DEFAULT_APP_DIR = File.join(TEST_DIR, 'test_default_app')
 TEST_CUSTOM_APP_DIR = File.join(TEST_DIR, 'test_custom_app')
 TEST_PLUGIN_APP_DIR = File.join(TEST_DIR, 'test_plugin_app')
+TEST_VERBS_APP_DIR = File.join(TEST_DIR, 'test_verbs_app')
 
 require 'racket'
 
@@ -29,16 +30,17 @@ require 'rack/test'
 require 'bacon'
 
 # Method tests should always be run first.
-require File.join(TEST_DIR, '_request.rb')
+# require File.join(TEST_DIR, '_request.rb')
 
 # Next up, tests for Template caching.
-require File.join(TEST_DIR, '_template_cache.rb')
+# require File.join(TEST_DIR, '_template_cache.rb')
 
 # Application tests.
 suites = [
-  -> { Dir.chdir(TEST_DEFAULT_APP_DIR) { require File.join(TEST_DIR, '_default.rb') } },
-  -> { Dir.chdir(TEST_CUSTOM_APP_DIR) { require File.join(TEST_DIR, '_custom.rb') } },
-  -> { Dir.chdir(TEST_PLUGIN_APP_DIR) { require File.join(TEST_DIR, '_plugin.rb') } }
+  # -> { Dir.chdir(TEST_DEFAULT_APP_DIR) { require File.join(TEST_DIR, '_default.rb') } },
+  # -> { Dir.chdir(TEST_CUSTOM_APP_DIR) { require File.join(TEST_DIR, '_custom.rb') } },
+  # -> { Dir.chdir(TEST_PLUGIN_APP_DIR) { require File.join(TEST_DIR, '_plugin.rb') } },
+  -> { Dir.chdir(TEST_VERBS_APP_DIR) { require File.join(TEST_DIR, '_verbs.rb') } }
 ]
 
 # Leave off randomization for now. Sessions does not seem to be reset correctly between suites!

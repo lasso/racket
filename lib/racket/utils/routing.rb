@@ -40,6 +40,10 @@ module Racket
           @logger = logger
         end
 
+        def allows?(controller_class, action, verb)
+          controller_class.settings.fetch("#{verb}_allowed").include?(action)
+        end
+
         # Returns whether +controller_class+ is in the cache and that it contains the action
         # +action+.
         #

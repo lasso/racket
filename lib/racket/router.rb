@@ -102,8 +102,9 @@ module Racket
     # @return [Array] A Rack response triplet
     def route(env)
       catch :response do # Catches early exits from Controller.respond.
-        # Ensure that that a controller will respond to the request. If not, send a 404.
-        return render_error(404) unless (target_info = target_info(env))
+        # Ensure that that a controller will respond to the request. If not, return the appropiate response code.
+        target_info = target_info(env)
+        return render_error(target_info) if target_info.is_a?(Fixnum)
         Racket::Utils::Routing::Dispatcher.new(env, target_info).dispatch
       end
     rescue => err
@@ -121,7 +122,7 @@ module Racket
     # is returned.
     #
     # @param [Hash] env
-    # @return [Array|nil]
+    # @return [Array|Fixnum]
     def target_info(env)
       matching_route = @router.recognize(env).first
       # Exit early if no controller is responsible for the route
@@ -129,7 +130,9 @@ module Racket
       # Some controller is claiming to be responsible for the route, find out which one.
       result = Racket::Utils::Routing::Dispatcher.extract_target(matching_route.first)
       # Exit early if action is not available on target
-      return nil unless action_cache.present?(result.first, result.last)
+      return 404 unless action_cache.present?(result.first, result.last)
+      # Exit early is method does not allow request method
+      return 405 unless action_cache.allows?(result.first, result.last, env['REQUEST_METHOD'].downcase)
       result
     end
   end

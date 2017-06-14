@@ -44,6 +44,13 @@ module Racket
       setting(hook_key, hooks) && nil
     end
 
+    def self.allow(verb, *methods)
+      verb = verb.to_s.downcase
+      meths = public_instance_methods(false)
+      meths &= methods.map(&:to_sym) unless methods.empty?
+      setting("#{verb}_allowed", meths)
+    end
+
     # Adds a before hook to one or more actions. Actions should be given as a list of symbols.
     # If no symbols are provided, *all* actions on the controller is affected.
     #
