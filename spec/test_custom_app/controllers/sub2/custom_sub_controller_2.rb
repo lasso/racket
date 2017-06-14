@@ -1,5 +1,9 @@
 # Custom sub controller 2
 class CustomSubController2 < Racket::Controller
+  before do
+    @before = 'Data added in before block'
+  end
+
   def index
     "#{self.class}::#{__method__}"
   end
@@ -19,10 +23,6 @@ class CustomSubController2 < Racket::Controller
   def hook_action
     @action = 'Data added in action'
     [@before, @action].to_json
-  end
-
-  before do
-    @before = 'Data added in before block'
   end
 
   after :hook_action do

@@ -26,10 +26,11 @@ module Racket
     # @param [Proc] blk
     # @return [nil]
     def self.__register_hook(type, methods, blk)
-      meths = public_instance_methods(false)
-      meths &= methods.map(&:to_sym) unless methods.empty?
-      __update_hooks("#{type}_hooks".to_sym, meths, blk)
-      context.logger.inform_dev("Adding #{type} hook #{blk} for actions #{meths} for #{self}.")
+      methods = ['*'] if methods.empty?
+      methods.map!(&:to_sym)
+      __update_hooks("#{type}_hooks".to_sym, methods, blk)
+      actions_str = methods == ['*'.to_sym] ? 'all actions' : "actions #{methods}" 
+      context.logger.inform_dev("Adding #{type} hook #{blk} for #{actions_str} for #{self}.")
     end
 
     # Updates hooks in settings object.
@@ -255,7 +256,7 @@ module Racket
 
     def __run_hook(type)
       hooks = settings.fetch("#{type}_hooks".to_sym, {})
-      blk = hooks.fetch(racket.action, nil)
+      blk = hooks.fetch('*'.to_sym, hooks.fetch(racket.action, nil))
       (instance_eval(&blk) if blk) && nil
     end
   end
