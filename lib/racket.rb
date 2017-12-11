@@ -20,6 +20,7 @@ require 'pathname'
 require 'rack'
 
 require_relative 'racket/application.rb'
+require_relative 'racket/modules/controller_hooks.rb'
 require_relative 'racket/controller.rb'
 require_relative 'racket/current.rb'
 require_relative 'racket/request.rb'
