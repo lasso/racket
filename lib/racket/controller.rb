@@ -20,7 +20,7 @@ module Racket
   # Base controller class. Your controllers should inherit this class.
   class Controller
 
-    include Racket::Modules::ControllerViews
+    extend Racket::Modules::ControllerViews
     extend Racket::Modules::ControllerHooks
 
     # Returns the current context.
@@ -103,6 +103,11 @@ module Racket
 
     private_class_method :__load_helpers, :__register_hook, :__update_hooks
 
+    # Returns layout settings associated with the current controller
+    def layout_settings
+      self.class.layout_settings
+    end
+
     # Redirects the client. After hooks are run.
     #
     # @param [String] target URL to redirect to
@@ -147,6 +152,11 @@ module Racket
     # Returns settings associated with the current controller
     def settings
       self.class.settings
+    end
+
+    # Returns view settings associated with the current controller
+    def view_settings
+      self.class.view_settings
     end
 
     # Calls hooks, action and renderer.
