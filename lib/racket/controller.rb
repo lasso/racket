@@ -20,6 +20,7 @@ module Racket
   # Base controller class. Your controllers should inherit this class.
   class Controller
 
+    include Racket::Modules::ControllerViews
     extend Racket::Modules::ControllerHooks
 
     # Returns the current context.
@@ -73,14 +74,6 @@ module Racket
       settings.fetch(:last_added_controller).push(klass)
     end
 
-    # Returns the layout settings for the current controller.
-    #
-    # @return [Hash]
-    def self.layout_settings
-      template_settings = settings.fetch(:template_settings)
-      template_settings[:common].merge(template_settings[:layout])
-    end
-
     # Add a setting for the current controller class
     #
     # @param [Symbol] key
@@ -96,35 +89,6 @@ module Racket
       @settings ||= Racket::Settings::Controller.new(self)
     end
 
-    # Add a setting used by Tilt when rendering views/layouts.
-    #
-    # @param [Symbol] key
-    # @param [Object] value
-    # @param [Symbol] type One of +:common+, +:layout+ or +:view+
-    def self.template_setting(key, value, type = :common)
-      # If controller has no template settings on its own, copy the template settings
-      # from its "closest" parent (might even be application settings)
-      # @todo - How about template options that are unmarshallable?
-      settings.store(
-        :template_settings, Marshal.load(Marshal.dump(settings.fetch(:template_settings)))
-      ) unless settings.present?(:template_settings)
-
-      # Fetch current settings (guaranteed to be in controller by now)
-      template_settings = settings.fetch(:template_settings)
-
-      # Update settings
-      template_settings[type][key] = value
-      settings.store(:template_settings, template_settings)
-    end
-
-    # Returns the view settings for the current controller.
-    #
-    # @return [Hash]
-    def self.view_settings
-      template_settings = settings.fetch(:template_settings)
-      template_settings[:common].merge(template_settings[:view])
-    end
-
     # Loads new helpers and stores the list of helpers associated with the currenct controller
     # in the settings.
     #
@@ -138,11 +102,6 @@ module Racket
     end
 
     private_class_method :__load_helpers, :__register_hook, :__update_hooks
-
-    # Returns layout settings associated with the current controller
-    def layout_settings
-      self.class.layout_settings
-    end
 
     # Redirects the client. After hooks are run.
     #
@@ -188,11 +147,6 @@ module Racket
     # Returns settings associated with the current controller
     def settings
       self.class.settings
-    end
-
-    # Returns view settings associated with the current controller
-    def view_settings
-      self.class.view_settings
     end
 
     # Calls hooks, action and renderer.
