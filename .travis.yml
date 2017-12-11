@@ -5,12 +5,11 @@ cache: bundler
 rvm:
   - 2.0.0
   - 2.1.10
-  - 2.2.7
-  - 2.3.4
-  - 2.4.1
+  - 2.2.8
+  - 2.3.5
+  - 2.4.2
   - jruby-9.0.5.0
-  - jruby-9.1.12.0
-  - rbx-3.82
+  - jruby-9.1.15.0
 before_install:
   # bundler installation needed for jruby-head
   # https://github.com/travis-ci/travis-ci/issues/5861

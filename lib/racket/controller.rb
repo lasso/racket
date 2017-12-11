@@ -19,49 +19,9 @@
 module Racket
   # Base controller class. Your controllers should inherit this class.
   class Controller
-    # Adds a hook to one or more actions.
-    #
-    # @param [Symbol] type
-    # @param [Array] methods
-    # @param [Proc] blk
-    # @return [nil]
-    def self.__register_hook(type, methods, blk)
-      methods = ['*'] if methods.empty?
-      methods.map!(&:to_sym)
-      __update_hooks("#{type}_hooks".to_sym, methods, blk)
-      actions_str = methods == ['*'.to_sym] ? 'all actions' : "actions #{methods}" 
-      context.logger.inform_dev("Adding #{type} hook #{blk} for #{actions_str} for #{self}.")
-    end
 
-    # Updates hooks in settings object.
-    #
-    # @param [Symbol] hook_key
-    # @param [Array] meths
-    # @param [Proc] blk
-    # @return [nil]
-    def self.__update_hooks(hook_key, meths, blk)
-      hooks = settings.fetch(hook_key, {})
-      meths.each { |meth| hooks[meth] = blk }
-      setting(hook_key, hooks) && nil
-    end
-
-    # Adds a before hook to one or more actions. Actions should be given as a list of symbols.
-    # If no symbols are provided, *all* actions on the controller is affected.
-    #
-    # @param [Array] methods
-    # @return [nil]
-    def self.after(*methods, &blk)
-      __register_hook(:after, methods, blk) if block_given?
-    end
-
-    # Adds an after hook to one or more actions. Actions should be given as a list of symbols.
-    # If no symbols are provided, *all* actions on the controller is affected.
-    #
-    # @param [Array] methods
-    # @return [nil]
-    def self.before(*methods, &blk)
-      __register_hook(:before, methods, blk) if block_given?
-    end
+    extend Racket::Modules::ControllerViews
+    extend Racket::Modules::ControllerHooks
 
     # Returns the current context.
     #
@@ -114,14 +74,6 @@ module Racket
       settings.fetch(:last_added_controller).push(klass)
     end
 
-    # Returns the layout settings for the current controller.
-    #
-    # @return [Hash]
-    def self.layout_settings
-      template_settings = settings.fetch(:template_settings)
-      template_settings[:common].merge(template_settings[:layout])
-    end
-
     # Add a setting for the current controller class
     #
     # @param [Symbol] key
@@ -135,35 +87,6 @@ module Racket
     # @return [Racket::Settings::Controller]
     def self.settings
       @settings ||= Racket::Settings::Controller.new(self)
-    end
-
-    # Add a setting used by Tilt when rendering views/layouts.
-    #
-    # @param [Symbol] key
-    # @param [Object] value
-    # @param [Symbol] type One of +:common+, +:layout+ or +:view+
-    def self.template_setting(key, value, type = :common)
-      # If controller has no template settings on its own, copy the template settings
-      # from its "closest" parent (might even be application settings)
-      # @todo - How about template options that are unmarshallable?
-      settings.store(
-        :template_settings, Marshal.load(Marshal.dump(settings.fetch(:template_settings)))
-      ) unless settings.present?(:template_settings)
-
-      # Fetch current settings (guaranteed to be in controller by now)
-      template_settings = settings.fetch(:template_settings)
-
-      # Update settings
-      template_settings[type][key] = value
-      settings.store(:template_settings, template_settings)
-    end
-
-    # Returns the view settings for the current controller.
-    #
-    # @return [Hash]
-    def self.view_settings
-      template_settings = settings.fetch(:template_settings)
-      template_settings[:common].merge(template_settings[:view])
     end
 
     # Loads new helpers and stores the list of helpers associated with the currenct controller

@@ -27,11 +27,11 @@ Have a look in the `spec` directory. The code base have tests covering (almost) 
 
 - 2.0.0
 - 2.1.10
-- 2.2.6
-- 2.3.3
-- 2.4.0
+- 2.2.8
+- 2.3.5
+- 2.4.2
 - jruby-9.0.5.0
-- jruby-9.1.6.0
+- jruby-9.1.15.0
 
 I am using [bacon](https://github.com/chneukirchen/bacon) and [rack-test](https://github.com/brynary/rack-test) for testing. Run the tests by typing `rake test`in the root directory. Code coverage reports are provided by [simplecov](https://rubygems.org/gems/simplecov). After the tests have run the an HTML report can be found in the `coverage` directory.
 
