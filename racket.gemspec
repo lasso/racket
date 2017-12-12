@@ -16,16 +16,16 @@ Gem::Specification.new do |s|
   s.required_ruby_version = '>= 2.0.0'
 
   s.add_dependency('http_router', '~>0.11')
+  s.add_dependency('json', '~>2.0')
   s.add_dependency('rack', '~>1.6')
   s.add_dependency('racket-registry', '~>0.5')
   s.add_dependency('tilt', '~>2.0')
 
   s.add_development_dependency('bacon', '~>1.2')
   s.add_development_dependency('codecov', '~>0.1')
-  s.add_dependency('json', '~>2.0')
-  s.add_development_dependency('rack-test', '~>0.6')
+  s.add_development_dependency('rack-test', '~>0.8')
   s.add_development_dependency('rake', '~>12')
-  s.add_development_dependency('sass', '~>3.4') # Needed by SASS plugin
-  s.add_development_dependency('simplecov', '~>0.12')
+  s.add_development_dependency('sass', '~>3.5') # Needed by SASS plugin
+  s.add_development_dependency('simplecov', '~>0.15')
   s.add_development_dependency('yard', '~>0.9')
 end

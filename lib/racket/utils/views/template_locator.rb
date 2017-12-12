@@ -39,7 +39,10 @@ module Racket
         end
 
         def initialize(options)
-          options.each_pair { |key, value| instance_variable_set("@#{key}".to_sym, value) }
+          @layout_cache = options[:layout_cache]
+          @layout_resolver = options[:layout_resolver]
+          @view_cache = options[:view_cache]
+          @view_resolver = options[:view_resolver]
         end
 
         # Returns the layout associated with the current request. On the first request to any action

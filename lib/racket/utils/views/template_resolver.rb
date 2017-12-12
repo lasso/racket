@@ -41,7 +41,10 @@ module Racket
         end
 
         def initialize(options)
-          options.each_pair { |key, value| instance_variable_set("@#{key}".to_sym, value) }
+          @base_dir = options[:base_dir]
+          @logger = options[:logger]
+          @type = options[:type]
+          @utils = options[:utils]
         end
 
         # Returns the template object representing the specified path/controller combination.
