@@ -23,7 +23,7 @@ Gem::Specification.new do |s|
 
   s.add_development_dependency('bacon', '~>1.2')
   s.add_development_dependency('codecov', '~>0.1')
-  s.add_development_dependency('rack-test', '~>0.8')
+  s.add_development_dependency('rack-test', '~>0.7')
   s.add_development_dependency('rake', '~>12')
   s.add_development_dependency('sass', '~>3.5') # Needed by SASS plugin
   s.add_development_dependency('simplecov', '~>0.15')
