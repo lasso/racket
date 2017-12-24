@@ -25,10 +25,10 @@ module Racket
     class Application < Base
       @defaults = Defaults.application_defaults
 
-      [
-        :default_action, :default_content_type, :default_controller_helpers,
-        :default_layout, :default_view, :logger, :middleware, :mode, :plugins,
-        :session_handler, :root_dir, :template_settings, :warmup_urls
+      %i[
+        default_action default_content_type default_controller_helpers
+        default_layout default_view logger middleware mode plugins
+        session_handler root_dir template_settings warmup_urls
       ].each { |key| setting(key) }
 
       # Returns a service proc that can be used by the registry.

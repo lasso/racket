@@ -30,7 +30,7 @@ module Racket
         Racket::Registry.with_map(
           default_action: -> { :index },
           default_content_type: -> { 'text/html' },
-          default_controller_helpers: -> { [:routing, :view] },
+          default_controller_helpers: -> { %i[routing view] },
           default_layout: nil_block,
           default_view: nil_block,
           logger: -> { Logger.new($stdout) },

@@ -18,51 +18,51 @@
 module Racket
   # Collects modules that are included by the core classes.
   module Modules
-      # Hook methods used by the Controller class.
-      module ControllerHooks
-        # Adds a hook to one or more actions.
-        #
-        # @param [Symbol] type
-        # @param [Array] methods
-        # @param [Proc] blk
-        # @return [nil]
-        def __register_hook(type, methods, blk)
-          methods = ['*'] if methods.empty?
-          methods.map!(&:to_sym)
-          __update_hooks("#{type}_hooks".to_sym, methods, blk)
-          actions_str = methods == ['*'.to_sym] ? 'all actions' : "actions #{methods}"
-          context.logger.inform_dev("Adding #{type} hook #{blk} for #{actions_str} for #{self}.")
-        end
-
-        # Updates hooks in settings object.
-        #
-        # @param [Symbol] hook_key
-        # @param [Array] meths
-        # @param [Proc] blk
-        # @return [nil]
-        def __update_hooks(hook_key, meths, blk)
-          hooks = settings.fetch(hook_key, {})
-          meths.each { |meth| hooks[meth] = blk }
-          setting(hook_key, hooks) && nil
-        end
-
-        # Adds a before hook to one or more actions. Actions should be given as a list of symbols.
-        # If no symbols are provided, *all* actions on the controller is affected.
-        #
-        # @param [Array] methods
-        # @return [nil]
-        def after(*methods, &blk)
-          __register_hook(:after, methods, blk) if block_given?
-        end
-
-        # Adds an after hook to one or more actions. Actions should be given as a list of symbols.
-        # If no symbols are provided, *all* actions on the controller is affected.
-        #
-        # @param [Array] methods
-        # @return [nil]
-        def before(*methods, &blk)
-          __register_hook(:before, methods, blk) if block_given?
-        end
+    # Hook methods used by the Controller class.
+    module ControllerHooks
+      # Adds a hook to one or more actions.
+      #
+      # @param [Symbol] type
+      # @param [Array] methods
+      # @param [Proc] blk
+      # @return [nil]
+      def __register_hook(type, methods, blk)
+        methods = ['*'] if methods.empty?
+        methods.map!(&:to_sym)
+        __update_hooks("#{type}_hooks".to_sym, methods, blk)
+        actions_str = methods == ['*'.to_sym] ? 'all actions' : "actions #{methods}"
+        context.logger.inform_dev("Adding #{type} hook #{blk} for #{actions_str} for #{self}.")
       end
+
+      # Updates hooks in settings object.
+      #
+      # @param [Symbol] hook_key
+      # @param [Array] meths
+      # @param [Proc] blk
+      # @return [nil]
+      def __update_hooks(hook_key, meths, blk)
+        hooks = settings.fetch(hook_key, {})
+        meths.each { |meth| hooks[meth] = blk }
+        setting(hook_key, hooks) && nil
+      end
+
+      # Adds a before hook to one or more actions. Actions should be given as a list of symbols.
+      # If no symbols are provided, *all* actions on the controller is affected.
+      #
+      # @param [Array] methods
+      # @return [nil]
+      def after(*methods, &blk)
+        __register_hook(:after, methods, blk) if block_given?
+      end
+
+      # Adds an after hook to one or more actions. Actions should be given as a list of symbols.
+      # If no symbols are provided, *all* actions on the controller is affected.
+      #
+      # @param [Array] methods
+      # @return [nil]
+      def before(*methods, &blk)
+        __register_hook(:before, methods, blk) if block_given?
+      end
+    end
   end
 end

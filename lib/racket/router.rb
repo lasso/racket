@@ -87,7 +87,7 @@ module Racket
 
     # @todo: Allow the user to set custom handlers for different errors
     def render_error(status, error = nil)
-      if (error)
+      if error
         # If running in dev mode, let Rack::ShowExceptions handle the error.
         raise error if @options.dev_mode
         # Not running in dev mode, let us handle the error ourselves.
