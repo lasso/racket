@@ -91,7 +91,9 @@ module Racket
         # If running in dev mode, let Rack::ShowExceptions handle the error.
         raise error if @options.dev_mode
         # Not running in dev mode, let us handle the error ourselves.
-        $stderr.write("#{error.class}: #{error.message}\n#{error.backtrace.map { |l| "\t#{l}" }.join("\n")}\n\n")
+        $stderr.write(
+          "#{error.class}: #{error.message}\n#{error.backtrace.map { |l| "\t#{l}" }.join("\n")}\n\n"
+        )
       end
       Response.generate_error_response(status)
     end
@@ -106,7 +108,7 @@ module Racket
         return render_error(404) unless (target_info = target_info(env))
         Racket::Utils::Routing::Dispatcher.new(env, target_info).dispatch
       end
-    rescue => err
+    rescue StandardError => err
       render_error(500, err)
     end
 

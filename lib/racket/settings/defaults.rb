@@ -27,21 +27,7 @@ module Racket
       #
       # @return [Racket::Registry]
       def self.application_defaults
-        Racket::Registry.with_map(
-          default_action: -> { :index },
-          default_content_type: -> { 'text/html' },
-          default_controller_helpers: -> { %i[routing view] },
-          default_layout: nil_block,
-          default_view: nil_block,
-          logger: -> { Logger.new($stdout) },
-          middleware: array_block,
-          mode: -> { :live },
-          plugins: array_block,
-          session_handler: session_handler,
-          root_dir: -> { Dir.pwd },
-          template_settings: template_settings,
-          warmup_urls: -> { Set.new }
-        )
+        Racket::Registry.with_map(@defaults)
       end
 
       def self.array_block
@@ -76,6 +62,22 @@ module Racket
       end
 
       private_class_method :array_block, :nil_block, :session_handler, :template_settings
+
+      @defaults = {
+        default_action: -> { :index },
+        default_content_type: -> { 'text/html' },
+        default_controller_helpers: -> { %i[routing view] },
+        default_layout: nil_block,
+        default_view: nil_block,
+        logger: -> { Logger.new($stdout) },
+        middleware: array_block,
+        mode: -> { :live },
+        plugins: array_block,
+        session_handler: session_handler,
+        root_dir: -> { Dir.pwd },
+        template_settings: template_settings,
+        warmup_urls: -> { Set.new }
+      }
     end
   end
 end

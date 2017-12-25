@@ -128,9 +128,9 @@ module Racket
         # @param [Fixnum] num_params
         # @return [nil]
         def update_path_info(num_params)
-          @env['PATH_INFO'] = @env['PATH_INFO']
-                              .split('/')[0...-num_params]
-                              .join('/') unless num_params.zero?
+          unless num_params.zero?
+            @env['PATH_INFO'] = @env['PATH_INFO'].split('/')[0...-num_params].join('/')
+          end
           nil
         end
       end

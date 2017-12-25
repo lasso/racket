@@ -37,9 +37,11 @@ module Racket
         # If controller has no template settings on its own, copy the template settings
         # from its "closest" parent (might even be application settings)
         # @todo - How about template options that are unmarshallable?
-        settings.store(
-          :template_settings, Marshal.load(Marshal.dump(settings.fetch(:template_settings)))
-        ) unless settings.present?(:template_settings)
+        unless settings.present?(:template_settings)
+          settings.store(
+            :template_settings, Marshal.load(Marshal.dump(settings.fetch(:template_settings)))
+          )
+        end
 
         # Fetch current settings (guaranteed to be in controller by now)
         template_settings = settings.fetch(:template_settings)

@@ -35,12 +35,27 @@ module Racket
       # fallback.
       def fetch(key, default = nil)
         return @custom[key] if @custom.key?(key)
-        parent = @owner.is_a?(Class) ? @owner.superclass : @owner.class
-        return @owner.context.application_settings.fetch(key, default) if
-          @owner == ::Racket::Controller
-        return parent.context.application_settings.fetch(key, default) if
-          parent == ::Racket::Controller
+        parent = parent_class(@owner)
+        return @owner.context.application_settings.fetch(key, default) if controller_base?(@owner)
+        return parent.context.application_settings.fetch(key, default) if controller_base?(parent)
         parent.settings.fetch(key, default)
+      end
+
+      private
+
+      # Returns whether the provided argument is a Racket::Controller class
+      #
+      # @param [Class] klass
+      # @return true|false
+      def controller_base?(klass)
+        klass == ::Racket::Controller
+      end
+
+      # Returns the "parent" class of object
+      # @param [Object] object
+      # @return [Class]
+      def parent_class(obj)
+        obj.is_a?(Class) ? obj.superclass : obj.class
       end
     end
   end

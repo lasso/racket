@@ -65,14 +65,14 @@ module Racket
           return unless @options.fetch(:download, false)
           content_disposition = 'attachment'
           filename = @options.fetch(:filename, nil).to_s
-          content_disposition << format('; filename="%s"', filename) unless filename.empty?
+          content_disposition << format('; filename="%<fn>s"', fn: filename) unless filename.empty?
           @response.headers['Content-Disposition'] = content_disposition
         end
 
         def set_mime_type
           mime_type = @options.fetch(:mime_type, nil)
           # Calculate MIME type if it was not already specified.
-          mime_type = Rack::Mime.mime_type(::File.extname(@file)) unless mime_type
+          mime_type ||= Rack::Mime.mime_type(::File.extname(@file))
           @response.headers['Content-Type'] = mime_type
         end
       end

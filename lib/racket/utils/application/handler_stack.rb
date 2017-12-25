@@ -32,24 +32,24 @@ module Racket
         def self.service(_options = {})
           lambda do |reg|
             settings = reg.application_settings
-
-            options = {
-              default_content_type:       settings.default_content_type,
-              default_controller_helpers: settings.default_controller_helpers,
-              dev_mode:                   settings.mode == :dev,
-              logger:                     reg.application_logger,
-              middleware:                 settings.middleware,
-              plugins:                    settings.plugins,
-              router:                     reg.router,
-              session_handler:            settings.session_handler,
-              static_server:              reg.static_server,
-              utils:                      reg.utils,
-              warmup_urls:                settings.warmup_urls
-            }
-
+            options = service_options(reg, settings)
             new(options).stack
           end
         end
+
+        def self.service_options(reg, settings)
+          {
+            default_content_type: settings.default_content_type,
+            default_controller_helpers: settings.default_controller_helpers,
+            dev_mode: settings.mode == :dev, logger: reg.application_logger,
+            middleware: settings.middleware, plugins: settings.plugins,
+            router: reg.router, session_handler: settings.session_handler,
+            static_server: reg.static_server, utils: reg.utils,
+            warmup_urls: settings.warmup_urls
+          }
+        end
+
+        private_class_method :service_options
 
         def initialize(options)
           @stack = Rack::Builder.new

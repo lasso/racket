@@ -51,16 +51,20 @@ module Racket
 
         def controller_context
           lambda do |reg|
-            Module.new do
-              define_singleton_method(:application_settings) { reg.application_settings }
-              define_singleton_method(:helper_cache) { reg.helper_cache }
-              define_singleton_method(:logger) { reg.application_logger }
-              define_singleton_method(:get_route) do |klass, action, params|
-                reg.router.get_route(klass, action, params)
-              end
-              define_singleton_method(:utils) { reg.utils }
-              define_singleton_method(:view_manager) { reg.view_manager }
+            define_context_singleton_methods(reg)
+          end
+        end
+
+        def define_context_singleton_methods(reg)
+          Module.new do
+            define_singleton_method(:application_settings) { reg.application_settings }
+            define_singleton_method(:helper_cache) { reg.helper_cache }
+            define_singleton_method(:logger) { reg.application_logger }
+            define_singleton_method(:get_route) do |klass, action, params|
+              reg.router.get_route(klass, action, params)
             end
+            define_singleton_method(:utils) { reg.utils }
+            define_singleton_method(:view_manager) { reg.view_manager }
           end
         end
 
