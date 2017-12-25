@@ -26,6 +26,9 @@ module Racket
   class Router
     # A struct describing a route.
     Route = Struct.new(:root, :action, :params) do
+      # Returns the route as a string
+      #
+      # @return [String]
       def to_s
         route = root.dup
         route << "/#{action}" if action
@@ -91,9 +94,7 @@ module Racket
         # If running in dev mode, let Rack::ShowExceptions handle the error.
         raise error if @options.dev_mode
         # Not running in dev mode, let us handle the error ourselves.
-        $stderr.write(
-          "#{error.class}: #{error.message}\n#{error.backtrace.map { |l| "\t#{l}" }.join("\n")}\n\n"
-        )
+        $stderr.write(Racket::Utils::Routing::Dispatcher.format_error(error))
       end
       Response.generate_error_response(status)
     end

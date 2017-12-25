@@ -23,45 +23,44 @@ module Racket
       # Adds a hook to one or more actions.
       #
       # @param [Symbol] type
-      # @param [Array] methods
+      # @param [Array] actions
       # @param [Proc] blk
       # @return [nil]
-      def __register_hook(type, methods, blk)
-        methods = ['*'] if methods.empty?
-        methods.map!(&:to_sym)
-        __update_hooks("#{type}_hooks".to_sym, methods, blk)
-        actions_str = methods == ['*'.to_sym] ? 'all actions' : "actions #{methods}"
+      def __register_hook(type, actions, blk)
+        actions = Racket::Utils::Routing::Dispatcher.action_symbol_list(actions)
+        __update_hooks("#{type}_hooks".to_sym, actions, blk)
+        actions_str = actions == ['*'.to_sym] ? 'all actions' : "actions #{actions}"
         context.logger.inform_dev("Adding #{type} hook #{blk} for #{actions_str} for #{self}.")
       end
 
       # Updates hooks in settings object.
       #
       # @param [Symbol] hook_key
-      # @param [Array] meths
+      # @param [Array] actions
       # @param [Proc] blk
       # @return [nil]
-      def __update_hooks(hook_key, meths, blk)
+      def __update_hooks(hook_key, actions, blk)
         hooks = settings.fetch(hook_key, {})
-        meths.each { |meth| hooks[meth] = blk }
+        actions.each { |action| hooks[action] = blk }
         setting(hook_key, hooks) && nil
       end
 
       # Adds a before hook to one or more actions. Actions should be given as a list of symbols.
       # If no symbols are provided, *all* actions on the controller is affected.
       #
-      # @param [Array] methods
+      # @param [Array] actions
       # @return [nil]
-      def after(*methods, &blk)
-        __register_hook(:after, methods, blk) if block_given?
+      def after(*actions, &blk)
+        __register_hook(:after, actions, blk) if block_given?
       end
 
       # Adds an after hook to one or more actions. Actions should be given as a list of symbols.
       # If no symbols are provided, *all* actions on the controller is affected.
       #
-      # @param [Array] methods
+      # @param [Array] actions
       # @return [nil]
-      def before(*methods, &blk)
-        __register_hook(:before, methods, blk) if block_given?
+      def before(*actions, &blk)
+        __register_hook(:before, actions, blk) if block_given?
       end
     end
   end

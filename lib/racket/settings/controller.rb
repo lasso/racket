@@ -24,9 +24,37 @@ module Racket
     # This settings class will lookup settings further up in the inheritance chain and will use
     # the application settings as a final fallback.
     class Controller < Base
+      # Returns whether the provided argument is a Racket::Controller class
+      #
+      # @param [Class] klass
+      # @return true|false
+      def self.controller_base?(klass)
+        klass == ::Racket::Controller
+      end
+
+      # Fetches settings from parent controller class
+      # (or, if at top level, from application settings)
+      #
+      # @param [Racket::Controller] parent
+      # @param [Symbol] key
+      # @param [Object] default
+      # @return [Object]
+      def self.fetch_from_parent(parent, key, default)
+        return parent.context.application_settings.fetch(key, default) if controller_base?(parent)
+        parent.settings.fetch(key, default)
+      end
+
+      # Returns the "parent" class of object
+      # @param [Object] obj
+      # @return [Class]
+      def self.parent_class(obj)
+        obj.is_a?(Class) ? obj.superclass : obj.class
+      end
+
       def initialize(owner, defaults = {})
-        super(defaults)
+        @custom = {}
         @owner = owner
+        super(defaults)
       end
 
       # Fetches settings from the current object. If the setting cannot be found in the current
@@ -35,27 +63,10 @@ module Racket
       # fallback.
       def fetch(key, default = nil)
         return @custom[key] if @custom.key?(key)
-        parent = parent_class(@owner)
-        return @owner.context.application_settings.fetch(key, default) if controller_base?(@owner)
-        return parent.context.application_settings.fetch(key, default) if controller_base?(parent)
-        parent.settings.fetch(key, default)
-      end
-
-      private
-
-      # Returns whether the provided argument is a Racket::Controller class
-      #
-      # @param [Class] klass
-      # @return true|false
-      def controller_base?(klass)
-        klass == ::Racket::Controller
-      end
-
-      # Returns the "parent" class of object
-      # @param [Object] object
-      # @return [Class]
-      def parent_class(obj)
-        obj.is_a?(Class) ? obj.superclass : obj.class
+        klass = Racket::Settings::Controller
+        return @owner.context.application_settings.fetch(key, default) if
+          klass.controller_base?(@owner)
+        klass.fetch_from_parent(klass.parent_class(@owner), key, default)
       end
     end
   end

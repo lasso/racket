@@ -20,6 +20,9 @@ module Racket
   module Utils
     # Namespace for application utilities
     module Application
+      # Struct encapsulating a log message
+      LogData = Struct.new(:message, :level)
+
       # Class for logging messages in the application.
       class Logger
         # Returns a service proc that can be used by the registry.
@@ -44,7 +47,7 @@ module Racket
         # @param [Symbol] level
         # @return nil
         def inform_all(message, level = :info)
-          inform(message, level)
+          inform(LogData.new(message, level))
         end
 
         # Sends a message to the logger, but only if we are running in dev mode.
@@ -53,18 +56,17 @@ module Racket
         # @param [Symbol] level
         # @return nil
         def inform_dev(message, level = :debug)
-          (inform(message, level) if @in_dev_mode) && nil
+          (inform(LogData.new(message, level)) if @in_dev_mode) && nil
         end
 
         private
 
         # Writes a message to the logger if there is one present.
         #
-        # @param [String] message
-        # @param [Symbol] level
+        # @param [LogData] logdata
         # @return nil
-        def inform(message, level)
-          (@logger.send(level, message) if @logger) && nil
+        def inform(logdata)
+          (@logger.send(logdata.level, logdata.message) if @logger) && nil
         end
       end
     end

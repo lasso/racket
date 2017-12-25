@@ -38,14 +38,18 @@ module Racket
         -> { nil }
       end
 
+      def self.secure_random
+        SecureRandom.hex(16)
+      end
+
       def self.session_handler
         lambda do
           [
             Rack::Session::Cookie,
             {
               key: 'racket.session',
-              old_secret: SecureRandom.hex(16),
-              secret: SecureRandom.hex(16)
+              old_secret: secure_random,
+              secret: secure_random
             }
           ]
         end
@@ -61,7 +65,8 @@ module Racket
         end
       end
 
-      private_class_method :array_block, :nil_block, :session_handler, :template_settings
+      private_class_method :array_block, :nil_block, :secure_random, :session_handler,
+                           :template_settings
 
       @defaults = {
         default_action: -> { :index },

@@ -80,6 +80,17 @@ module Racket
 
       # Class responsible for dispatching requests to controllers.
       class Dispatcher
+        # Formats an error message (inlcuding backtrace)
+        #
+        # @param [StandardError] error
+        # @return [String]
+        def self.format_error(error)
+          klass = error.class
+          message = error.message
+          backtrace = error.backtrace.map { |line| "\t#{line}" }.join("\n")
+          "#{klass}: #{message}\n#{backtrace}\n\n"
+        end
+
         # Extracts the target class, target params and target action from a list of valid routes.
         #
         # @param [HttpRouter::Response] response
@@ -94,6 +105,16 @@ module Racket
               params.shift.to_sym
             end
           [target_klass, params, action]
+        end
+
+        # Converts an array with actions to a list of symbols
+        #
+        # @param [Array] actions
+        # @return [Array]
+        def self.action_symbol_list(actions)
+          actions = ['*'] if actions.empty?
+          actions.map!(&:to_sym)
+          actions
         end
 
         # Constructor
