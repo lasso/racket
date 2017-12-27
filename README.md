@@ -30,6 +30,7 @@ Have a look in the `spec` directory. The code base have tests covering (almost) 
 - 2.2.8
 - 2.3.5
 - 2.4.2
+- 2.5.0
 - jruby-9.0.5.0
 - jruby-9.1.15.0
 
