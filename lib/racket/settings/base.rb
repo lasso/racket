@@ -25,9 +25,7 @@ module Racket
         @custom = {}
         defaults.each_pair do |key, value|
           meth = "#{key}=".to_sym
-          if respond_to?(meth) then send(meth, value)
-          else @custom[key] = value
-          end
+          respond_to?(meth) ? send(meth, value) : @custom[key] = value
         end
       end
 

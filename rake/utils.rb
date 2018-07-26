@@ -31,6 +31,6 @@ def racket_files
     files = Dir.glob('lib/**/*.rb')
     files.concat(Dir.glob('rake/**/*'))
     files.concat(Dir.glob('spec/**/*'))
-    files.concat(['COPYING.AGPL', 'Rakefile', 'README.md'])
+    files.concat(%w(COPYING.AGPL Rakefile README.md))
   end
 end

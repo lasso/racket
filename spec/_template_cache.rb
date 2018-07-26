@@ -1,9 +1,9 @@
 describe 'Racket::Utils::Vievs::TemplateCache should adhere to Moneta::Cache interface' do
   templates = {
-    'template_1' => nil,
-    'template_2' => 'template.haml',
-    'template_3' => :template,
-    'template_4' => ->(action) { action.to_s }
+      :template_1 => nil,
+      :template_2 => 'template.haml',
+      :template_3 => :template,
+      :template_4 => ->(action) { action.to_s }
   }.freeze
 
   describe 'API compliance' do

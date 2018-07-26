@@ -7,7 +7,7 @@ describe 'A custom Racket test application' do
       my_custom_secret: 42,
       mode: :dev,
       view_dir: 'templates',
-      warmup_urls: ['/sub1', '/sub2', '/sub3']
+      warmup_urls: %w(/sub1 /sub2 /sub3)
     )
   end
 
