@@ -38,14 +38,18 @@ module Racket
         # @param [Logger] logger
         # @return [Proc|nil]
         def self.static_server(static_dir, logger)
-          unless static_dir
-            logger.inform_dev('Static server disabled.')
-            return nil
-          end
+          return nil unless static_dir_valid?(static_dir, logger)
           logger.inform_dev("Setting up static server to serve files from #{static_dir}.")
           handler = Rack::File.new(static_dir)
           ->(env) { handler.call(env) }
         end
+
+        def self.static_dir_valid?(static_dir, logger)
+          logger.inform_dev('Static server disabled.') unless static_dir
+          static_dir
+        end
+
+        private_class_method :static_dir_valid?
 
         private
 
@@ -56,15 +60,20 @@ module Racket
         end
 
         def define_context_singleton_methods(reg)
+          context = {
+            application_settings: :application_settings,
+            helper_cache: :helper_cache,
+            logger: :application_logger,
+            utils: :utils,
+            view_manager: :view_manager
+          }
           Module.new do
-            define_singleton_method(:application_settings) { reg.application_settings }
-            define_singleton_method(:helper_cache) { reg.helper_cache }
-            define_singleton_method(:logger) { reg.application_logger }
+            context.each_pair do |key, val|
+              define_singleton_method(key) { reg.send(val) }
+            end
             define_singleton_method(:get_route) do |klass, action, params|
               reg.router.get_route(klass, action, params)
             end
-            define_singleton_method(:utils) { reg.utils }
-            define_singleton_method(:view_manager) { reg.view_manager }
           end
         end
 

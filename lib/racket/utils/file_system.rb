@@ -57,7 +57,9 @@ module Racket
 
         def initialize(root_dir, args)
           @root_dir = root_dir
-          extract_base_path(args.dup)
+          @args = args.dup
+          @path = nil
+          extract_base_path
           build_path
           clean_path
         end
@@ -66,8 +68,8 @@ module Racket
           @path = @path.cleanpath.expand_path
         end
 
-        def extract_base_path(args)
-          if (@args = args).empty?
+        def extract_base_path
+          if @args.empty?
             @path = Pathname.pwd
             return
           end

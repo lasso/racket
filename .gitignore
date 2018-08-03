@@ -1,5 +1,6 @@
 *.gem
 .bundle
+.idea
 .metadata
 .project
 .rubocop.yml
@@ -7,4 +8,5 @@
 coverage
 doc
 Gemfile.lock
+tmp
 vendor
