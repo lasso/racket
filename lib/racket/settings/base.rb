@@ -25,7 +25,11 @@ module Racket
         @custom = {}
         defaults.each_pair do |key, value|
           meth = "#{key}=".to_sym
-          respond_to?(meth) ? send(meth, value) : @custom[key] = value
+          begin
+            send(meth, value)
+          rescue NoMethodError
+            @custom[key] = value
+          end
         end
       end
 
@@ -34,7 +38,7 @@ module Racket
       # @param [Symbol] key
       # @return [nil]
       def delete(key)
-        raise ArgumentErrpr, "Cannot delete standard setting #{key}" if respond_to?(key.to_sym)
+        raise ArgumentError, "Cannot delete standard setting #{key}" if respond_to?(key.to_sym)
         @custom.delete(key) && nil
       end
 
@@ -46,8 +50,11 @@ module Racket
       # @return [Object]
       def fetch(key, default = nil)
         meth = key.to_sym
-        return send(meth) if respond_to?(meth)
-        @custom.fetch(key, default)
+        begin
+          send(meth)
+        rescue NoMethodError
+          @custom.fetch(key, default)
+        end
       end
 
       # Returns whether +key+ is present among the settings.
@@ -76,8 +83,12 @@ module Racket
       # @param [Symbol] symbol
       # @return [Object]
       def self.default_value(symbol)
-        return nil unless defined?(@defaults) && @defaults.respond_to?(symbol)
-        @defaults.send(symbol)
+        return nil unless defined?(@defaults)
+        begin
+          @defaults.send(symbol)
+        rescue NoMethodError
+          nil
+        end
       end
 
       # Creates a setting with a default value.

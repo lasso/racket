@@ -33,11 +33,10 @@ module Racket
       # @param [Hash] template_settings
       # @return [Hash]
       def self.extract_template_settings(context, template_settings)
-        if context.respond_to?(:view_settings) && !template_settings
+        return template_settings if template_settings
+        begin
           context.view_settings
-        elsif template_settings
-          template_settings
-        else
+        rescue NoMethodError
           {}
         end
       end
