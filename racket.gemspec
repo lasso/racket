@@ -13,7 +13,7 @@ Gem::Specification.new do |s|
   s.files                 = racket_files
   s.platform              = Gem::Platform::RUBY
   s.require_path          = 'lib'
-  s.required_ruby_version = '>= 2.0.0'
+  s.required_ruby_version = '>= 2.2.0'
 
   s.add_dependency('http_router', '~>0.11')
   s.add_dependency('json', '~>2.0')

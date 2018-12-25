@@ -3,11 +3,14 @@ sudo: false
 language: ruby
 cache: bundler
 rvm:
-  - 2.3
-  - 2.4
-  - 2.5
-  - jruby-9.1
-  - jruby-9.2
+  - 2.2.10
+  - 2.3.8
+  - 2.4.5
+  - 2.5.3
+  - 2.6.0
+  - jruby-9.1.17.0
+  - jruby-9.2.5.0
+  - rbx-3.107
 before_install:
   # bundler installation needed for jruby-head
   # https://github.com/travis-ci/travis-ci/issues/5861
